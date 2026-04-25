@@ -2,25 +2,943 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111111;
+
+  /* Brand palette */
+  --color-accent: #e45684;
+  --color-brand-blue: #2e71f1;
+  --color-footer-blue: #1c7cf5;
+  --color-ink: #202020;
+  --color-head-ink: #101010;
+  --color-body-ink: #000000;
+
+  /* Surfaces */
+  --color-hero-bg: #fcf9f8;
+  --color-fun-bg: #e0eefd;
+  --color-fun-ink: #303030;
+
+  /* Card palette — per project */
+  --color-card-adani-bg: #e4daf2;
+  --color-card-adani-ink: #50228c;
+  --color-card-microsoft-bg: #f4d6dc;
+  --color-card-microsoft-ink: #932535;
+  --color-card-jira-bg: #e0eefd;
+  --color-card-jira-ink: #0a619a;
+  --color-card-lcg-bg: #f1efed;
+  --color-card-lcg-ink: #85603b;
+  --color-card-uniquefit-bg: #def4f0;
+  --color-card-uniquefit-ink: #1c601c;
+  --color-card-reporters-bg: #fbeae4;
+  --color-card-reporters-ink: #c40d12;
+  --color-card-b2b-bg: #e8edfd;
+  --color-card-b2b-ink: #2a34c6;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-accent: var(--color-accent);
+  --color-brand-blue: var(--color-brand-blue);
+  --color-footer-blue: var(--color-footer-blue);
+  --color-ink: var(--color-ink);
+  --color-head-ink: var(--color-head-ink);
+  --color-body-ink: var(--color-body-ink);
+  --color-hero-bg: var(--color-hero-bg);
+  --color-fun-bg: var(--color-fun-bg);
+  --color-fun-ink: var(--color-fun-ink);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   Typography utilities — match live dineshrevunuru.com
+   ========================================================= */
+@layer components {
+  .t-serif-hero {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 48px;
+    line-height: 50px;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+  }
+  .t-sans-hero {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 48px;
+    line-height: 50px;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+  .t-serif-title {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 38px;
+    line-height: 50px;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+  .t-section-head {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 24px;
+    line-height: 24px;
+    font-weight: 500;
+    color: var(--color-head-ink);
+  }
+  .t-body-lg {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: 0.2px;
+    font-weight: 400;
+  }
+  .t-body {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 22px;
+    letter-spacing: 0.2px;
+    font-weight: 400;
+  }
+  .t-body-fun {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.2px;
+    font-weight: 300;
+  }
+  .t-cta {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 16px;
+    letter-spacing: 0.6px;
+    font-weight: 500;
+  }
+  .t-fun-title {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 22px;
+    line-height: 22px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+  .t-footer-brand {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 32px;
+    line-height: 32px;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+  }
+  .t-footer-role {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 18px;
+    letter-spacing: 0.8px;
+    font-weight: 400;
+  }
+  .t-footer-meta {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0.8px;
+    font-weight: 400;
+  }
+  .t-footer-contact {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.8px;
+    font-weight: 400;
+  }
+  .t-footer-social {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0.6px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  /* Tablet — <=1024 */
+  @media (max-width: 1024px) {
+    .t-serif-hero {
+      font-size: 52px;
+    }
+    .t-sans-hero {
+      font-size: 40px;
+      line-height: 44px;
+    }
+    .t-serif-title {
+      font-size: 32px;
+      line-height: 40px;
+    }
+    .t-footer-brand {
+      font-size: 28px;
+      line-height: 28px;
+    }
+  }
+
+  /* Mobile — <=640 */
+  @media (max-width: 640px) {
+    .t-serif-hero {
+      font-size: 36px;
+    }
+    .t-sans-hero {
+      font-size: 32px;
+      line-height: 36px;
+    }
+    .t-serif-title {
+      font-size: 26px;
+      line-height: 34px;
+    }
+    .t-body-lg {
+      font-size: 16px;
+      line-height: 26px;
+    }
+    .t-section-head {
+      font-size: 20px;
+      line-height: 20px;
+    }
+    .t-footer-brand {
+      font-size: 26px;
+      line-height: 26px;
+    }
+    .t-footer-social {
+      font-size: 14px;
+    }
+  }
+}
+
+/* =========================================================
+   Section paddings — responsive
+   ========================================================= */
+@layer components {
+  .pad-nav {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  .pad-hero {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  .pad-section {
+    padding-left: 130px;
+    padding-right: 130px;
+  }
+  .pad-cards {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  .pad-footer-inner {
+    padding: 120px 155px;
+  }
+
+  @media (max-width: 1024px) {
+    .pad-nav {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-hero {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-section {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-cards {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-footer-inner {
+      padding: 80px 60px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .pad-nav {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-hero {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-section {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-cards {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-footer-inner {
+      padding: 60px 24px;
+    }
+  }
+}
+
+/* =========================================================
+   Project card base + per-card color variants
+   ========================================================= */
+@layer components {
+  .project-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 36px 32px;
+    border-radius: 16px;
+    overflow: hidden;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+  @media (max-width: 640px) {
+    .project-card {
+      padding: 28px 24px 24px;
+    }
+  }
+
+  .card-adani {
+    background: var(--color-card-adani-bg);
+    color: var(--color-card-adani-ink);
+  }
+  .card-microsoft {
+    background: var(--color-card-microsoft-bg);
+    color: var(--color-card-microsoft-ink);
+  }
+  .card-jira {
+    background: var(--color-card-jira-bg);
+    color: var(--color-card-jira-ink);
+  }
+  .card-lcg {
+    background: var(--color-card-lcg-bg);
+    color: var(--color-card-lcg-ink);
+  }
+  .card-uniquefit {
+    background: var(--color-card-uniquefit-bg);
+    color: var(--color-card-uniquefit-ink);
+  }
+  .card-reporters {
+    background: var(--color-card-reporters-bg);
+    color: var(--color-card-reporters-ink);
+  }
+  .card-b2b {
+    background: var(--color-card-b2b-bg);
+    color: var(--color-card-b2b-ink);
+  }
+}
+
+/* =========================================================
+   Thumbnail variants — all contained inside card padding
+   ========================================================= */
+@layer components {
+  .thumb {
+    display: flex;
+    margin-top: auto;
+    width: 100%;
+  }
+  .thumb > img {
+    height: auto;
+    object-fit: contain;
+    object-position: bottom;
+  }
+
+  /* Logo cards + B2B — image flush with card right edge (extends 36px past card's inner content width) */
+  .thumb-wide {
+    justify-content: flex-start;
+    width: calc(100% + 36px);
+  }
+  .thumb-wide > img {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Uniquefit — image flush with card left edge (extends 36px left past card's inner content width) */
+  .thumb-composite {
+    justify-content: flex-start;
+    width: calc(100% + 36px);
+    margin-left: -36px;
+  }
+  .thumb-composite > img {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* 101 Reporters — phone portrait, pushed to bottom, flush with card edge */
+  .thumb-tall {
+    justify-content: center;
+    margin-top: auto !important;
+    margin-bottom: -32px;
+    margin-left: -36px;
+    margin-right: -36px;
+    width: calc(100% + 72px);
+  }
+  .thumb-tall > img {
+    width: 373px !important;
+    max-width: 100%;
+    height: 406px !important;
+    object-fit: cover !important;
+    object-position: top !important;
+  }
+  @media (max-width: 1024px) {
+    .thumb-tall {
+      margin-left: 0;
+      margin-right: 0;
+      width: 100%;
+    }
+    .thumb-tall > img {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 380px !important;
+      object-fit: cover !important;
+      object-position: top !important;
+    }
+  }
+}
+
+/* 101 Reporters — phone contained within card (no bleed) */
+.project-card.card-reporters {
+  overflow: hidden;
+}
+@media (max-width: 1024px) {
+  .project-card.card-reporters {
+    min-height: 580px;
+  }
+}
+
+/* =========================================================
+   Fun card
+   ========================================================= */
+@layer components {
+  .fun-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    border-radius: 12px;
+    background: var(--color-fun-bg);
+    color: var(--color-fun-ink);
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+    min-height: 220px;
+  }
+  .fun-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* =========================================================
+   Hero
+   ========================================================= */
+@layer components {
+  .hero-card {
+    position: relative;
+    background: var(--color-hero-bg);
+    border-radius: 24px;
+    height: 440px;
+  }
+  @media (max-width: 1024px) {
+    .hero-card {
+      height: auto;
+      min-height: 480px;
+    }
+  }
+  @media (max-width: 640px) {
+    .hero-card {
+      min-height: 0;
+      border-radius: 20px;
+    }
+  }
+
+  .hero-copy {
+    padding: 0 72px;
+  }
+  @media (max-width: 1024px) {
+    .hero-copy {
+      padding: 48px 40px;
+    }
+  }
+  @media (max-width: 640px) {
+    .hero-copy {
+      padding: 32px 24px;
+    }
+  }
+
+  .hero-portrait {
+    position: absolute;
+    right: 60px;
+    top: -22px;
+    bottom: 0;
+    width: 413px;
+    max-width: 100%;
+  }
+  @media (max-width: 1024px) {
+    .hero-portrait {
+      position: relative;
+      right: auto;
+      top: -40px;
+      bottom: auto;
+      width: 320px;
+      height: 380px;
+      margin: 0 auto -40px;
+    }
+  }
+  @media (max-width: 640px) {
+    .hero-portrait {
+      width: 260px;
+      height: 320px;
+      top: -24px;
+      margin-bottom: -24px;
+    }
+  }
+}
+
+/* =========================================================
+   Resume page
+   ========================================================= */
+@layer components {
+  /* skills card */
+  .resume-skills-card {
+    background: #f5f8fe;
+    border-radius: 16px;
+    padding: 20px 18px;
+  }
+
+  /* unified experience band */
+  .resume-exp-band {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+  @media (max-width: 1024px) {
+    .resume-exp-band {
+      padding-top: 60px;
+      padding-bottom: 60px;
+    }
+  }
+  @media (max-width: 640px) {
+    .resume-exp-band {
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+  }
+  .resume-exp-band--filled {
+    background-color: #f5f8fe;
+  }
+  .resume-exp-entry {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (max-width: 840px) {
+    .resume-exp-entry {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+  .resume-exp-entry .t-serif-title {
+    text-transform: none;
+  }
+  .resume-exp-entry .resume-meta-label {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 14px;
+    opacity: 0.6;
+  }
+
+  .resume-meta-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.75;
+  }
+
+  .resume-divider {
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    margin-top: 40px;
+  }
+
+  .resume-mini-head {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-head-ink);
+  }
+
+  .resume-list {
+    margin-top: 16px;
+  }
+  .resume-list li {
+    padding: 4px 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-body-ink);
+  }
+}
+
+/* =========================================================
+   Case study template
+   ========================================================= */
+@layer components {
+  /* Per-slug accent theming for case study pages */
+  .cs-theme-adani {
+    --cs-accent-bg: var(--color-card-adani-bg);
+    --cs-accent-ink: var(--color-card-adani-ink);
+  }
+  .cs-theme-microsoft {
+    --cs-accent-bg: var(--color-card-microsoft-bg);
+    --cs-accent-ink: var(--color-card-microsoft-ink);
+  }
+  .cs-theme-jira {
+    --cs-accent-bg: var(--color-card-jira-bg);
+    --cs-accent-ink: var(--color-card-jira-ink);
+  }
+  .cs-theme-lcg {
+    --cs-accent-bg: var(--color-card-lcg-bg);
+    --cs-accent-ink: var(--color-card-lcg-ink);
+  }
+  .cs-theme-uniquefit {
+    --cs-accent-bg: var(--color-card-uniquefit-bg);
+    --cs-accent-ink: var(--color-card-uniquefit-ink);
+    --cs-brand-dark: #387A76;
+  }
+  .cs-theme-reporters {
+    --cs-accent-bg: var(--color-card-reporters-bg);
+    --cs-accent-ink: var(--color-card-reporters-ink);
+    --cs-brand-dark: #EA1D23;
+  }
+  .cs-theme-b2b {
+    --cs-accent-bg: var(--color-card-b2b-bg);
+    --cs-accent-ink: var(--color-card-b2b-ink);
+    --cs-brand-dark: #4A69D6;
+  }
+
+  /* Content containers */
+  .cs-container {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cs-container-wide {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cs-container-full {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (max-width: 840px) {
+    .cs-container,
+    .cs-container-wide,
+    .cs-container-full {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+
+  /* Hero title */
+  .cs-hero-title {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 56px;
+    line-height: 64px;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+  }
+  @media (max-width: 1024px) {
+    .cs-hero-title {
+      font-size: 48px;
+      line-height: 54px;
+    }
+  }
+  @media (max-width: 640px) {
+    .cs-hero-title {
+      font-size: 36px;
+      line-height: 42px;
+    }
+  }
+
+  /* Overview block (3-col + Client-below) */
+  .cs-overview-head {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-head-ink);
+  }
+  .cs-overview-body {
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--color-body-ink);
+  }
+
+  /* Eyebrow label */
+  .cs-eyebrow {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cs-accent-ink, var(--color-ink));
+  }
+
+  /* Meta label (role / duration / client) */
+  .cs-meta-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.6;
+  }
+  .cs-meta-value {
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--color-body-ink);
+  }
+
+  /* Phase wrapper — full-width bg strip */
+  .cs-phase-wrapper {
+    background: #F5F8FE;
+    margin-top: 48px;
+  }
+
+  /* Phase marker */
+  .cs-phase-number {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cs-accent-ink, var(--color-ink));
+  }
+  .cs-phase-label {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 32px;
+    line-height: 40px;
+    font-weight: 600;
+    color: var(--cs-brand-dark, #387a76);
+  }
+
+  /* Section heading inside body */
+  .cs-section-head {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 600;
+    color: var(--color-head-ink);
+  }
+  @media (max-width: 640px) {
+    .cs-section-head {
+      font-size: 18px;
+      line-height: 26px;
+    }
+  }
+
+  /* Special heading for prototype sections — Playfair serif */
+  .cs-section-head-prototype {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 38px;
+    line-height: 48px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--color-head-ink);
+  }
+  @media (max-width: 640px) {
+    .cs-section-head-prototype {
+      font-size: 28px;
+      line-height: 36px;
+    }
+  }
+
+  /* Prose body text */
+  .cs-prose p {
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 26px;
+    color: var(--color-body-ink);
+  }
+  .cs-prose p:first-child {
+    margin-top: 0;
+  }
+  .cs-prose strong {
+    font-weight: 600;
+  }
+
+  /* List */
+  .cs-list {
+    margin-top: 16px;
+  }
+  .cs-list li {
+    padding: 6px 0;
+    font-size: 16px;
+    line-height: 26px;
+    color: var(--color-body-ink);
+  }
+  .cs-list--bulleted {
+    list-style: disc;
+    padding-left: 24px;
+  }
+  .cs-list--ordered {
+    list-style: decimal;
+    padding-left: 24px;
+  }
+
+  /* Image / placeholder */
+  .cs-figure img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+  .cs-figure video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    object-fit: cover;
+  }
+  .cs-theme-uniquefit .cs-figure img,
+  .cs-theme-uniquefit .cs-figure video {
+    border-radius: 0;
+  }
+  .cs-theme-reporters .cs-figure img,
+  .cs-theme-reporters .cs-figure video,
+  .cs-theme-b2b .cs-figure img,
+  .cs-theme-b2b .cs-figure video {
+    border-radius: 0 !important;
+  }
+
+  /* User insight quote — used under User interviews */
+  .cs-insight-quote {
+    border-left: 3px solid var(--cs-brand-dark, #387a76);
+    padding: 12px 20px;
+    margin: 0;
+    font-style: italic;
+    color: var(--color-body-ink);
+    font-size: 15px;
+    line-height: 24px;
+  }
+  .cs-placeholder {
+    width: 100%;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.035),
+        rgba(0, 0, 0, 0.035) 10px,
+        rgba(0, 0, 0, 0.01) 10px,
+        rgba(0, 0, 0, 0.01) 20px
+      );
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .cs-caption {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 20px;
+    opacity: 0.6;
+    text-align: center;
+  }
+
+  /* Callout box (problem statement, hypothesis, etc.) */
+  .cs-callout {
+    background: var(--cs-accent-bg, #f5f8fe);
+    color: var(--cs-accent-ink, var(--color-ink));
+    border-radius: 16px;
+    padding: 32px 28px;
+  }
+  @media (max-width: 640px) {
+    .cs-callout {
+      padding: 24px 20px;
+    }
+  }
+  .cs-callout-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    opacity: 0.75;
+  }
+  .cs-callout-body {
+    margin-top: 12px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 22px;
+    line-height: 32px;
+    font-weight: 500;
+  }
+  @media (max-width: 640px) {
+    .cs-callout-body {
+      font-size: 18px;
+      line-height: 26px;
+    }
+  }
+
+  /* Intro band — full-width brand-colored section (Intro / Project overview / Business goals) */
+  .cs-intro-band {
+    width: 100%;
+    background: var(--cs-brand-dark, #527c78);
+    color: #ffffff;
+    --color-ink: #ffffff;
+    --color-head-ink: #ffffff;
+    --color-body-ink: rgba(255, 255, 255, 0.85);
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+  @media (max-width: 640px) {
+    .cs-intro-band {
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+  }
+  .cs-intro-label {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 56px;
+    line-height: 64px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  @media (max-width: 1024px) {
+    .cs-intro-label {
+      font-size: 48px;
+      line-height: 54px;
+    }
+  }
+  @media (max-width: 640px) {
+    .cs-intro-label {
+      font-size: 40px;
+      line-height: 46px;
+    }
+  }
+
+  /* Phase band — full-width tint for major phase transitions */
+  .cs-phase-band {
+    background: var(--cs-accent-bg, #f5f8fe);
+    padding-top: 80px;
+    padding-bottom: 80px;
+    margin-top: 40px;
+  }
+  @media (max-width: 640px) {
+    .cs-phase-band {
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+  }
 }
