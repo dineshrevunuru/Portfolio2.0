@@ -1,0 +1,7 @@
+/* =========================================================
+   Fonts — Poppins (sans) + Playfair Display (serif).
+   Self-contained @import so previews render on-brand without
+   host setup. Consumers already loading these fonts (e.g. via
+   next/font) can skip importing this file.
+   ========================================================= */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap");

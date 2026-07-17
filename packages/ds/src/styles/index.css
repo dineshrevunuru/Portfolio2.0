@@ -1,0 +1,10 @@
+/* =========================================================
+   Portfolio Design System — full stylesheet.
+   Import this one file to get fonts, tokens, and all
+   utility + pattern classes. Order matters: tokens before
+   the utilities/patterns that reference them.
+   ========================================================= */
+@import "./fonts.css";
+@import "./tokens.css";
+@import "./utilities.css";
+@import "./patterns.css";
