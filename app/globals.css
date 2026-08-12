@@ -1,6 +1,23 @@
 @import "tailwindcss";
 
 :root {
+  /* ── Motion tokens ───────────────────────────────────────────────────────
+     The single source for this project, filled from design-taste's locked
+     curve system and duration tiers. Never invent, never tweak, and never
+     inline a cubic-bezier or a raw millisecond anywhere else — a literal
+     outside this block is a defect, because it drifts from the taste file the
+     moment either changes.
+     Presentation register only: 0% overshoot, no springs. The gesture register
+     (drag / swipe / voice barge-in) has its own values and no surface here
+     uses it. */
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1); /* "the settle" — entrance transform */
+  --ease-enter-soft: cubic-bezier(0, 0, 0.2, 1); /* entrance opacity / filter */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-morph: cubic-bezier(0.4, 0, 0.2, 1); /* in-place state change */
+  --dur-quick: 200ms; /* 150–250 tier — press, hover, toggle */
+  --dur-standard: 400ms; /* 350–450 tier — entrances */
+  --dur-slow: 650ms; /* 550–800 tier — set-pieces */
+
   --background: #ffffff;
   --foreground: #111111;
 
@@ -32,6 +49,10 @@
   --color-card-reporters-ink: #c40d12;
   --color-card-b2b-bg: #e8edfd;
   --color-card-b2b-ink: #2a34c6;
+  /* HSS — gold family, from the salon's brand gold #e6bf6d. Same hue for
+     tint and ink (both ~40deg) like every other card here. 7.67:1. */
+  --color-card-hss-bg: #f6e8cd;
+  --color-card-hss-ink: #5c4304;
 }
 
 @theme inline {
@@ -116,14 +137,18 @@ body {
   .t-cta {
     font-family: var(--font-sans), system-ui, sans-serif;
     font-size: 16px;
-    line-height: 16px;
+    /* Was 16px, i.e. ratio 1.0, so wrapped lines collided and descenders
+       sat on the line below. Unitless so it holds if the size changes. */
+    line-height: 1.4;
     letter-spacing: 0.6px;
     font-weight: 500;
   }
   .t-fun-title {
     font-family: var(--font-sans), system-ui, sans-serif;
     font-size: 22px;
-    line-height: 22px;
+    /* Same fix as .t-cta: was ratio 1.0, so "Employee on boarding" wrapped
+       into itself in a narrow card. */
+    line-height: 1.35;
     font-weight: 500;
     letter-spacing: 0.2px;
   }
@@ -294,13 +319,10 @@ body {
     padding: 40px 36px 32px;
     border-radius: 16px;
     overflow: hidden;
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
+    transition: transform 0.3s ease;
   }
   .project-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   }
   @media (max-width: 640px) {
     .project-card {
@@ -335,6 +357,10 @@ body {
   .card-b2b {
     background: var(--color-card-b2b-bg);
     color: var(--color-card-b2b-ink);
+  }
+  .card-hss {
+    background: var(--color-card-hss-bg);
+    color: var(--color-card-hss-ink);
   }
 }
 
@@ -404,17 +430,67 @@ body {
       object-position: top !important;
     }
   }
+
+  /* Phone cards (HSS, 101 Reporters) — the copy is short, so the phone grows
+     into whatever height the row gives the card instead of leaving a gap under
+     the text. The base .thumb-tall pins the image to a fixed 373x406 box that
+     margin-top:auto then shoves to the bottom, which left ~94px of dead card
+     above the phone on Reporters.
+     Must sit in this layer, after the base: for !important declarations the
+     cascade-layer order inverts, so an unlayered override would lose. */
+  /* The phone is taken OUT OF FLOW so it contributes no intrinsic height.
+     Otherwise this card sets the row height and stretches its neighbour.
+     The slot flexes into whatever space the row already has; the absolutely
+     positioned image then fills that slot. */
+  .project-card.card-hss .thumb-tall,
+  .project-card.card-reporters .thumb-tall {
+    position: relative;
+    margin-top: 28px !important;
+    flex: 1 1 0%;
+    min-height: 0;
+  }
+  /* Width follows height so the phone scales whole. A fixed width with
+     object-fit:cover would crop the sides as the card grows taller. */
+  .project-card.card-hss .thumb-tall > img,
+  .project-card.card-reporters .thumb-tall > img {
+    position: absolute;
+    inset: 0;
+    margin-inline: auto;
+    height: 100% !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    object-position: bottom !important;
+  }
+  /* Single column below 1024: no sibling to stretch against, so give the
+     phone an explicit floor or a zero flex-basis would collapse it. */
+  @media (max-width: 1024px) {
+    .project-card.card-hss .thumb-tall,
+    .project-card.card-reporters .thumb-tall {
+      flex: 0 0 auto;
+      min-height: 380px;
+    }
+    .project-card.card-hss .thumb-tall > img,
+    .project-card.card-reporters .thumb-tall > img {
+      position: static;
+      height: 380px !important;
+      max-height: none !important;
+    }
+  }
 }
 
-/* 101 Reporters — phone contained within card (no bleed) */
-.project-card.card-reporters {
+/* 101 Reporters + HSS — phone contained within card (no bleed) */
+.project-card.card-reporters,
+.project-card.card-hss {
   overflow: hidden;
 }
 @media (max-width: 1024px) {
-  .project-card.card-reporters {
+  .project-card.card-reporters,
+  .project-card.card-hss {
     min-height: 580px;
   }
 }
+
 
 /* =========================================================
    Fun card
@@ -448,6 +524,26 @@ body {
     background: var(--color-hero-bg);
     border-radius: 24px;
     height: 440px;
+  }
+  /* 1025–1079 is the one band where the two-column layout is still on but the
+     copy column has narrowed enough to push the bio to six lines (476px) inside
+     a card fixed at 440. The result was the resume link sitting outside the
+     card on the white page. Above 1080 the copy fits; at 1024 the tablet rules
+     below take over. Only this gap needs the card to grow. */
+  @media (min-width: 1025px) and (max-width: 1079px) {
+    .hero-card {
+      height: auto;
+      min-height: 440px;
+      padding-bottom: 32px;
+    }
+    /* Pin the portrait to its own height instead of the card's. Left on
+       bottom:0 it would stretch with the taller card, and since object-contain
+       is width-bound at a fixed 413px the painting would stay put and sink away
+       from the top edge it is meant to break. */
+    .hero-portrait {
+      bottom: auto;
+      height: 462px;
+    }
   }
   @media (max-width: 1024px) {
     .hero-card {
@@ -506,87 +602,288 @@ body {
 }
 
 /* =========================================================
-   Resume page
+   Resume page — ported 1:1 from the design board (boards/full/Resume.html)
    ========================================================= */
 @layer components {
-  /* skills card */
+  /* header-width gutters (match nav.top) for the intro + skills sections */
+  .gut {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  @media (max-width: 1024px) {
+    .gut {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+  @media (max-width: 640px) {
+    .gut {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+
+  /* header */
+  .rhead h1 {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: clamp(44px, 6vw, 72px);
+    font-weight: 600;
+    line-height: 1.02;
+    margin: 0;
+    color: var(--color-ink);
+  }
+  .rhead h2 {
+    font-size: clamp(20px, 2.4vw, 28px);
+    font-weight: 500;
+    color: var(--color-accent);
+    margin: 8px 0 0;
+  }
+  .rhead .c {
+    margin-top: 24px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--color-body-ink);
+  }
+  .rhead .c a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .rhead .c a:hover {
+    opacity: 0.7;
+  }
+
+  /* skills cards */
   .resume-skills-card {
     background: #f5f8fe;
     border-radius: 16px;
     padding: 20px 18px;
   }
-
-  /* unified experience band */
-  .resume-exp-band {
-    padding-top: 100px;
-    padding-bottom: 100px;
-  }
-  @media (max-width: 1024px) {
-    .resume-exp-band {
-      padding-top: 60px;
-      padding-bottom: 60px;
-    }
-  }
-  @media (max-width: 640px) {
-    .resume-exp-band {
-      padding-top: 40px;
-      padding-bottom: 40px;
-    }
-  }
-  .resume-exp-band--filled {
-    background-color: #f5f8fe;
-  }
-  .resume-exp-entry {
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  @media (max-width: 840px) {
-    .resume-exp-entry {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
-  }
-  .resume-exp-entry .t-serif-title {
-    text-transform: none;
-  }
-  .resume-exp-entry .resume-meta-label {
-    text-transform: none;
-    letter-spacing: normal;
-    font-size: 14px;
-    opacity: 0.6;
-  }
-
-  .resume-meta-label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    opacity: 0.75;
-  }
-
-  .resume-divider {
-    border: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
-    margin-top: 40px;
-  }
-
   .resume-mini-head {
     font-size: 15px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-head-ink);
+    margin: 0;
   }
-
   .resume-list {
-    margin-top: 16px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
   }
   .resume-list li {
     padding: 4px 0;
     font-size: 15px;
     line-height: 1.6;
     color: var(--color-body-ink);
+  }
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  @media (min-width: 768px) {
+    .skills-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .span2 {
+      grid-column: span 2;
+    }
+  }
+  @media (min-width: 1024px) {
+    .skills-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .span2 {
+      grid-column: span 1;
+      grid-row: span 2;
+    }
+  }
+
+  /* experience bands */
+  .resume-exp-band {
+    padding: 100px 16px;
+  }
+  @media (max-width: 1024px) {
+    .resume-exp-band {
+      padding: 60px 16px;
+    }
+  }
+  @media (max-width: 640px) {
+    .resume-exp-band {
+      padding: 40px 16px;
+    }
+  }
+  .resume-exp-band--filled {
+    background: #f5f8fe;
+  }
+  .resume-exp-entry {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .resume-exp-entry h3 {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-head-ink);
+  }
+  .exp-meta {
+    font-size: 14px;
+    opacity: 0.6;
+    font-weight: 600;
+    margin: 8px 0 0;
+  }
+  .resume-exp-entry p.b {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-body-ink);
+    margin: 24px 0 0;
+  }
+
+  /* narrow sections */
+  .narrow {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 64px 16px 0;
+  }
+  .t-sec {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #9a9aa0;
+    margin: 0;
+  }
+  .resume-meta-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.75;
+    margin: 0;
+  }
+  .resume-divider {
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    margin-top: 40px;
+  }
+  /* Education entries.
+
+     Deliberately the Certifications tier — 20px Playfair name over a 15px meta
+     line — and not a new scale. Measured 2026-08-11, the old treatment set every
+     line in this section as one 12px uppercase label at 0.75 opacity, which made
+     a master's degree SMALLER and fainter than the word "Education" printed
+     above it (13px at full opacity), and 60% the size of a Coursera badge in the
+     next section. Two credentials sections should share one tier; the badge
+     outranking the degree was the actual bug.
+
+     Work experience stays at 32px. It is the page's primary content and has to
+     keep outranking both.
+
+     New classes rather than redefining .resume-meta-label: that class is also
+     published in packages/ds and scoped elsewhere as
+     .resume-exp-entry .resume-meta-label, so repurposing it would reach further
+     than this section. */
+  .resume-edu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .resume-edu-degree {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0;
+    color: var(--color-head-ink);
+  }
+  .resume-edu-meta {
+    font-size: 15px;
+    color: var(--color-body-ink);
+    margin: 4px 0 0;
+  }
+  .cert {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .cert .logo {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .cert .nm {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0;
+    color: var(--color-head-ink);
+  }
+  .cert .is {
+    font-size: 15px;
+    color: var(--color-body-ink);
+    margin: 4px 0 0;
+  }
+  .certs {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .body-p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-body-ink);
+    margin: 24px 0 0;
+    max-width: 720px;
+  }
+
+  /* endorsements */
+  .endo-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-top: 32px;
+  }
+  @media (min-width: 768px) {
+    .endo-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 1024px) {
+    .endo-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+  .endo {
+    aspect-ratio: 775 / 1024;
+    border-radius: 12px;
+    background: repeating-linear-gradient(
+      45deg,
+      #f7f4f2,
+      #f7f4f2 12px,
+      #f1ecea 12px,
+      #f1ecea 24px
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    color: #a89d90;
+    font-size: 13px;
+    line-height: 1.6;
   }
 }
 
@@ -602,6 +899,10 @@ body {
   .cs-theme-microsoft {
     --cs-accent-bg: var(--color-card-microsoft-bg);
     --cs-accent-ink: var(--color-card-microsoft-ink);
+    /* The card's own ink, reused as the intro band. Every built case study
+       takes its band from the project's colour rather than the default teal,
+       and #932535 carries white at 8.4:1. */
+    --cs-brand-dark: #932535;
   }
   .cs-theme-jira {
     --cs-accent-bg: var(--color-card-jira-bg);
@@ -626,30 +927,42 @@ body {
     --cs-accent-ink: var(--color-card-b2b-ink);
     --cs-brand-dark: #4A69D6;
   }
+  .cs-theme-hss {
+    --cs-accent-bg: var(--color-card-hss-bg);
+    --cs-accent-ink: var(--color-card-hss-ink);
+    --cs-brand-dark: #5c4304;
+    /* The product's own single accent — the green in the widget header and the
+       outcomes stage — as opposed to --cs-brand-dark, which is the case
+       study's editorial olive. Kept as a separate token because they are two
+       different things that happen to both be dark: one is the client's brand,
+       one is this page's furniture. */
+    --cs-brand-green: #002526;
+  }
 
   /* Content containers */
+  /* width: min(100% - 32px, N) rather than max-width plus a padding media
+     query. Same result at wide viewports (min picks N, so no rail shrinks),
+     but the 16px gutter now appears exactly when the viewport would otherwise
+     squeeze it out, at every container's own threshold instead of one shared
+     840px guess.
+
+     The old rule only padded below 840px, which left a real hole: between
+     841px and 1100px, cs-container-wide ran edge to edge and the hero title
+     touched both sides of the window with no gutter at all. */
   .cs-container {
-    max-width: 800px;
+    width: min(100% - 32px, 800px);
     margin-left: auto;
     margin-right: auto;
   }
   .cs-container-wide {
-    max-width: 1100px;
+    width: min(100% - 32px, 1100px);
     margin-left: auto;
     margin-right: auto;
   }
   .cs-container-full {
-    max-width: 1600px;
+    width: min(100% - 32px, 1600px);
     margin-left: auto;
     margin-right: auto;
-  }
-  @media (max-width: 840px) {
-    .cs-container,
-    .cs-container-wide,
-    .cs-container-full {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
   }
 
   /* Hero title */
@@ -660,10 +973,26 @@ body {
     letter-spacing: 0.2px;
     font-weight: 600;
   }
+  /* Each hero title carries a hard <br> placed for the desktop measure. Below
+     1025px the column narrows faster than the type shrinks, so the half after
+     the break wraps again and strands a fragment on its own line. This used to
+     be scoped to 640px, where the symptom was single words ("books", "own");
+     the HSS outcome title exposed the same fault across the whole tablet band,
+     leaving "60%" alone at ~860px — the one word in that headline that has to
+     land. So the break is dropped for the entire band and the browser balances
+     instead.
+
+     Safe to apply globally: measured 2026-08-11 across all five hero titles at
+     860px, and the other four render byte-identical, because balance reproduces
+     exactly the break their <br> was forcing. Only HSS moves. */
   @media (max-width: 1024px) {
     .cs-hero-title {
       font-size: 48px;
       line-height: 54px;
+      text-wrap: balance;
+    }
+    .cs-hero-title br {
+      display: none;
     }
   }
   @media (max-width: 640px) {
@@ -694,6 +1023,521 @@ body {
     color: var(--cs-accent-ink, var(--color-ink));
   }
 
+  /* Problem / Solution / Outcome summary — the 30-second layer.
+     Its statements sit at 24px: clearly above body (16px) so a scanner stops on
+     them, clearly below the act claims (36px) so they never compete with the
+     spine. Three peers, stacked rather than columned — the statements are
+     different lengths and a 3-col grid would rag them against each other. */
+  .cs-summary-statement {
+    /* Poppins, not the display serif. The serif read as another editorial
+       flourish next to the act claims; the sans reads as a stated finding,
+       which is what a problem statement is.
+       No max-width — the summary shares the Intro band's 800px measure so the
+       two openings read as one column, not two. */
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 28px;
+    /* 41px (1.46). This has moved three times: 42px originally, tightened to
+       36px (1.29) so the block read as one object, opened back to 40 because at
+       36 the four-line problem statement measured airless, then to 41 on
+       2026-08-11. The last +1px is for the marks: a slab that wraps sets its own
+       fill 4px above the cap height, so two marked lines eat leading that a
+       plain line does not, and the block closed up again when the statement
+       went from one mark to two.
+
+       Floor is ~34px, below which the marker's inline box collides with the
+       line above it on a wrap; there is no ceiling except cohesion. */
+    line-height: 41px;
+    /* 400, dropped from 500 on 2026-08-11. The note this replaces argued 500
+       over 600 on the grounds that 600 competed with the marker. That argument
+       only got stronger when the statement went from one mark to two: with a
+       green slab and a gold one in the same paragraph, the running text has to
+       recede further or the whole block reads as emphasis and the key stops
+       being legible as a key.
+
+       400 is the floor of the 400–600 display band, so the marks now carry all
+       of the weight in this paragraph and none of it is spent on body text. */
+    font-weight: 400;
+    /* Neutral. Opened +0.3px from −0.28px on 2026-08-11, which lands at +0.07%
+       of size — effectively no tracking at all. The history is −2%, then −1%,
+       now zero, and each step was the same correction: negative tracking is
+       right for true display type (48px+), and at 28px it only closes the
+       counters. Dropping to 400 weight removed the last argument for it, since
+       there is less stroke to hold the letterform open.
+
+       Sub-pixel is not decorative here — 0.3px accumulates to about 1.2px across
+       a 60-character line, which is what reopens the word shapes. */
+    letter-spacing: 0.02px;
+    /* Warm near-black instead of the global --color-head-ink (#101010), which
+       is cool and effectively pure black — an anti-pattern in the taste file.
+       Scoped here; the global ink tokens are a separate, systemic fix. */
+    color: #1d1b1b;
+    /* Never let the browser fake the weight if the real cut hasn't loaded —
+       synthesised weight at this size is visibly mushy against the true one. */
+    font-synthesis-weight: none;
+  }
+  @media (max-width: 640px) {
+    .cs-summary-statement {
+      font-size: 22px;
+      /* Same absolute move as desktop — +1px leading, +0.3px tracking — rather
+         than the same ratio the two used to share. That link is broken on
+         purpose: +1px on a 22px size is a bigger proportional step, so this
+         lands at 1.50 against desktop's 1.46. It earns it. The statement runs
+         about twelve lines in a 375px column, and a block that long reads
+         better at body leading than at display leading. */
+      line-height: 33px;
+      letter-spacing: 0.08px;
+    }
+  }
+
+  /* The marker. Same device as the Uniquefit problem statement — a plain
+     sentence with the operative clause struck through in solid brand colour —
+     but built as real text, not a PNG, so it stays selectable, searchable and
+     server-rendered (the machine-readability finding). White on the HSS green
+     #002526 is 16.3:1, up from 9.29:1 on the olive it replaced.
+     `box-decoration-break: clone` re-draws the padding on every wrapped line,
+     which is what makes it read as a highlighter rather than one long
+     rectangle with ragged ends.
+
+     The green is the client's accent, not the page's olive furniture, and it
+     appears here at TEXT scale — the same distinction that keeps the demo
+     poster's eyebrow green while its surface stays paper. Surface-scale
+     #002526 still belongs to exactly one moment: the outcomes stage. Using it
+     as ink in the summary foreshadows that stage rather than competing with
+     it. */
+  .cs-summary-mark {
+    /* Painted as a gradient rather than background-color, because an inline
+       background-color box is sized by the font's ascent+descent — 41px at
+       28px Poppins — regardless of line-height. At the 36px display leading
+       this statement wants, two wrapped strokes touched with no gap and read
+       as one slab. A gradient's height is ours to set.
+       Corners come out square, which is also how the Uniquefit original sets
+       it — the reference this device is borrowed from. */
+    background-color: transparent;
+    /* Falls back to the editorial dark for any theme that has no brand green
+       of its own, so this stays reusable outside the HSS case. */
+    background-image: linear-gradient(
+      var(--cs-brand-green, var(--cs-brand-dark, var(--color-ink))),
+      var(--cs-brand-green, var(--cs-brand-dark, var(--color-ink)))
+    );
+    background-repeat: no-repeat;
+    /* 1.07em covers cap to descender; the +8px adds 4px of fill above and 4px
+       below. The two values are ONE adjustment — the size grows by 8 and the
+       position moves up by half of that, so the extra fill lands evenly rather
+       than all on the bottom. Change one and the other has to follow.
+
+       In px, not em, so the 4px is literally 4px at every breakpoint instead of
+       scaling with the type. */
+    background-size: 100% calc(1.07em + 8px);
+    background-position: 0 calc(0.25em - 4px);
+    color: #fff;
+    padding: 0 0.22em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  /* The second slab colour, and the whole point of having two.
+
+     The marks are a key, not decoration: the plain mark (brand green, the
+     product's own accent) always marks the CUSTOMER side, and this one (the
+     editorial olive the phase bands are painted in) always marks the BUSINESS
+     side. Used consistently across The problem and The solution, the pair draws
+     the page's argument — that the customer problem and the business problem
+     are the same problem — without a sentence having to assert it.
+
+     That consistency is the only thing making two slabs legible instead of two
+     competing emphases, so a mark of either colour on the wrong side of the
+     argument breaks the device for every other one on the page.
+
+     Deliberately keyed to --cs-brand-dark rather than a new token: on a theme
+     with no --cs-brand-green the plain mark already falls back to
+     --cs-brand-dark, so the two would render identical. That is correct — the
+     key only means something on a case that has two accents, and no other case
+     study uses this modifier. Contrast on #5c4304 is 9.4:1 against white. */
+  .cs-summary-mark--business {
+    background-image: linear-gradient(
+      var(--cs-brand-dark, var(--color-ink)),
+      var(--cs-brand-dark, var(--color-ink))
+    );
+  }
+  /* Space, not a rule. The hairline used to sit at the midpoint of a 113px gap,
+     which meant each block got only ~56px of clear air before hitting ink — the
+     separation read as tight even though the total measured inside the taste
+     file's band. Removing the line and spending the whole gap as emptiness is
+     the grouping ladder's first rung, and it is what makes a reader pause.
+
+     Every summary block — problem, solution, outcome — owns 75px of clear air
+     above and below itself on desktop, so the three read as peers rather than
+     as one block with two afterthoughts hung off it.
+
+     PADDING, not margin, and that is the whole trick. Adjacent sibling margins
+     COLLAPSE — 75 bottom against 75 top resolves to 75, which silently made the
+     gap smaller than the 120px it replaced. Padding does not collapse, so each
+     block genuinely keeps its own 75px and the rendered gap between blocks is
+     the full 150px. If this is ever converted back to margin, the spacing
+     halves without any number in the file changing. */
+  .cs-summary-block {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+  @media (min-width: 641px) {
+    .cs-summary-block {
+      padding-top: 75px;
+      padding-bottom: 75px;
+    }
+  }
+
+  /* The operable prototype, sitting between the outcome and the case.
+     Copy left, widget right, on a 1200px rail — the one section that breaks
+     the 800px prose measure, because the artifact and its explanation earn a
+     side-by-side. The stage stays phone-shaped (that is what shipped), but its
+     height is capped against the viewport so the whole widget is visible in
+     one look instead of demanding a page-scroll to reach its composer. */
+  .cs-demo {
+    /* 800px, the same rail as cs-container and the product-video sections.
+       This used to break out to 1200px on the argument that the artifact and
+       its explanation earn extra width. On the page they did not: the copy sat
+       hard left, the widget hard right, and the middle was empty, so the
+       section read as two unrelated objects rather than one. Matching the rail
+       is the cheaper answer, and it leaves 1200px meaning exactly one thing on
+       this page, which is a research board.
+
+       The stage keeps its 390px handset width, so the copy column takes what
+       is left. See the note there before narrowing anything further. */
+    max-width: 800px;
+    /* 75px + 72px. The demo is a major section break, so it sits in the same
+       ~150px rhythm the summary blocks use, not the 72px figure-band rhythm. */
+    margin: 147px auto 8px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 390px;
+    gap: 40px;
+    align-items: center;
+  }
+  .cs-demo-copy {
+    max-width: 560px;
+  }
+  /* The sandbox disclosure as a note card. Bone fill and a hairline from the
+     product's own palette — a note, not a warning: nothing here is dangerous,
+     it is just honest. Full-opacity ink because a disclosure set in faded
+     caption grey read as fine print, which is the opposite of disclosure. */
+  .cs-demo-note {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: #f7f6f3;
+    border: 1px solid rgb(0 0 0 / 0.08);
+    font-size: 13.5px;
+    line-height: 20px;
+    color: rgb(29 27 27 / 0.85);
+  }
+  .cs-demo-note strong {
+    font-weight: 600;
+    color: #1d1b1b;
+    letter-spacing: 0.01em;
+  }
+  /* The click prompt on the poster CTA.
+     Justification (the first question craft-motion asks): this carries real
+     evidence — an embedded artifact that looks like a screenshot until you
+     touch it needs to say it is operable. That is the only reason it exists.
+     Frequency-appropriate: seen once per visit, so a loop is affordable — but
+     it rests 1.4s of every 3.6s so it reads as an invitation, not a nag.
+     Structure: outer span travels (settle curve), inner image presses (morph
+     curve). Separating them keeps one transform per element, so neither
+     animation has to reconstruct the other's state on every keyframe. */
+  .cs-demo-poster-cta {
+    position: relative;
+  }
+  .cs-demo-cursor {
+    position: absolute;
+    right: -24px;
+    bottom: -24px;
+    /* 38x41, up from the glyph's native 26x28. Sized to be noticed as an
+       instruction, not just decoration — the earlier 3x read as a toy and was
+       reverted; this is the middle register. */
+    width: 38px;
+    height: 41px;
+    pointer-events: none;
+    display: block;
+  }
+  .cs-demo-cursor img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Pre-rendered shadow via filter on a tiny decorative asset only — the
+       law bans animating filter, not setting it once. */
+    filter: drop-shadow(0 2px 5px rgb(0 0 0 / 0.35));
+  }
+  /* The click echo: a ring that blooms from the pointer's tip at the moment
+     the press bottoms out. This is what turns "a cursor is hovering" into
+     "click this" — press alone read as idle motion. Same 3.6s timeline as the
+     travel and the press, so the three read as one gesture. Invisible at rest
+     and under reduced motion.
+
+     Geometry matters more than timing here, and the first cut got it wrong
+     twice: the ring was centred on the pointer's body rather than its tip, so
+     the echo bloomed from the wrong place, and it painted OVER the glyph,
+     which read as a lens in front of the cursor instead of a ripple behind
+     it. Now centred on the tip (the glyph's top-left, where the click
+     happens) and stacked underneath. */
+  .cs-demo-cursor {
+    z-index: 0;
+  }
+  .cs-demo-cursor::after {
+    content: "";
+    position: absolute;
+    top: -11px;
+    left: -11px;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #d39514;
+    border-radius: 999px;
+    opacity: 0;
+    transform: scale(0.35);
+    z-index: -1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cs-demo-cursor {
+      animation: csCursorTravel 3.6s var(--ease-enter) infinite;
+    }
+    .cs-demo-cursor img {
+      animation: csCursorPress 3.6s var(--ease-morph) infinite;
+    }
+    .cs-demo-cursor::after {
+      animation: csCursorPing 3.6s var(--ease-enter-soft, cubic-bezier(0, 0, 0.2, 1)) infinite;
+    }
+  }
+  /* Reduced motion: the cursor still appears — it is information, not
+     decoration — it simply stops moving. Removing it entirely would take the
+     "this is clickable" signal away from the people most likely to need it. */
+  @media (prefers-reduced-motion: reduce) {
+    .cs-demo-cursor {
+      animation: none;
+      opacity: 0.9;
+    }
+  }
+  @keyframes csCursorTravel {
+    0% {
+      /* Travel is proportional to the glyph — these two move together, so if
+         the cursor is ever resized this offset has to follow it (24/20 for the
+         38px glyph, was 16/14 at 26px). */
+      transform: translate3d(24px, 20px, 0);
+      opacity: 0;
+    }
+    14% {
+      opacity: 1;
+    }
+    38%,
+    72% {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+    }
+    86%,
+    100% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0;
+    }
+  }
+  /* The dip lands after the travel settles (38%) — press, then release, then
+     hold still. Bottoms out at 0.85, never rebounds past 1: the overshoot law.
+     Deeper than the old 0.9 because the press is now the cue the ring hangs
+     off, and at 0.9 it read as jitter rather than a click. */
+  @keyframes csCursorPress {
+    0%,
+    44% {
+      transform: scale(1);
+    }
+    52% {
+      transform: scale(0.85);
+    }
+    62%,
+    100% {
+      transform: scale(1);
+    }
+  }
+  /* The ring fires exactly as the press bottoms out (52%) and is gone by 66% —
+     roughly half a second. The first cut ran to 74%, and at ~790ms the bloom
+     floated like a bubble instead of snapping like a click; an echo has to be
+     faster than the gesture that caused it. Opacity leads (full by 54%, right
+     at impact) and decays for the rest of the bloom. Never reaches 1: it is an
+     echo, not a second actor. */
+  @keyframes csCursorPing {
+    0%,
+    51% {
+      opacity: 0;
+      transform: scale(0.35);
+    }
+    54% {
+      opacity: 0.8;
+    }
+    66%,
+    100% {
+      opacity: 0;
+      transform: scale(1.45);
+    }
+  }
+  /* A plain container, not a device costume — the phone frame is gone (its
+     chrome read as broken, not premium). One hairline border and the house
+     radius do the framing; 390px wide so the widget still lays out at a true
+     handset width; height capped against the viewport so the whole thing is
+     visible in one look. */
+  .cs-demo-stage {
+    position: relative;
+    justify-self: end;
+    width: 100%;
+    max-width: 390px;
+    height: min(660px, calc(100vh - 120px));
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgb(0 0 0 / 0.12);
+    background: #fbfaf8;
+  }
+  .cs-demo-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  @media (max-width: 960px) {
+    .cs-demo {
+      grid-template-columns: 1fr;
+      gap: 36px;
+      margin-top: 48px;
+    }
+    .cs-demo-stage {
+      justify-self: center;
+      height: min(600px, 80vh);
+    }
+  }
+  /* The poster sits on the stage's own paper, not on the outcomes teal.
+     #002526 at surface scale belongs to exactly one moment on this page — the
+     outcomes stage — and repeating it here as a 660px slab demoted that moment
+     to a theme. The dark reveal now happens when the widget loads: earned by
+     the click, not spent on the invitation. Centered rather than bottom-anchored
+     for the same reason — bottom-left text on a tall card reads as a film
+     poster, which needs the dark ground this no longer has. */
+  .cs-demo-poster {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px 24px;
+    text-align: left;
+    background: transparent;
+    color: #1d1b1b;
+    cursor: pointer;
+  }
+  .cs-demo-poster-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    /* The brand dark at text scale — an echo of the outcomes stage, not a
+       repetition of it. Gold at 12px on this paper fails contrast. */
+    color: #002526;
+  }
+  .cs-demo-poster-title {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 34px;
+    line-height: 40px;
+    font-weight: 500;
+    letter-spacing: -0.8px;
+  }
+  .cs-demo-poster-body {
+    font-size: 14px;
+    line-height: 21px;
+    /* 0.85, not the 0.75 the dark poster wore — same floor as the callout
+       fixes: ink over this paper at 0.75 sits below 4.5:1 at 14px. */
+    opacity: 0.85;
+    max-width: 32em;
+  }
+  .cs-demo-poster-cta {
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: #e7bf6d;
+    color: #002526;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .cs-demo-poster:hover .cs-demo-poster-cta {
+    opacity: 0.9;
+  }
+
+  /* Hand-off from the summary to the case. Deliberately one line with a lot of
+     air on both sides: the Phase One band that follows is already a full-bleed
+     tint with a 36px claim on it, so this only has to say "mode change", not
+     stage one. No rule — a hairline here would read as another boundary in a
+     page that already has several, and space does the same job with no ink. */
+  .cs-handoff {
+    padding-top: 72px;
+    padding-bottom: 8px;
+  }
+  .cs-handoff-line {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 20px;
+    line-height: 30px;
+    font-weight: 500;
+    color: var(--color-body-ink);
+    opacity: 0.8;
+  }
+  @media (max-width: 640px) {
+    .cs-handoff {
+      padding-top: 48px;
+    }
+    .cs-handoff-line {
+      font-size: 18px;
+      line-height: 28px;
+    }
+  }
+
+  /* Optional-depth band.
+     Four sections here — design system, accessibility, architecture, prompt
+     framework — are the ones a design lead reads and a recruiter does not.
+     Unmarked they read as more of the same and everyone pays for them. The band
+     signals "this is depth, and you may leave" with two hairlines and a skip
+     link: no tint, no box, because a background would rhyme with the act
+     landmarks and put a fifth thing in a four-thing tier. */
+  .cs-depth-band {
+    border-top: 1px solid rgb(0 0 0 / 0.1);
+    border-bottom: 1px solid rgb(0 0 0 / 0.1);
+    margin-top: 56px;
+    padding-bottom: 16px;
+  }
+  .cs-depth-band__head {
+    display: flex;
+    flex-wrap: wrap;
+    /* Centre, not baseline: the skip link carries its own 44px target height,
+       so a baseline would hang the label off the top of it. */
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 24px;
+    padding-top: 8px;
+  }
+  .cs-depth-band__skip {
+    /* 44px min target. The accessibility section of this very case study claims
+       "every control at least 40px tall" — an 18px link here would make the page
+       contradict itself. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cs-brand-dark, var(--color-ink));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .cs-depth-band__skip:hover {
+    opacity: 0.65;
+  }
+
   /* Meta label (role / duration / client) */
   .cs-meta-label {
     font-size: 12px;
@@ -714,6 +1558,65 @@ body {
     background: #F5F8FE;
     margin-top: 48px;
   }
+  /* HSS act-breaks are olive, chosen over the quiet cream chapter with the
+     tradeoff stated: five olive bands spend the intro band's uniqueness, and
+     Dinesh took the loud chapters anyway (band lab, 2026-07-30). The claim
+     flips to white — the serif at 36px on olive is the scroll-stopper. */
+  .cs-theme-hss .cs-phase-wrapper {
+    background: var(--cs-brand-dark, #5c4304);
+  }
+  .cs-theme-hss .cs-phase-wrapper .cs-phase-number {
+    /* 0.78 white on olive ≈ 6.5:1 at 14px/600 — clears the 4.5 floor. */
+    color: rgb(255 255 255 / 0.78);
+  }
+  .cs-theme-hss .cs-phase-wrapper .cs-phase-label,
+  .cs-theme-hss .cs-phase-wrapper .cs-phase-claim {
+    color: #ffffff;
+  }
+
+  /* The artifact stage. Full-bleed cream behind every research board, so the
+     back half alternates two meanings and only two: olive says a new act
+     begins, cream says an artifact is on stage. White prose between them.
+     Same grammar as cs-hero-band, which now shares this cream. */
+  .cs-figure-band {
+    width: 100%;
+    background: #fffbf4;
+    /* Two different jobs, deliberately separated.
+
+       MARGIN is the white gap between the prose and the stage. Without it the
+       last line of body copy sat directly on the cream edge, so the tint read
+       as an interruption rather than a stage the prose steps back from.
+
+       PADDING is the cream around the artwork itself, inside the tint.
+
+       The prose sections above use padding-top only, so nothing collapses
+       against this margin and the 72px lands in full. Two adjacent bands DO
+       collapse to 72px rather than 144px, which is the intent — consecutive
+       stages should read as a pair, not drift apart. */
+    display: block;
+    margin: 72px 0;
+    padding: 56px 0;
+  }
+  /* The figure ships with Tailwind's `mt-6 sm:mt-8` from CaseStudyImage, which
+     added 32px on top of the band's own 56px padding and left the cream
+     asymmetric: 88px above the artwork, 56px below.
+
+     !important is load-bearing here, not laziness. Tailwind v4 puts utilities
+     in a later cascade layer than @layer components, so `sm:mt-8` beats this
+     rule on layer order no matter how specific the selector gets. The
+     alternatives were compensating with a smaller padding-top (fragile, and it
+     re-breaks below 640px where mt-6 is 24px) or threading a prop through the
+     shared component for one case study's sake. */
+  .cs-figure-band .cs-figure {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  @media (max-width: 640px) {
+    .cs-figure-band {
+      margin: 40px 0;
+      padding: 32px 0;
+    }
+  }
 
   /* Phase marker */
   .cs-phase-number {
@@ -729,6 +1632,34 @@ body {
     line-height: 40px;
     font-weight: 600;
     color: var(--cs-brand-dark, #387a76);
+  }
+
+  /* Landmark claim — the level-1 of an act. Serif at display size so the four
+     of them read as one tier when scanning, and separated from the page's other
+     38px serif moment by the tinted band it sits on rather than by size. */
+  .cs-phase-claim {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 36px;
+    line-height: 46px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--cs-brand-dark, #387a76);
+    /* Display type wants a shorter measure than prose — ~45 characters here
+       against the 800px container, so it lands on two lines by design. */
+    max-width: 660px;
+    text-wrap: balance;
+  }
+  @media (max-width: 1024px) {
+    .cs-phase-claim {
+      font-size: 30px;
+      line-height: 40px;
+    }
+  }
+  @media (max-width: 640px) {
+    .cs-phase-claim {
+      font-size: 26px;
+      line-height: 34px;
+    }
   }
 
   /* Section heading inside body */
@@ -870,12 +1801,95 @@ body {
       padding: 24px 20px;
     }
   }
+  /* The outcome stage.
+     Three tinted cards failed the grayscale test outright: the gold lead
+     measured 0.817 luminance against 0.922 for its peers — a 1.12 ratio, so
+     the hierarchy existed only in hue and vanished on desaturation. The quiet
+     cards sat at 1.05 against the page, barely present at all. The most
+     important content on the page was on its faintest surface.
+     This is the sanctioned dark treatment from the taste file: ONE deep-toned
+     rounded panel acting as a stage for the star content, never dark as the
+     page. Colours are the product's own — teal #002526 is the shipped single
+     accent and gold #E7BF6D its "tiny spot accent only" — so the panel is the
+     artifact's palette, not a decoration invented for the page. */
+  .cs-stage {
+    background: #002526;
+    border-radius: 16px;
+    padding: 48px 44px;
+  }
+  @media (max-width: 640px) {
+    .cs-stage {
+      padding: 32px 24px;
+      border-radius: 14px;
+    }
+  }
+  /* Order inside an item is figure-first — from → FIGURE → label → note — so
+     the payoff lands before its category (the rank-1 "lead with the outcome"
+     ask, applied inside the card). Ladder: 2 / 12 / 6px within an item against
+     40px between columns — "between" is 3x "within", so the eye groups the
+     three stats before it reads any of them. */
+  .cs-stage-from {
+    /* Slot always rendered so all three figures share a baseline; empty on the
+       metric that has no honest baseline to count from. */
+    min-height: 18px;
+    font-size: 13px;
+    line-height: 18px;
+    color: #fff;
+    opacity: 0.6;
+  }
+  .cs-stage-value {
+    margin-top: 2px;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    /* 56px, up from 38 — at 38 the panel was doing the shouting and the
+       numbers were just sitting in it. */
+    font-size: 56px;
+    line-height: 64px;
+    /* 500 not 600 — type on a dark field reads optically heavier, so the
+       weight that looked right on cream looks blunt here. */
+    font-weight: 500;
+    letter-spacing: -1.4px;
+    font-variant-numeric: tabular-nums;
+    font-synthesis-weight: none;
+    color: #fcfcfd;
+  }
+  /* Gold once, on the one metric that met the number the owners asked for. */
+  .cs-stage-value--lead {
+    color: #e7bf6d;
+  }
+  .cs-stage-label {
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #fff;
+    opacity: 0.75;
+  }
+  .cs-stage-note {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 18px;
+    color: #fff;
+    opacity: 0.6;
+  }
+  @media (max-width: 640px) {
+    .cs-stage-value {
+      font-size: 40px;
+      line-height: 48px;
+      letter-spacing: -1px;
+    }
+  }
+
   .cs-callout-label {
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    opacity: 0.75;
+    /* Was 0.75, which measured 4.16:1 on the gold card. 12px bold is normal
+       text under WCAG, not large text, so the floor is 4.5:1 — this had been
+       failing since before the outcome row was rebuilt. 0.85 clears it. */
+    opacity: 0.85;
   }
   .cs-callout-body {
     margin-top: 12px;
@@ -884,10 +1898,50 @@ body {
     line-height: 32px;
     font-weight: 500;
   }
+  /* Preflight zeroes paragraph margins, and every callout until now passed
+     bare text, so a multi-paragraph one ran together into a single block.
+     Scoped to adjacent siblings, which no existing callout has — additive
+     by construction. */
+  .cs-callout-body p + p {
+    margin-top: 16px;
+  }
   @media (max-width: 640px) {
     .cs-callout-body {
       font-size: 18px;
       line-height: 26px;
+    }
+  }
+
+  /* Establishing-shot band. The hero bitmap carries its own #f6f6f6 ground,
+     and a tinted rounded card floating on white reads as a mistake — a
+     low-contrast edge with visible corners looks like a rendering error, where
+     a full-bleed tint reads as a section. So CSS paints the same grey to the
+     viewport edges and the image sits inside it with no radius: the seam
+     disappears because there is nothing left to seam.
+
+     Kept flush against the intro band below (no bottom padding on the last
+     child) so the scroll reads white → grey → olive: three surfaces, two
+     deliberate cuts. If the export's background ever changes, this hex has to
+     change with it — they are one surface split across two files. */
+  .cs-hero-band {
+    display: block;
+    width: 100%;
+    /* Was #f6f6f6, which existed only because the first export came out grey.
+       Now the same cream as .cs-figure-band, so the page has ONE artifact-stage
+       colour — this band and the bitmap inside it must stay in lockstep, so a
+       change here means a re-export (hero-v4 is baked on this cream). */
+    background: #fffbf4;
+    padding: 72px 0;
+  }
+  .cs-hero-band .cs-figure {
+    margin-top: 0;
+  }
+  .cs-hero-band .cs-figure img {
+    border-radius: 0;
+  }
+  @media (max-width: 640px) {
+    .cs-hero-band {
+      padding: 40px 0;
     }
   }
 
@@ -941,4 +1995,830 @@ body {
       padding-bottom: 48px;
     }
   }
+}
+
+/* =========================================================
+   Site chrome — nav + CTA arrow (Landing Card / Resume design)
+   Ported from the design project's site-chrome.css
+   ========================================================= */
+@layer components {
+  nav.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 26px 100px;
+  }
+  @media (max-width: 1024px) {
+    nav.top {
+      padding: 22px 40px;
+    }
+  }
+  @media (max-width: 640px) {
+    nav.top {
+      padding: 18px 16px;
+    }
+  }
+  /* Case-study pages only. The default nav rail (1440 wide, 100/40/16 padding)
+     is correct on Home and Resume, which are built on max-w-[1440px]. Case
+     studies are not: they centre cs-container-wide at 1100, so the logo drifted
+     against the content as the window resized — 100px right of it around
+     1025px, crossing over near 1300px, and 70px LEFT of it at 1440 and above.
+     The direction of the error reversed, which is what made it read as a bug
+     rather than a margin choice.
+
+     Matching cs-container-wide exactly puts the logo on the same line as the
+     hero title at every width. Scoped by attribute so all four case studies and
+     the template inherit it without touching each page. */
+  [class*="cs-theme-"] nav.top {
+    width: min(100% - 32px, 1100px);
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  nav.top .brand {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  nav.top .brand b {
+    color: var(--color-accent);
+  }
+  nav.top .links {
+    display: flex;
+    gap: 28px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  nav.top .links a {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  nav.top .links a:hover {
+    color: var(--color-accent);
+  }
+  nav.top .links a.on {
+    color: var(--color-footer-blue);
+  }
+
+  /* ── Sticky options pill — case studies only ────────────────────────────
+     The page nav scrolls away with the hero; this takes over once it is gone.
+     Its outline is the page's scroll progress, which on a 43,000px case study
+     is information the reader otherwise does not have — so the ring is a
+     readout, not an ornament. Mounted by ScrollProgressPill, which renders
+     nothing unless it finds a cs-theme-* wrapper. */
+  /* The header itself is the pill — one element changing shape, not a second
+     nav floating over the first. Sticky rather than fixed so it starts in the
+     page's own flow and needs no placeholder to stop the hero jumping.
+
+     The morph is scroll-DRIVEN: ScrollProgressPill writes a single progress
+     number --m (0 = full header, 1 = pill) and every visual below derives from
+     it with calc(). No transitions — a transition tweens between states on the
+     browser's clock after the fact, which is exactly the "pill appears
+     immediately" complaint. Deriving from --m means the wordmark and links
+     travel inward AS the reader scrolls, at the reader's own speed, and
+     reverse mid-gesture. The JS lerps --m so coarse wheel ticks glide instead
+     of stepping. */
+  nav.top.cs-nav-morph {
+    --m: 0;
+    /* Dock offset from centre, set by ScrollProgressPill; --drag-dx is the
+       live finger delta. Both are scaled by --m, so the dock unwinds to centre
+       on its own as the pill expands back into the full-width header. */
+    --dock-dx: 0px;
+    --drag-dx: 0px;
+    /* The transform itself CANNOT live here — see the unlayered rule below the
+       .seq block. `.seq.in { transform: none }` is unlayered, and unlayered
+       normal declarations beat anything inside @layer, so a transform declared
+       here is silently discarded. */
+    position: sticky;
+    top: 12px;
+    z-index: 50;
+    border-radius: 999px;
+    /* 1100px rail at rest → 360px pill; min() keeps the gutter on narrow
+       screens. The two ends must both be resolved lengths for calc to walk
+       between them. */
+    width: min(100% - 32px, calc(1100px - 740px * var(--m)));
+    /* 26px 0 at rest (the case-study rail has no side padding) → 12px 26px. */
+    padding: calc(26px - 14px * var(--m)) calc(26px * var(--m));
+    /* The card face arrives EARLY (fully in by ~45% collapsed) because the
+       sticky nav is what page content scrolls under — mid-morph with no
+       background, the wordmark sat naked on top of the hero title. Only at
+       exactly m=0 is it a plain transparent header. The shadow lags behind
+       the face so the card reads as settling, not popping. Alpha values
+       clamp to [0,1] on their own. */
+    background: rgb(255 255 255 / calc((var(--m) - 0.1) / 0.35));
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / calc(0.06 * (var(--m) - 0.45) / 0.4)),
+      0 10px 30px rgb(0 0 0 / calc(0.1 * (var(--m) - 0.45) / 0.4));
+  }
+  /* The wordmark comes along, which is the point of morphing the whole header
+     rather than only the links: there is still a way home at 40,000px down. */
+  nav.top.cs-nav-morph .brand {
+    font-size: calc(30px - 9px * var(--m));
+  }
+  nav.top.cs-nav-morph .links {
+    gap: calc(28px - 6px * var(--m));
+  }
+  /* Grabbable only once it is a pill. pan-y keeps vertical scrolling native on
+     touch while the horizontal axis belongs to the drag. */
+  nav.top.cs-nav-morph.is-draggable {
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  /* Closed hand from the moment it is held, not once it has travelled 4px.
+     is-pressed is set on pointerdown; is-dragging only after the slop
+     threshold, because that one also gates click suppression. */
+  nav.top.cs-nav-morph.is-pressed,
+  nav.top.cs-nav-morph.is-dragging {
+    cursor: grabbing;
+  }
+  nav.top.cs-nav-morph.is-dragging {
+    user-select: none;
+  }
+  /* Clickable things keep the link pointer — the grab hand on top of a link
+     promised a drag where a click was the likelier intent. Only while a drag
+     is actually in flight does the closed hand take over everywhere. */
+  nav.top.cs-nav-morph.is-dragging .links a,
+  nav.top.cs-nav-morph.is-dragging .brand {
+    cursor: grabbing;
+  }
+  /* The snap transition also has to be unlayered — see below the .seq block. */
+  .cs-progress-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    /* Only meaningful once the header is a pill — as a full-width header the
+       "ring" would be a rectangle drawn around the top of the page. Fades in
+       over the last 30% of the morph, after the card face has arrived. */
+    opacity: calc((var(--m, 0) - 0.7) / 0.3);
+  }
+  .cs-progress-track,
+  .cs-progress-fill {
+    fill: none;
+    stroke-width: 2;
+  }
+  .cs-progress-track {
+    stroke: rgb(0 0 0 / 9%);
+  }
+  .cs-progress-fill {
+    /* pathLength="1" on the rect means the dash maths is size-independent:
+       offset 1 = empty, 0 = full, at any pill width. */
+    stroke: var(--pill-accent, #002526);
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    stroke-linecap: round;
+  }
+  /* No reduced-motion override needed: the morph is scroll-linked direct
+     manipulation (it tracks the reader's own hand 1:1, nothing autonomous),
+     and the JS already skips its lerp smoothing under reduced motion. */
+
+  /* CTA arrow — nudges right when its .group ancestor is hovered */
+  .warrow {
+    display: inline-block;
+    margin-left: 6px;
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .group:hover .warrow {
+    transform: translateX(4px);
+  }
+
+  /* Footer — full-width blue band + baseline row (© + tagline) */
+  footer.site {
+    background: var(--color-footer-blue);
+    color: #fff;
+    margin-top: 96px;
+  }
+  footer.site a,
+  footer.site a:hover {
+    color: #fff;
+  }
+  footer.site .inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 150px 100px 120px;
+  }
+  @media (max-width: 1024px) {
+    footer.site .inner {
+      padding: 90px 40px 70px;
+    }
+  }
+  @media (max-width: 640px) {
+    footer.site .inner {
+      padding: 64px 16px 48px;
+    }
+  }
+  footer.site h2 {
+    font-family: var(--font-sans), sans-serif;
+    font-size: clamp(34px, 3.6vw, 48px);
+    font-weight: 700;
+    line-height: 1.08;
+    margin: 0;
+  }
+  footer.site .role {
+    font-size: 19px;
+    opacity: 0.95;
+    margin-top: 14px;
+  }
+  footer.site .role.sub {
+    margin-top: 6px;
+    font-size: 14px;
+  }
+  footer.site .intro {
+    font-size: 17px;
+    line-height: 1.7;
+    opacity: 0.95;
+    margin: 72px 0 18px;
+  }
+  footer.site .mail {
+    font-family: var(--font-sans), sans-serif;
+    font-size: 19px;
+    font-weight: 500;
+    text-decoration: none;
+    word-break: break-all;
+  }
+  footer.site .phone {
+    font-size: 17px;
+    opacity: 0.95;
+    margin-top: 12px;
+  }
+  footer.site .socials {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 88px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  footer.site .socials span {
+    opacity: 0.7;
+  }
+  footer.site .base {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 100px 26px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    opacity: 0.65;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  @media (max-width: 1024px) {
+    footer.site .base {
+      padding: 0 40px 26px;
+    }
+  }
+  @media (max-width: 640px) {
+    footer.site .base {
+      padding: 0 16px 26px;
+    }
+  }
+}
+
+/* =========================================================
+   Entrance reveal — .seq / [data-seq-group] (driven by SeqReveal.tsx)
+   Hidden initial state applies ONLY when motion is allowed, so
+   reduced-motion users always see content.
+   ========================================================= */
+@media (prefers-reduced-motion: no-preference) {
+  .seq {
+    opacity: 0;
+    transform: translateY(30px);
+    transition:
+      opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--sd, 0ms);
+  }
+  .seq.in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The docked pill's x-offset. Deliberately UNLAYERED and more specific than
+   `.seq.in`: that rule sets `transform: none` and is itself unlayered, so an
+   equivalent declaration inside @layer components loses the cascade outright.
+   Scoped to `.in` so the entrance reveal still owns the transform until the
+   nav has finished arriving. */
+nav.top.cs-nav-morph.in {
+  transform: translateX(calc((var(--dock-dx, 0px) + var(--drag-dx, 0px)) * var(--m, 0)));
+}
+/* `.seq` sets `transition: transform 1s` for the entrance reveal. Left in
+   place, the pill would trail a full second behind the pointer while dragging.
+   Cancelled only once it is a pill (is-draggable ⇒ m > 0.9), so the entrance
+   reveal at the top of the page still animates normally. */
+nav.top.cs-nav-morph.in.is-draggable {
+  transition: none;
+}
+/* Re-enabled for the snap itself. Must follow the rule above: equal
+   specificity, so source order decides. */
+nav.top.cs-nav-morph.in.is-snapping {
+  transition: transform var(--dur-standard) var(--ease-enter);
+}
+
+/* =========================================================
+   Lorem banner (.loremv) + ported Lorem DS component classes
+   (Aurora wave field + MicOrb voice control). Lorem uses the
+   blue brand accent, scoped so it never leaks to the page.
+   ========================================================= */
+.loremv {
+  --accent: #1c7cf5;
+  --accent-soft: #eaf2ff;
+  --accent-ink: #0e5ad6;
+  --ink: #181d27;
+  --ink-dark: #16181d;
+  --line: #eef0f3;
+  --mut: #727a86;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  /* Aurora's light blue as the resting surface. The animated waves only
+     appear on hover, so at rest this is a calm flat pill. */
+  background: #eaf2ff;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 24px 32px;
+  text-decoration: none;
+  color: var(--ink, #16181d);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow: hidden;
+  transition:
+    box-shadow 0.3s,
+    border-color 0.3s;
+}
+.loremv:hover {
+  color: var(--ink, #16181d);
+  border-color: #c9ddfa;
+}
+.loremv-wave {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Hidden at rest, so the pill reads as a flat light-blue object.
+     The waves fade in on hover. */
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .loremv-wave {
+    display: none;
+  }
+}
+.loremv:hover .loremv-wave,
+.loremv:focus-visible .loremv-wave {
+  opacity: 1;
+}
+.loremv-mic {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  pointer-events: none;
+}
+.loremv-txt {
+  position: relative;
+  z-index: 1;
+}
+.loremv-txt h3 {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  margin: 0;
+  color: var(--color-ink, #16181d);
+}
+.loremv-txt h3 em {
+  font-style: normal;
+  color: var(--accent, #1c7cf5);
+}
+.loremv-txt p {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 15.5px;
+  color: var(--color-body-ink, #6a7080);
+  margin: 7px 0 0;
+  line-height: 1.55;
+  min-height: 1.55em;
+  transition: color 0.3s;
+  opacity: 0.75;
+}
+.loremv:hover .loremv-txt p {
+  opacity: 1;
+}
+.loremv-go {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  margin-left: auto;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: #0a4faf;
+  /* White on the light-blue pill, otherwise the button vanishes into it. */
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 11px 20px;
+  transition: background 0.3s;
+}
+/* Stays white on hover: the aurora fades in behind it, so a tinted button
+   would sink into the moving background. */
+.loremv:hover .loremv-go {
+  background: #ffffff;
+}
+.loremv:focus-visible {
+  outline: 3px solid var(--accent, #1c7cf5);
+  outline-offset: 3px;
+}
+/* Mid widths: close the gap before the CTA drifts too far from the text. */
+@media (max-width: 1024px) {
+  .loremv {
+    gap: 18px;
+    padding: 22px 26px;
+  }
+}
+
+/* Phones: orb and text share the top row, the CTA takes its own full-width
+   row underneath as a proper tap target. Smaller orb and heading so the
+   whole thing does not balloon into a 256px blob. */
+@media (max-width: 640px) {
+  .loremv {
+    flex-wrap: wrap;
+    gap: 14px 16px;
+    padding: 18px 20px;
+    border-radius: 28px;
+  }
+  .loremv .lorem-micorb {
+    width: 48px;
+    height: 48px;
+  }
+  .loremv-txt {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .loremv-txt h3 {
+    font-size: 19px;
+  }
+  .loremv-txt p {
+    font-size: 14.5px;
+  }
+  .loremv-go {
+    margin-left: 0;
+    flex: 1 0 100%;
+    text-align: center;
+    padding: 12px 20px;
+  }
+}
+
+/* Lorem DS component styles (.lorem-*) are the single source in
+   ./components/lorem/lorem.css (imported in layout.tsx). The banner's own
+   wrapper classes (.loremv / .loremv-*) stay above; the .lorem-* classes it
+   uses (aurora, micorb) come from lorem.css. */
+
+/* Lorem — one-time entrance beats for each block the model composes (LoremHome). */
+@keyframes lorem-beatin {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lorem-home [style*="lorem-beatin"] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* The listening-orb ring is handled in lorem.css (upstream patch 7), which
+     substitutes a static ring rather than removing the affordance entirely. */
+}
+
+/* =========================================================
+   Post-footer bubble-wrap easter egg (.bstrip) — liquid-glass
+   orbs, blue variant continues the footer band. Ported verbatim
+   from the design project's bubble-strip.css. Driven by BubbleStrip.tsx.
+   ========================================================= */
+.bstrip {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 48% 46%, rgb(230 250 242 / 14%), transparent 48%),
+    linear-gradient(120deg, #b5d7cb, #a9cdbf 52%, #a4c8ba);
+}
+.bs-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px 0;
+  font-size: 13px;
+  color: #2c5a4c;
+  position: relative;
+  z-index: 5;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+.bs-bar b {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+}
+.bs-bar .r {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.bs-ct {
+  font-weight: 600;
+}
+.bs-fresh {
+  border: 1px solid rgb(255 255 255 / 55%);
+  background: rgb(248 255 251 / 55%);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1f4a3d;
+  cursor: pointer;
+  font-family: inherit;
+}
+.bs-fresh:hover {
+  background: rgb(248 255 251 / 55%);
+}
+.bs-sheet {
+  position: relative;
+  padding: 26px 0 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.bstrip .rw {
+  display: flex;
+  gap: var(--g);
+  justify-content: center;
+}
+.bstrip .rw + .rw {
+  margin-top: var(--g);
+}
+.bstrip .ow {
+  --outer-turn: 0deg;
+  --rim-turn: -24deg;
+  position: relative;
+  width: var(--s);
+  height: var(--s);
+  flex: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.bstrip .ow::before {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: -3.5%;
+  height: 11%;
+  border-radius: 50%;
+  z-index: -1;
+  background: radial-gradient(ellipse at center, rgb(48 90 76 / 24%), rgb(48 90 76 / 10%) 55%, transparent 75%);
+}
+.bstrip .orb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: block;
+  pointer-events: none;
+  border: 1px solid rgb(239 255 250 / 28%);
+  border-radius: 49% 51% 48% 52% / 51% 48% 52% 49%;
+  background: radial-gradient(circle at 50% 53%, rgb(205 236 225 / 17%) 0 44%, rgb(133 184 168 / 5%) 61%, transparent 69%),
+    radial-gradient(circle at 44% 38%, rgb(248 255 252 / 32%) 0 3%, rgb(229 251 243 / 7%) 14%, transparent 31%),
+    linear-gradient(140deg, rgb(243 255 250 / 22%), rgb(142 190 174 / 12%) 55%, rgb(243 255 250 / 12%));
+  box-shadow: inset 0 0 0 3px rgb(225 249 240 / 16%), inset 4px 7px 16px rgb(242 255 250 / 38%),
+    inset -6px -11px 20px rgb(89 143 126 / 14%), 0 3px 11px rgb(64 117 100 / 15%),
+    0 25px 25px -19px rgb(60 106 91 / 36%);
+  transform: rotate(var(--outer-turn));
+}
+.bstrip .orb::before,
+.bstrip .orb::after,
+.bstrip .inner-rim,
+.bstrip .glint {
+  position: absolute;
+  pointer-events: none;
+  content: "";
+}
+.bstrip .orb::before {
+  inset: 0.6%;
+  border-radius: inherit;
+  background: conic-gradient(from var(--rim-turn), rgb(248 255 251 / 96%) 0deg 26deg, rgb(192 236 224 / 14%) 39deg 72deg, rgb(247 255 251 / 72%) 86deg 109deg, transparent 120deg 183deg, rgb(212 245 235 / 52%) 195deg 221deg, transparent 233deg 294deg, rgb(247 255 252 / 90%) 310deg 337deg, rgb(248 255 251 / 96%) 360deg);
+  opacity: 0.84;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 6px) calc(100% - 2px), transparent 100%);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 6px) calc(100% - 2px), transparent 100%);
+}
+.bstrip .orb::after {
+  inset: 4%;
+  border: clamp(1px, 0.16vw, 2.4px) solid;
+  border-color: rgb(249 255 252 / 86%) rgb(218 246 237 / 22%) rgb(246 255 252 / 44%) rgb(224 250 241 / 60%);
+  border-radius: 51% 49% 48% 52% / 48% 52% 49% 51%;
+  opacity: 0.84;
+  transform: rotate(-8deg);
+}
+.bstrip .inner-rim {
+  inset: 14%;
+  border-radius: 47% 53% 49% 51% / 51% 46% 54% 49%;
+  background: conic-gradient(from 202deg, rgb(255 255 253 / 96%) 0deg 18deg, rgb(241 255 250 / 48%) 25deg 43deg, transparent 55deg 112deg, rgb(246 255 252 / 78%) 124deg 148deg, transparent 159deg 218deg, rgb(255 255 253 / 96%) 231deg 261deg, rgb(231 252 245 / 27%) 274deg 315deg, rgb(255 255 253 / 90%) 330deg 360deg);
+  filter: none;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 7px) calc(100% - 2px), transparent 100%);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 7px) calc(100% - 2px), transparent 100%);
+}
+.bstrip .glints {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: rotate(var(--gr, 0deg));
+}
+.bstrip .glint {
+  height: 3.2%;
+  border-radius: 999px 72% 999px 62%;
+  background: rgb(255 255 253 / 92%);
+}
+.bstrip .glint-a {
+  top: 19%;
+  left: 39%;
+  width: 10%;
+  transform: rotate(-3deg);
+}
+.bstrip .glint-b {
+  top: 29%;
+  right: 18%;
+  width: 5.5%;
+  transform: rotate(31deg);
+}
+.bstrip .glint-c {
+  bottom: 27%;
+  left: 22%;
+  width: 6%;
+  opacity: 0.7;
+  transform: rotate(-47deg);
+}
+.bstrip .ow:nth-child(4n + 2) {
+  --outer-turn: 0.8deg;
+  --rim-turn: 11deg;
+}
+.bstrip .ow:nth-child(4n + 2) .inner-rim {
+  inset: 16% 12% 12% 14%;
+  transform: rotate(8deg);
+}
+.bstrip .ow:nth-child(4n + 3) {
+  --outer-turn: -0.65deg;
+  --rim-turn: -78deg;
+}
+.bstrip .ow:nth-child(4n + 3) .inner-rim {
+  inset: 13% 16% 14% 12%;
+  transform: rotate(-18deg);
+}
+.bstrip .ow:nth-child(4n) {
+  --outer-turn: 0.35deg;
+  --rim-turn: 52deg;
+}
+.bstrip .ow:nth-child(4n) .inner-rim {
+  inset: 16% 13% 12% 15%;
+  transform: rotate(16deg);
+}
+.bstrip .ow:nth-child(3n) .glint-b {
+  display: none;
+}
+.bstrip .ow:nth-child(5n) .glint-c {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .bstrip .ow:not(.popped):hover .orb {
+    filter: saturate(1.06) brightness(1.025);
+  }
+}
+.bstrip .ow:not(.popped):active .orb {
+  transform: scale(0.95) rotate(var(--outer-turn));
+}
+.bstrip .ow.popped {
+  cursor: default;
+  filter: none;
+}
+.bstrip .ow.popped::before {
+  opacity: 0.35;
+  height: 8%;
+  bottom: -2%;
+}
+.bstrip .ow.popped .orb {
+  transform: scale(0.97) rotate(var(--r, 0deg));
+  border-color: rgb(239 255 250 / 18%);
+  border-radius: 47% 53% 51% 49% / 52% 48% 53% 47%;
+  background: radial-gradient(circle at 47% 45%, rgb(93 143 126 / 16%) 0 12%, rgb(150 195 178 / 10%) 30%, rgb(205 236 225 / 12%) 52%, rgb(226 248 240 / 16%) 72%, transparent 88%),
+    linear-gradient(140deg, rgb(243 255 250 / 10%), rgb(142 190 174 / 8%) 55%, rgb(243 255 250 / 6%));
+  box-shadow: inset 3px 6px 12px rgb(76 124 108 / 22%), inset -2px -4px 8px rgb(242 255 250 / 18%),
+    inset 0 0 0 2px rgb(225 249 240 / 10%), 0 1px 4px rgb(64 117 100 / 10%);
+}
+.bstrip .ow.popped .orb::before {
+  inset: 5%;
+  border-radius: 44% 56% 52% 48% / 55% 45% 57% 43%;
+  mask: none;
+  -webkit-mask: none;
+  opacity: 0.75;
+  background: repeating-conic-gradient(from var(--w1, 20deg), rgb(255 255 253 / 30%) 0deg 2deg, transparent 2deg 31deg, rgb(255 255 253 / 18%) 31deg 33deg, transparent 33deg 55deg),
+    radial-gradient(circle at 50% 48%, transparent 0 14%, rgb(248 255 252 / 14%) 20% 22%, transparent 30% 44%, rgb(248 255 252 / 10%) 50% 52%, transparent 60%);
+  filter: blur(0.35px);
+}
+.bstrip .ow.popped .orb::after {
+  inset: 30%;
+  border-width: 1px;
+  opacity: 0.4;
+  border-radius: 38% 62% 55% 45% / 60% 40% 58% 42%;
+  transform: rotate(var(--w2, -30deg));
+}
+.bstrip .ow.popped .inner-rim {
+  inset: 38%;
+  opacity: 0.35;
+  transform: rotate(var(--w1, 20deg));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px) calc(100% - 1px), transparent 100%);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px) calc(100% - 1px), transparent 100%);
+}
+.bstrip .ow.popped .glints {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bstrip .orb {
+    animation: none !important;
+    transition: none;
+  }
+}
+/* blue variant: strip continues the DS footer blue seamlessly */
+.bstrip--blue {
+  background: var(--color-footer-blue, #1c7cf5);
+}
+.bstrip--blue .bs-bar {
+  color: rgb(255 255 255 / 85%);
+}
+.bstrip--blue .bs-bar b {
+  color: #fff;
+}
+.bstrip--blue .bs-fresh {
+  border-color: rgb(255 255 255 / 45%);
+  background: rgb(255 255 255 / 16%);
+  color: #fff;
+}
+.bstrip--blue .bs-fresh:hover {
+  background: rgb(255 255 255 / 30%);
+}
+.bstrip--blue .ow {
+  filter: none;
+}
+.bstrip--blue .ow::before {
+  background: radial-gradient(ellipse at center, rgb(9 48 105 / 22%), rgb(9 48 105 / 8%) 55%, transparent 75%);
+}
+.bstrip--blue .orb {
+  border-color: rgb(240 248 255 / 16%);
+  background: radial-gradient(circle at 50% 53%, rgb(205 228 253 / 9%) 0 44%, rgb(120 175 240 / 4%) 61%, transparent 69%),
+    radial-gradient(circle at 44% 38%, rgb(248 252 255 / 16%) 0 3%, rgb(228 242 255 / 4%) 14%, transparent 31%),
+    linear-gradient(140deg, rgb(243 249 255 / 10%), rgb(130 180 245 / 7%) 55%, rgb(243 249 255 / 6%));
+  box-shadow: inset 0 0 0 3px rgb(226 241 255 / 9%), inset 4px 7px 16px rgb(244 250 255 / 20%),
+    inset -6px -11px 20px rgb(20 80 165 / 12%), 0 3px 11px rgb(12 60 130 / 12%),
+    0 25px 25px -19px rgb(10 50 110 / 25%);
+}
+.bstrip--blue .orb::before {
+  filter: none;
+  background: conic-gradient(from var(--rim-turn), rgb(250 253 255 / 52%) 0deg 26deg, rgb(190 220 250 / 8%) 39deg 72deg, rgb(248 252 255 / 38%) 86deg 109deg, transparent 120deg 183deg, rgb(212 234 255 / 26%) 195deg 221deg, transparent 233deg 294deg, rgb(249 252 255 / 46%) 310deg 337deg, rgb(250 253 255 / 52%) 360deg);
+  filter: blur(1px) drop-shadow(0 0 4px rgb(226 240 255 / 36%));
+}
+.bstrip--blue .orb::after {
+  border-color: rgb(250 253 255 / 44%) rgb(216 236 255 / 12%) rgb(246 251 255 / 22%) rgb(222 240 255 / 30%);
+}
+.bstrip--blue .inner-rim {
+  opacity: 0.55;
+  background: conic-gradient(from 202deg, rgb(255 255 255 / 85%) 0deg 18deg, rgb(241 249 255 / 40%) 25deg 43deg, transparent 55deg 112deg, rgb(246 251 255 / 65%) 124deg 148deg, transparent 159deg 218deg, rgb(255 255 255 / 85%) 231deg 261deg, rgb(229 244 255 / 22%) 274deg 315deg, rgb(255 255 255 / 75%) 330deg 360deg);
+}
+.bstrip--blue .glint {
+  opacity: 0.55;
+}
+.bstrip--blue .glint-c {
+  opacity: 0.4;
+}
+.bstrip--blue .ow.popped .orb {
+  background: radial-gradient(circle at 47% 45%, rgb(14 62 130 / 18%) 0 12%, rgb(90 150 225 / 11%) 30%, rgb(200 227 253 / 12%) 52%, rgb(224 240 255 / 16%) 72%, transparent 88%),
+    linear-gradient(140deg, rgb(243 249 255 / 10%), rgb(130 180 245 / 9%) 55%, rgb(243 249 255 / 6%));
+  box-shadow: inset 3px 6px 12px rgb(15 65 140 / 26%), inset -2px -4px 8px rgb(244 250 255 / 18%),
+    inset 0 0 0 2px rgb(226 241 255 / 10%), 0 1px 4px rgb(12 60 130 / 12%);
 }

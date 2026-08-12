@@ -40,4 +40,22 @@
   --color-card-reporters-ink: #c40d12;
   --color-card-b2b-bg: #e8edfd;
   --color-card-b2b-ink: #2a34c6;
+  /* HSS — added 2026-08-03 with the case study's styling. The other seven
+     pairs were here; this one only ever lived in the app, so .cs-theme-hss
+     resolved its accent to nothing in the shipped DS. */
+  --color-card-hss-bg: #f6e8cd;
+  --color-card-hss-ink: #5c4304;
+
+  /* Motion. One locked set, materialized once and referenced everywhere —
+     an inline cubic-bezier or a raw ms value anywhere else is a defect.
+     Migrated from the app 2026-08-03 because the case study's animations
+     (the demo pointer's travel, press and click ring) reference them, and
+     without these definitions those animations run on the browser default. */
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1); /* "the settle" — entrance transform */
+  --ease-enter-soft: cubic-bezier(0, 0, 0.2, 1); /* entrance opacity / filter */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-morph: cubic-bezier(0.4, 0, 0.2, 1); /* in-place state change */
+  --dur-quick: 200ms; /* 150–250 tier — press, hover, toggle */
+  --dur-standard: 400ms; /* 350–450 tier — entrances */
+  --dur-slow: 650ms; /* 550–800 tier — set-pieces */
 }

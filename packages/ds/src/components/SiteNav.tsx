@@ -8,49 +8,47 @@ export type NavLink = {
 };
 
 export type SiteNavProps = {
-  /** Brand mark shown at the left. Defaults to a text wordmark. */
+  /** Brand mark shown at the left. Defaults to the "Rd." wordmark. */
   logo?: ReactNode;
-  /** Nav links at the right. Defaults to Home + Resume. */
+  /** Nav links at the right. Defaults to Work · Resume. */
   links?: NavLink[];
   /** `key` of the active link. */
   active?: string;
-  /** Color of the active link. */
-  activeColor?: string;
-  /** Color of inactive links. */
-  inactiveColor?: string;
 };
 
+// "Contact" was removed 2026-08-07: as a mailto: it fired the OS mail client
+// when the label promised contact details. The footer carries that instead,
+// with the address itself as the link text.
 const DEFAULT_LINKS: NavLink[] = [
-  { key: "home", label: "Home", href: "/" },
+  { key: "work", label: "Work", href: "/#work" },
   { key: "resume", label: "Resume", href: "/resume" },
 ];
 
+/**
+ * Framework-agnostic mirror of the app nav (design-sync source). The app ships
+ * its own `next/link` variant in `app/components/SiteNav.tsx`; this plain-anchor
+ * version keeps the design-tool copy in step with the current chrome.
+ */
 export default function SiteNav({
   logo,
   links = DEFAULT_LINKS,
   active,
-  activeColor = "var(--color-footer-blue)",
-  inactiveColor = "var(--color-ink)",
 }: SiteNavProps) {
   return (
-    <nav className="pad-nav mx-auto flex w-full max-w-[1440px] items-center justify-between py-6">
-      <a href="/" aria-label="Home" className="flex items-center">
+    <nav className="top">
+      <a className="brand" href="/" aria-label="Home">
         {logo ?? (
-          <span
-            className="t-footer-brand"
-            style={{ fontSize: 32, color: "var(--color-ink)" }}
-          >
-            Rd<span style={{ color: "var(--color-accent)" }}>.</span>
-          </span>
+          <>
+            Rd<b>.</b>
+          </>
         )}
       </a>
-      <div className="flex items-center text-[16px] font-normal">
+      <div className="links">
         {links.map((link) => (
           <a
             key={link.key}
             href={link.href}
-            className="px-[15px] hover:opacity-70"
-            style={{ color: link.key === active ? activeColor : inactiveColor }}
+            className={link.key === active ? "on" : undefined}
           >
             {link.label}
           </a>

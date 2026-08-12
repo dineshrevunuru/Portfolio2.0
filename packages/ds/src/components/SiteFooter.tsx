@@ -1,56 +1,37 @@
-export type SocialLink = {
-  label: string;
-  href: string;
-};
-
 export type SiteFooterProps = {
-  /** Display name / brand shown large at the top. */
-  name: string;
-  role?: string;
-  location?: string;
-  /** Intro line above the contact details. */
-  contactIntro?: string;
-  email?: string;
-  phone?: string;
-  socials?: SocialLink[];
+  /** Right-hand text in the footer baseline row (e.g. the bubble-wrap hint). */
+  tagline?: string;
 };
 
-export default function SiteFooter({
-  name,
-  role,
-  location,
-  contactIntro,
-  email,
-  phone,
-  socials = [],
-}: SiteFooterProps) {
+export default function SiteFooter({ tagline }: SiteFooterProps) {
   return (
-    <footer className="w-full bg-[color:var(--color-footer-blue)] text-white">
-      <div className="pad-footer-inner mx-auto w-full max-w-[1440px]">
-        <div className="max-w-[555px]">
-          <h3 className="t-footer-brand">{name}</h3>
-          {role && <p className="mt-3 t-footer-role">{role}</p>}
-          {location && <p className="mt-3 t-footer-meta">{location}</p>}
-
-          {contactIntro && (
-            <p className="mt-[80px] t-footer-meta">{contactIntro}</p>
-          )}
-          {email && <p className="mt-6 t-footer-contact">{email}</p>}
-          {phone && <p className="mt-2 t-footer-contact">{phone}</p>}
-
-          {socials.length > 0 && (
-            <div className="mt-[120px] flex items-center gap-4 t-footer-social">
-              {socials.map((social, i) => (
-                <span key={social.href} className="flex items-center gap-4">
-                  {i > 0 && <span className="opacity-60">|</span>}
-                  <a href={social.href} className="hover:underline">
-                    {social.label}
-                  </a>
-                </span>
-              ))}
-            </div>
-          )}
+    <footer className="site">
+      <div className="inner">
+        <div>
+          <h2>Dinesh Revunuru</h2>
+          <div className="role">AI Product Designer</div>
+          <div className="role sub">Chicago, IL USA</div>
+          <p className="intro">
+            If you are thinking about hiring me or would like to
+            <br />
+            discuss a project, get in touch with me at,
+          </p>
+          <a className="mail" href="mailto:dineshrevunuru@gmail.com">
+            dineshrevunuru@gmail.com
+          </a>
+          <div className="phone">+1 (312) 838-4876</div>
+          <div className="socials">
+            <a href="https://www.linkedin.com/in/dinesh-revunuru/">LinkedIn</a>
+            <span aria-hidden="true">|</span>
+            <a href="https://www.instagram.com/dinesh_revunuru/">Instagram</a>
+            <span aria-hidden="true">|</span>
+            <a href="https://twitter.com/dinesh_revunuru/">Twitter</a>
+          </div>
         </div>
+      </div>
+      <div className="base">
+        <span>&copy; 2026 Dinesh Revunuru</span>
+        <span>{tagline}</span>
       </div>
     </footer>
   );

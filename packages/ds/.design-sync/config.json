@@ -1,0 +1,12 @@
+{
+  "pkg": "@portfolio/ds",
+  "globalName": "PortfolioDS",
+  "projectId": "aa230818-c911-49da-a371-ddf99fbb4491",
+  "shape": "package",
+  "buildCmd": "npm run build",
+  "cssEntry": "./dist/ds.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "SiteNav": { "cardMode": "column" }
+  }
+}

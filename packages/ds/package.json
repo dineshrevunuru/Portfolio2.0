@@ -18,13 +18,13 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles/index.css",
+    "./styles.css": "./dist/ds.css",
     "./tokens.css": "./dist/styles/tokens.css",
     "./tailwind-theme.css": "./dist/styles/tailwind-theme.css",
     "./styles/*": "./dist/styles/*"
   },
   "scripts": {
-    "build": "tsup && cp -r src/styles dist/styles",
+    "build": "tsup && tailwindcss -i src/styles/tailwind-build.css -o dist/.ds-tw.css && node scripts/bundle-css.mjs",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
@@ -34,6 +34,7 @@
     "react-dom": ">=18"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.2.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tsup": "^8.5.0",

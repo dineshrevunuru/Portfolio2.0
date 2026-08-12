@@ -119,10 +119,56 @@
       object-position: top !important;
     }
   }
+
+  /* Phone cards (HSS, 101 Reporters) — the copy is short, so the phone grows
+     into whatever height the row gives the card instead of leaving a gap under
+     the text. The base .thumb-tall above pins the image to a fixed 373x406 box
+     that margin-top:auto then shoves to the bottom, which left ~94px of dead
+     card above the phone.
+     Must sit in this layer, after the base: for !important declarations the
+     cascade-layer order inverts, so an unlayered override would lose.
+     The phone is taken OUT OF FLOW so it contributes no intrinsic height,
+     otherwise the card sets the row height and stretches its neighbour. */
+  .project-card.card-hss .thumb-tall,
+  .project-card.card-reporters .thumb-tall {
+    position: relative;
+    margin-top: 28px !important;
+    flex: 1 1 0%;
+    min-height: 0;
+  }
+  /* Width follows height so the phone scales whole. A fixed width with
+     object-fit:cover would crop the sides as the card grows taller. */
+  .project-card.card-hss .thumb-tall > img,
+  .project-card.card-reporters .thumb-tall > img {
+    position: absolute;
+    inset: 0;
+    margin-inline: auto;
+    height: 100% !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    object-position: bottom !important;
+  }
+  /* Single column below 1024: no sibling to stretch against, so give the
+     phone an explicit floor or a zero flex-basis would collapse it. */
+  @media (max-width: 1024px) {
+    .project-card.card-hss .thumb-tall,
+    .project-card.card-reporters .thumb-tall {
+      flex: 0 0 auto;
+      min-height: 380px;
+    }
+    .project-card.card-hss .thumb-tall > img,
+    .project-card.card-reporters .thumb-tall > img {
+      position: static;
+      height: 380px !important;
+      max-height: none !important;
+    }
+  }
 }
 
-/* 101 Reporters — phone contained within card (no bleed) */
-.project-card.card-reporters {
+/* 101 Reporters + HSS — phone contained within card (no bleed) */
+.project-card.card-reporters,
+.project-card.card-hss {
   overflow: hidden;
 }
 @media (max-width: 1024px) {
@@ -286,6 +332,31 @@
     margin-top: 40px;
   }
 
+  /* Education entries — the Certifications tier, not a new scale. The previous
+     treatment set every line as one 12px uppercase label at 0.75 opacity, which
+     rendered a master's degree smaller and fainter than the word "Education"
+     above it, and at 60% the size of a certification name. Two credentials
+     sections share one tier; work experience stays at 32px above both. */
+  .resume-edu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .resume-edu-degree {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0;
+    color: var(--color-head-ink);
+  }
+  .resume-edu-meta {
+    font-size: 15px;
+    color: var(--color-body-ink);
+    margin: 4px 0 0;
+  }
+
   .resume-mini-head {
     font-size: 15px;
     font-weight: 700;
@@ -317,6 +388,10 @@
   .cs-theme-microsoft {
     --cs-accent-bg: var(--color-card-microsoft-bg);
     --cs-accent-ink: var(--color-card-microsoft-ink);
+    /* The card's own ink, reused as the intro band. Every built case study
+       takes its band from the project's colour rather than the default teal,
+       and #932535 carries white at 8.4:1. */
+    --cs-brand-dark: #932535;
   }
   .cs-theme-jira {
     --cs-accent-bg: var(--color-card-jira-bg);
@@ -343,28 +418,29 @@
   }
 
   /* Content containers */
+  /* width: min(100% - 32px, N) rather than max-width plus a padding media
+     query. Same result at wide viewports (min picks N, so no rail shrinks),
+     but the 16px gutter now appears exactly when the viewport would otherwise
+     squeeze it out, at every container's own threshold instead of one shared
+     840px guess.
+
+     The old rule only padded below 840px, which left a real hole: between
+     841px and 1100px, cs-container-wide ran edge to edge and the hero title
+     touched both sides of the window with no gutter at all. */
   .cs-container {
-    max-width: 800px;
+    width: min(100% - 32px, 800px);
     margin-left: auto;
     margin-right: auto;
   }
   .cs-container-wide {
-    max-width: 1100px;
+    width: min(100% - 32px, 1100px);
     margin-left: auto;
     margin-right: auto;
   }
   .cs-container-full {
-    max-width: 1600px;
+    width: min(100% - 32px, 1600px);
     margin-left: auto;
     margin-right: auto;
-  }
-  @media (max-width: 840px) {
-    .cs-container,
-    .cs-container-wide,
-    .cs-container-full {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
   }
 
   /* Hero title */
@@ -375,10 +451,23 @@
     letter-spacing: 0.2px;
     font-weight: 600;
   }
+  /* Each hero title carries a hard <br> placed for the desktop measure. Below
+     1025px the column narrows faster than the type shrinks, so the half after
+     the break wraps again and strands a fragment on its own line — the HSS
+     outcome title left "60%" alone at ~860px. Drop the break for the whole
+     band and let the browser balance instead.
+
+     These two rules were missing from this copy entirely (the app had them at
+     640px only), which is the drift AGENTS.md warns about. Restored in sync
+     with app/globals.css 2026-08-11. */
   @media (max-width: 1024px) {
     .cs-hero-title {
       font-size: 48px;
       line-height: 54px;
+      text-wrap: balance;
+    }
+    .cs-hero-title br {
+      display: none;
     }
   }
   @media (max-width: 640px) {
@@ -590,7 +679,10 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    opacity: 0.75;
+    /* Was 0.75, which measured 4.16:1 on the gold card. 12px bold is normal
+       text under WCAG, not large text, so the floor is 4.5:1 — this had been
+       failing since before the outcome row was rebuilt. 0.85 clears it. */
+    opacity: 0.85;
   }
   .cs-callout-body {
     margin-top: 12px;
@@ -598,6 +690,13 @@
     font-size: 22px;
     line-height: 32px;
     font-weight: 500;
+  }
+  /* Preflight zeroes paragraph margins, and every callout until now passed
+     bare text, so a multi-paragraph one ran together into a single block.
+     Scoped to adjacent siblings, which no existing callout has — additive
+     by construction. */
+  .cs-callout-body p + p {
+    margin-top: 16px;
   }
   @media (max-width: 640px) {
     .cs-callout-body {
@@ -656,4 +755,805 @@
       padding-bottom: 48px;
     }
   }
+}
+
+
+/* =========================================================
+   HSS case study — migrated from the app 2026-08-03 so the
+   design system can reproduce that page exactly.
+
+   Everything below lived only in the portfolio's app/globals.css,
+   which meant the shipped DS had the components but not the styling
+   that makes them look like the case study: no cs-theme-hss scope,
+   no artifact stages, no outcomes board, no summary markers, and no
+   interactive-demo block. Comments are carried over verbatim because
+   they record why each value is what it is.
+   ========================================================= */
+@layer components {
+  .cs-theme-hss {
+      --cs-accent-bg: var(--color-card-hss-bg);
+      --cs-accent-ink: var(--color-card-hss-ink);
+      --cs-brand-dark: #5c4304;
+      /* The product's own single accent — the green in the widget header and the
+         outcomes stage — as opposed to --cs-brand-dark, which is the case
+         study's editorial olive. Kept as a separate token because they are two
+         different things that happen to both be dark: one is the client's brand,
+         one is this page's furniture. */
+      --cs-brand-green: #002526;
+    }
+
+  /* Problem / Solution / Outcome summary — the 30-second layer.
+       Its statements sit at 24px: clearly above body (16px) so a scanner stops on
+       them, clearly below the act claims (36px) so they never compete with the
+       spine. Three peers, stacked rather than columned — the statements are
+       different lengths and a 3-col grid would rag them against each other. */
+    .cs-summary-statement {
+      /* Poppins, not the display serif. The serif read as another editorial
+         flourish next to the act claims; the sans reads as a stated finding,
+         which is what a problem statement is.
+         No max-width — the summary shares the Intro band's 800px measure so the
+         two openings read as one column, not two. */
+      font-family: var(--font-sans), system-ui, sans-serif;
+      font-size: 28px;
+      /* 41px (1.46). This has moved three times: 42px originally, tightened to
+         36px (1.29) so the block read as one object, opened back to 40 because
+         at 36 the four-line problem statement measured airless, then to 41 on
+         2026-08-11. The last +1px is for the marks: a slab that wraps sets its
+         own fill 4px above the cap height, so two marked lines eat leading that
+         a plain line does not, and the block closed up again when the statement
+         went from one mark to two.
+
+         Floor is ~34px, below which the marker's inline box collides with the
+         line above it on a wrap; there is no ceiling except cohesion. */
+      line-height: 41px;
+      /* 400, dropped from 500 on 2026-08-11. The note this replaces argued 500
+         over 600 on the grounds that 600 competed with the marker. That argument
+         only got stronger when the statement went from one mark to two: with a
+         green slab and a gold one in the same paragraph, the running text has to
+         recede further or the whole block reads as emphasis and the key stops
+         being legible as a key.
+
+         400 is the floor of the 400–600 display band, so the marks now carry all
+         of the weight in this paragraph and none of it is spent on body text. */
+      font-weight: 400;
+      /* Neutral. Opened +0.3px from −0.28px on 2026-08-11, which lands at
+         +0.07% of size — effectively no tracking at all. The history is −2%,
+         then −1%, now zero, and each step was the same correction: negative
+         tracking is right for true display type (48px+), and at 28px it only
+         closes the counters. Dropping to 400 weight removed the last argument
+         for it, since there is less stroke to hold the letterform open.
+
+         Sub-pixel is not decorative here — 0.3px accumulates to about 1.2px
+         across a 60-character line, which is what reopens the word shapes. */
+      letter-spacing: 0.02px;
+      /* Warm near-black instead of the global --color-head-ink (#101010), which
+         is cool and effectively pure black — an anti-pattern in the taste file.
+         Scoped here; the global ink tokens are a separate, systemic fix. */
+      color: #1d1b1b;
+      /* Never let the browser fake the weight if the real cut hasn't loaded —
+         synthesised weight at this size is visibly mushy against the true one. */
+      font-synthesis-weight: none;
+    }
+
+  @media (max-width: 640px) {
+    .cs-summary-statement {
+        font-size: 22px;
+        /* Same absolute move as desktop — +1px leading, +0.3px tracking —
+           rather than the same ratio the two used to share. That link is broken
+           on purpose: +1px on a 22px size is a bigger proportional step, so this
+           lands at 1.50 against desktop's 1.46. It earns it. The statement runs
+           about twelve lines in a 375px column, and a block that long reads
+           better at body leading than at display leading. */
+        line-height: 33px;
+        letter-spacing: 0.08px;
+      }
+    }
+
+  /* The marker. Same device as the Uniquefit problem statement — a plain
+       sentence with the operative clause struck through in solid brand colour —
+       but built as real text, not a PNG, so it stays selectable, searchable and
+       server-rendered (the machine-readability finding). White on the HSS green
+       #002526 is 16.3:1, up from 9.29:1 on the olive it replaced.
+       `box-decoration-break: clone` re-draws the padding on every wrapped line,
+       which is what makes it read as a highlighter rather than one long
+       rectangle with ragged ends.
+
+       The green is the client's accent, not the page's olive furniture, and it
+       appears here at TEXT scale — the same distinction that keeps the demo
+       poster's eyebrow green while its surface stays paper. Surface-scale
+       #002526 still belongs to exactly one moment: the outcomes stage. Using it
+       as ink in the summary foreshadows that stage rather than competing with
+       it. */
+    .cs-summary-mark {
+      /* Painted as a gradient rather than background-color, because an inline
+         background-color box is sized by the font's ascent+descent — 41px at
+         28px Poppins — regardless of line-height. At the 36px display leading
+         this statement wants, two wrapped strokes touched with no gap and read
+         as one slab. A gradient's height is ours to set.
+         Corners come out square, which is also how the Uniquefit original sets
+         it — the reference this device is borrowed from. */
+      background-color: transparent;
+      /* Falls back to the editorial dark for any theme that has no brand green
+         of its own, so this stays reusable outside the HSS case. */
+      background-image: linear-gradient(
+        var(--cs-brand-green, var(--cs-brand-dark, var(--color-ink))),
+        var(--cs-brand-green, var(--cs-brand-dark, var(--color-ink)))
+      );
+      background-repeat: no-repeat;
+      /* 1.07em covers cap to descender; the +8px adds 4px of fill above and 4px
+         below. The two values are ONE adjustment — the size grows by 8 and the
+         position moves up by half of that, so the extra fill lands evenly rather
+         than all on the bottom. Change one and the other has to follow.
+
+         In px, not em, so the 4px is literally 4px at every breakpoint instead of
+         scaling with the type. */
+      background-size: 100% calc(1.07em + 8px);
+      background-position: 0 calc(0.25em - 4px);
+      color: #fff;
+      padding: 0 0.22em;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+    /* The second slab colour, and the whole point of having two.
+
+       The marks are a key, not decoration: the plain mark (brand green, the
+       product's own accent) always marks the CUSTOMER side, and this one (the
+       editorial olive the phase bands are painted in) always marks the BUSINESS
+       side. Used consistently across The problem and The solution, the pair
+       draws the argument that the customer problem and the business problem are
+       the same problem, without a sentence having to assert it.
+
+       That consistency is the only thing making two slabs legible instead of two
+       competing emphases, so a mark of either colour on the wrong side of the
+       argument breaks the device for every other one on the page.
+
+       Keyed to --cs-brand-dark rather than a new token: on a theme with no
+       --cs-brand-green the plain mark already falls back to --cs-brand-dark, so
+       the two render identical. That is correct — the key only means something
+       on a case that has two accents. Contrast on #5c4304 is 9.4:1 on white. */
+    .cs-summary-mark--business {
+      background-image: linear-gradient(
+        var(--cs-brand-dark, var(--color-ink)),
+        var(--cs-brand-dark, var(--color-ink))
+      );
+    }
+
+  /* Space, not a rule. The hairline used to sit at the midpoint of a 113px gap,
+       which meant each block got only ~56px of clear air before hitting ink — the
+       separation read as tight even though the total measured inside the taste
+       file's band. Removing the line and spending the whole gap as emptiness is
+       the grouping ladder's first rung, and it is what makes a reader pause.
+
+       Every summary block — problem, solution, outcome — owns 75px of clear air
+       above and below itself on desktop, so the three read as peers rather than
+       as one block with two afterthoughts hung off it.
+
+       PADDING, not margin, and that is the whole trick. Adjacent sibling margins
+       COLLAPSE — 75 bottom against 75 top resolves to 75, which silently made the
+       gap smaller than the 120px it replaced. Padding does not collapse, so each
+       block genuinely keeps its own 75px and the rendered gap between blocks is
+       the full 150px. If this is ever converted back to margin, the spacing
+       halves without any number in the file changing. */
+    .cs-summary-block {
+      padding-top: 36px;
+      padding-bottom: 36px;
+    }
+
+  @media (min-width: 641px) {
+    .cs-summary-block {
+        padding-top: 75px;
+        padding-bottom: 75px;
+      }
+    }
+
+  /* The operable prototype, sitting between the outcome and the case.
+       Copy left, widget right, on a 1200px rail — the one section that breaks
+       the 800px prose measure, because the artifact and its explanation earn a
+       side-by-side. The stage stays phone-shaped (that is what shipped), but its
+       height is capped against the viewport so the whole widget is visible in
+       one look instead of demanding a page-scroll to reach its composer. */
+    .cs-demo {
+      /* 800px, the same rail as cs-container and the product-video sections.
+         This used to break out to 1200px on the argument that the artifact and
+         its explanation earn extra width. On the page they did not: the copy sat
+         hard left, the widget hard right, and the middle was empty, so the
+         section read as two unrelated objects rather than one. Matching the rail
+         is the cheaper answer, and it leaves 1200px meaning exactly one thing on
+         this page, which is a research board.
+
+         The stage keeps its 390px handset width, so the copy column takes what
+         is left. See the note there before narrowing anything further. */
+      max-width: 800px;
+      /* 75px + 72px. The demo is a major section break, so it sits in the same
+         ~150px rhythm the summary blocks use, not the 72px figure-band rhythm. */
+      margin: 147px auto 8px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 390px;
+      gap: 40px;
+      align-items: center;
+    }
+
+  .cs-demo-copy {
+      max-width: 560px;
+    }
+
+  /* The sandbox disclosure as a note card. Bone fill and a hairline from the
+       product's own palette — a note, not a warning: nothing here is dangerous,
+       it is just honest. Full-opacity ink because a disclosure set in faded
+       caption grey read as fine print, which is the opposite of disclosure. */
+    .cs-demo-note {
+      display: block;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #f7f6f3;
+      border: 1px solid rgb(0 0 0 / 0.08);
+      font-size: 13.5px;
+      line-height: 20px;
+      color: rgb(29 27 27 / 0.85);
+    }
+
+  .cs-demo-note strong {
+      font-weight: 600;
+      color: #1d1b1b;
+      letter-spacing: 0.01em;
+    }
+
+  /* The click prompt on the poster CTA.
+       Justification (the first question craft-motion asks): this carries real
+       evidence — an embedded artifact that looks like a screenshot until you
+       touch it needs to say it is operable. That is the only reason it exists.
+       Frequency-appropriate: seen once per visit, so a loop is affordable — but
+       it rests 1.4s of every 3.6s so it reads as an invitation, not a nag.
+       Structure: outer span travels (settle curve), inner image presses (morph
+       curve). Separating them keeps one transform per element, so neither
+       animation has to reconstruct the other's state on every keyframe. */
+    .cs-demo-poster-cta {
+      position: relative;
+    }
+
+  .cs-demo-cursor {
+      position: absolute;
+      right: -24px;
+      bottom: -24px;
+      /* 38x41, up from the glyph's native 26x28. Sized to be noticed as an
+         instruction, not just decoration — the earlier 3x read as a toy and was
+         reverted; this is the middle register. */
+      width: 38px;
+      height: 41px;
+      pointer-events: none;
+      display: block;
+    }
+
+  .cs-demo-cursor img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      /* Pre-rendered shadow via filter on a tiny decorative asset only — the
+         law bans animating filter, not setting it once. */
+      filter: drop-shadow(0 2px 5px rgb(0 0 0 / 0.35));
+    }
+
+  /* The click echo: a ring that blooms from the pointer's tip at the moment
+       the press bottoms out. This is what turns "a cursor is hovering" into
+       "click this" — press alone read as idle motion. Same 3.6s timeline as the
+       travel and the press, so the three read as one gesture. Invisible at rest
+       and under reduced motion.
+
+       Geometry matters more than timing here, and the first cut got it wrong
+       twice: the ring was centred on the pointer's body rather than its tip, so
+       the echo bloomed from the wrong place, and it painted OVER the glyph,
+       which read as a lens in front of the cursor instead of a ripple behind
+       it. Now centred on the tip (the glyph's top-left, where the click
+       happens) and stacked underneath. */
+    .cs-demo-cursor {
+      z-index: 0;
+    }
+
+  .cs-demo-cursor::after {
+      content: "";
+      position: absolute;
+      top: -11px;
+      left: -11px;
+      width: 28px;
+      height: 28px;
+      border: 2px solid #d39514;
+      border-radius: 999px;
+      opacity: 0;
+      transform: scale(0.35);
+      z-index: -1;
+    }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cs-demo-cursor {
+        animation: csCursorTravel 3.6s var(--ease-enter) infinite;
+      }
+    .cs-demo-cursor img {
+        animation: csCursorPress 3.6s var(--ease-morph) infinite;
+      }
+    .cs-demo-cursor::after {
+        animation: csCursorPing 3.6s var(--ease-enter-soft, cubic-bezier(0, 0, 0.2, 1)) infinite;
+      }
+    }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cs-demo-cursor {
+        animation: none;
+        opacity: 0.9;
+      }
+    }
+
+  @keyframes csCursorTravel {
+      0% {
+        /* Travel is proportional to the glyph — these two move together, so if
+           the cursor is ever resized this offset has to follow it (24/20 for the
+           38px glyph, was 16/14 at 26px). */
+        transform: translate3d(24px, 20px, 0);
+        opacity: 0;
+      }
+      14% {
+        opacity: 1;
+      }
+      38%,
+      72% {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+      86%,
+      100% {
+        transform: translate3d(0, 0, 0);
+        opacity: 0;
+      }
+    }
+
+  /* The dip lands after the travel settles (38%) — press, then release, then
+       hold still. Bottoms out at 0.85, never rebounds past 1: the overshoot law.
+       Deeper than the old 0.9 because the press is now the cue the ring hangs
+       off, and at 0.9 it read as jitter rather than a click. */
+    @keyframes csCursorPress {
+      0%,
+      44% {
+        transform: scale(1);
+      }
+      52% {
+        transform: scale(0.85);
+      }
+      62%,
+      100% {
+        transform: scale(1);
+      }
+    }
+
+  /* The ring fires exactly as the press bottoms out (52%) and is gone by 66% —
+       roughly half a second. The first cut ran to 74%, and at ~790ms the bloom
+       floated like a bubble instead of snapping like a click; an echo has to be
+       faster than the gesture that caused it. Opacity leads (full by 54%, right
+       at impact) and decays for the rest of the bloom. Never reaches 1: it is an
+       echo, not a second actor. */
+    @keyframes csCursorPing {
+      0%,
+      51% {
+        opacity: 0;
+        transform: scale(0.35);
+      }
+      54% {
+        opacity: 0.8;
+      }
+      66%,
+      100% {
+        opacity: 0;
+        transform: scale(1.45);
+      }
+    }
+
+  /* A plain container, not a device costume — the phone frame is gone (its
+       chrome read as broken, not premium). One hairline border and the house
+       radius do the framing; 390px wide so the widget still lays out at a true
+       handset width; height capped against the viewport so the whole thing is
+       visible in one look. */
+    .cs-demo-stage {
+      position: relative;
+      justify-self: end;
+      width: 100%;
+      max-width: 390px;
+      height: min(660px, calc(100vh - 120px));
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgb(0 0 0 / 0.12);
+      background: #fbfaf8;
+    }
+
+  .cs-demo-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+  @media (max-width: 960px) {
+    .cs-demo {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        margin-top: 48px;
+      }
+    .cs-demo-stage {
+        justify-self: center;
+        height: min(600px, 80vh);
+      }
+    }
+
+  /* The poster sits on the stage's own paper, not on the outcomes teal.
+       #002526 at surface scale belongs to exactly one moment on this page — the
+       outcomes stage — and repeating it here as a 660px slab demoted that moment
+       to a theme. The dark reveal now happens when the widget loads: earned by
+       the click, not spent on the invitation. Centered rather than bottom-anchored
+       for the same reason — bottom-left text on a tall card reads as a film
+       poster, which needs the dark ground this no longer has. */
+    .cs-demo-poster {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 10px;
+      padding: 28px 24px;
+      text-align: left;
+      background: transparent;
+      color: #1d1b1b;
+      cursor: pointer;
+    }
+
+  .cs-demo-poster-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      /* The brand dark at text scale — an echo of the outcomes stage, not a
+         repetition of it. Gold at 12px on this paper fails contrast. */
+      color: #002526;
+    }
+
+  .cs-demo-poster-title {
+      font-family: var(--font-sans), system-ui, sans-serif;
+      font-size: 34px;
+      line-height: 40px;
+      font-weight: 500;
+      letter-spacing: -0.8px;
+    }
+
+  .cs-demo-poster-body {
+      font-size: 14px;
+      line-height: 21px;
+      /* 0.85, not the 0.75 the dark poster wore — same floor as the callout
+         fixes: ink over this paper at 0.75 sits below 4.5:1 at 14px. */
+      opacity: 0.85;
+      max-width: 32em;
+    }
+
+  .cs-demo-poster-cta {
+      margin-top: 6px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 20px;
+      border-radius: 999px;
+      background: #e7bf6d;
+      color: #002526;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+  .cs-demo-poster:hover .cs-demo-poster-cta {
+      opacity: 0.9;
+    }
+
+  /* Hand-off from the summary to the case. Deliberately one line with a lot of
+       air on both sides: the Phase One band that follows is already a full-bleed
+       tint with a 36px claim on it, so this only has to say "mode change", not
+       stage one. No rule — a hairline here would read as another boundary in a
+       page that already has several, and space does the same job with no ink. */
+    .cs-handoff {
+      padding-top: 72px;
+      padding-bottom: 8px;
+    }
+
+  .cs-handoff-line {
+      font-family: var(--font-sans), system-ui, sans-serif;
+      font-size: 20px;
+      line-height: 30px;
+      font-weight: 500;
+      color: var(--color-body-ink);
+      opacity: 0.8;
+    }
+
+  @media (max-width: 640px) {
+    .cs-handoff {
+        padding-top: 48px;
+      }
+    .cs-handoff-line {
+        font-size: 18px;
+        line-height: 28px;
+      }
+    }
+
+  /* Optional-depth band.
+       Four sections here — design system, accessibility, architecture, prompt
+       framework — are the ones a design lead reads and a recruiter does not.
+       Unmarked they read as more of the same and everyone pays for them. The band
+       signals "this is depth, and you may leave" with two hairlines and a skip
+       link: no tint, no box, because a background would rhyme with the act
+       landmarks and put a fifth thing in a four-thing tier. */
+    .cs-depth-band {
+      border-top: 1px solid rgb(0 0 0 / 0.1);
+      border-bottom: 1px solid rgb(0 0 0 / 0.1);
+      margin-top: 56px;
+      padding-bottom: 16px;
+    }
+
+  .cs-depth-band__head {
+      display: flex;
+      flex-wrap: wrap;
+      /* Centre, not baseline: the skip link carries its own 44px target height,
+         so a baseline would hang the label off the top of it. */
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px 24px;
+      padding-top: 8px;
+    }
+
+  .cs-depth-band__skip {
+      /* 44px min target. The accessibility section of this very case study claims
+         "every control at least 40px tall" — an 18px link here would make the page
+         contradict itself. */
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--cs-brand-dark, var(--color-ink));
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+  .cs-depth-band__skip:hover {
+      opacity: 0.65;
+    }
+
+  /* HSS act-breaks are olive, chosen over the quiet cream chapter with the
+       tradeoff stated: five olive bands spend the intro band's uniqueness, and
+       Dinesh took the loud chapters anyway (band lab, 2026-07-30). The claim
+       flips to white — the serif at 36px on olive is the scroll-stopper. */
+    .cs-theme-hss .cs-phase-wrapper {
+      background: var(--cs-brand-dark, #5c4304);
+    }
+
+  .cs-theme-hss .cs-phase-wrapper .cs-phase-number {
+      /* 0.78 white on olive ≈ 6.5:1 at 14px/600 — clears the 4.5 floor. */
+      color: rgb(255 255 255 / 0.78);
+    }
+
+  .cs-theme-hss .cs-phase-wrapper .cs-phase-label,
+    .cs-theme-hss .cs-phase-wrapper .cs-phase-claim {
+      color: #ffffff;
+    }
+
+  /* The artifact stage. Full-bleed cream behind every research board, so the
+       back half alternates two meanings and only two: olive says a new act
+       begins, cream says an artifact is on stage. White prose between them.
+       Same grammar as cs-hero-band, which now shares this cream. */
+    .cs-figure-band {
+      width: 100%;
+      background: #fffbf4;
+      /* Two different jobs, deliberately separated.
+
+         MARGIN is the white gap between the prose and the stage. Without it the
+         last line of body copy sat directly on the cream edge, so the tint read
+         as an interruption rather than a stage the prose steps back from.
+
+         PADDING is the cream around the artwork itself, inside the tint.
+
+         The prose sections above use padding-top only, so nothing collapses
+         against this margin and the 72px lands in full. Two adjacent bands DO
+         collapse to 72px rather than 144px, which is the intent — consecutive
+         stages should read as a pair, not drift apart. */
+      display: block;
+      margin: 72px 0;
+      padding: 56px 0;
+    }
+
+  /* The figure ships with Tailwind's `mt-6 sm:mt-8` from CaseStudyImage, which
+       added 32px on top of the band's own 56px padding and left the cream
+       asymmetric: 88px above the artwork, 56px below.
+
+       !important is load-bearing here, not laziness. Tailwind v4 puts utilities
+       in a later cascade layer than @layer components, so `sm:mt-8` beats this
+       rule on layer order no matter how specific the selector gets. The
+       alternatives were compensating with a smaller padding-top (fragile, and it
+       re-breaks below 640px where mt-6 is 24px) or threading a prop through the
+       shared component for one case study's sake. */
+    .cs-figure-band .cs-figure {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+  @media (max-width: 640px) {
+    .cs-figure-band {
+        margin: 40px 0;
+        padding: 32px 0;
+      }
+    }
+
+  /* Landmark claim — the level-1 of an act. Serif at display size so the four
+       of them read as one tier when scanning, and separated from the page's other
+       38px serif moment by the tinted band it sits on rather than by size. */
+    .cs-phase-claim {
+      font-family: var(--font-serif), Georgia, serif;
+      font-size: 36px;
+      line-height: 46px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      color: var(--cs-brand-dark, #387a76);
+      /* Display type wants a shorter measure than prose — ~45 characters here
+         against the 800px container, so it lands on two lines by design. */
+      max-width: 660px;
+      text-wrap: balance;
+    }
+
+  @media (max-width: 1024px) {
+    .cs-phase-claim {
+        font-size: 30px;
+        line-height: 40px;
+      }
+    }
+
+  @media (max-width: 640px) {
+    .cs-phase-claim {
+        font-size: 26px;
+        line-height: 34px;
+      }
+    }
+
+  /* The outcome stage.
+       Three tinted cards failed the grayscale test outright: the gold lead
+       measured 0.817 luminance against 0.922 for its peers — a 1.12 ratio, so
+       the hierarchy existed only in hue and vanished on desaturation. The quiet
+       cards sat at 1.05 against the page, barely present at all. The most
+       important content on the page was on its faintest surface.
+       This is the sanctioned dark treatment from the taste file: ONE deep-toned
+       rounded panel acting as a stage for the star content, never dark as the
+       page. Colours are the product's own — teal #002526 is the shipped single
+       accent and gold #E7BF6D its "tiny spot accent only" — so the panel is the
+       artifact's palette, not a decoration invented for the page. */
+    .cs-stage {
+      background: #002526;
+      border-radius: 16px;
+      padding: 48px 44px;
+    }
+
+  @media (max-width: 640px) {
+    .cs-stage {
+        padding: 32px 24px;
+        border-radius: 14px;
+      }
+    }
+
+  /* Order inside an item is figure-first — from → FIGURE → label → note — so
+       the payoff lands before its category (the rank-1 "lead with the outcome"
+       ask, applied inside the card). Ladder: 2 / 12 / 6px within an item against
+       40px between columns — "between" is 3x "within", so the eye groups the
+       three stats before it reads any of them. */
+    .cs-stage-from {
+      /* Slot always rendered so all three figures share a baseline; empty on the
+         metric that has no honest baseline to count from. */
+      min-height: 18px;
+      font-size: 13px;
+      line-height: 18px;
+      color: #fff;
+      opacity: 0.6;
+    }
+
+  .cs-stage-value {
+      margin-top: 2px;
+      font-family: var(--font-sans), system-ui, sans-serif;
+      /* 56px, up from 38 — at 38 the panel was doing the shouting and the
+         numbers were just sitting in it. */
+      font-size: 56px;
+      line-height: 64px;
+      /* 500 not 600 — type on a dark field reads optically heavier, so the
+         weight that looked right on cream looks blunt here. */
+      font-weight: 500;
+      letter-spacing: -1.4px;
+      font-variant-numeric: tabular-nums;
+      font-synthesis-weight: none;
+      color: #fcfcfd;
+    }
+
+  /* Gold once, on the one metric that met the number the owners asked for. */
+    .cs-stage-value--lead {
+      color: #e7bf6d;
+    }
+
+  .cs-stage-label {
+      margin-top: 12px;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #fff;
+      opacity: 0.75;
+    }
+
+  .cs-stage-note {
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 18px;
+      color: #fff;
+      opacity: 0.6;
+    }
+
+  @media (max-width: 640px) {
+    .cs-stage-value {
+        font-size: 40px;
+        line-height: 48px;
+        letter-spacing: -1px;
+      }
+    }
+
+  /* Establishing-shot band. The hero bitmap carries its own #f6f6f6 ground,
+       and a tinted rounded card floating on white reads as a mistake — a
+       low-contrast edge with visible corners looks like a rendering error, where
+       a full-bleed tint reads as a section. So CSS paints the same grey to the
+       viewport edges and the image sits inside it with no radius: the seam
+       disappears because there is nothing left to seam.
+
+       Kept flush against the intro band below (no bottom padding on the last
+       child) so the scroll reads white → grey → olive: three surfaces, two
+       deliberate cuts. If the export's background ever changes, this hex has to
+       change with it — they are one surface split across two files. */
+    .cs-hero-band {
+      display: block;
+      width: 100%;
+      /* Was #f6f6f6, which existed only because the first export came out grey.
+         Now the same cream as .cs-figure-band, so the page has ONE artifact-stage
+         colour — this band and the bitmap inside it must stay in lockstep, so a
+         change here means a re-export (hero-v4 is baked on this cream). */
+      background: #fffbf4;
+      padding: 72px 0;
+    }
+
+  .cs-hero-band .cs-figure {
+      margin-top: 0;
+    }
+
+  .cs-hero-band .cs-figure img {
+      border-radius: 0;
+    }
+
+  @media (max-width: 640px) {
+    .cs-hero-band {
+        padding: 40px 0;
+      }
+    }
+
+  /* Case-study pages only. The default nav rail (1440 wide, 100/40/16 padding)
+       is correct on Home and Resume, which are built on max-w-[1440px]. Case
+       studies are not: they centre cs-container-wide at 1100, so the logo drifted
+       against the content as the window resized — 100px right of it around
+       1025px, crossing over near 1300px, and 70px LEFT of it at 1440 and above.
+       The direction of the error reversed, which is what made it read as a bug
+       rather than a margin choice.
+
+       Matching cs-container-wide exactly puts the logo on the same line as the
+       hero title at every width. Scoped by attribute so all four case studies and
+       the template inherit it without touching each page. */
+    [class*="cs-theme-"] nav.top {
+      width: min(100% - 32px, 1100px);
+      max-width: none;
+      padding-left: 0;
+      padding-right: 0;
+    }
 }

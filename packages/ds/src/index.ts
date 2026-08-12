@@ -2,7 +2,7 @@
 export { default as SiteNav } from "./components/SiteNav";
 export type { SiteNavProps, NavLink } from "./components/SiteNav";
 export { default as SiteFooter } from "./components/SiteFooter";
-export type { SiteFooterProps, SocialLink } from "./components/SiteFooter";
+export type { SiteFooterProps } from "./components/SiteFooter";
 
 // Case study primitives
 export { default as CaseStudyHero } from "./components/case-study/CaseStudyHero";
