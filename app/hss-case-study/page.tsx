@@ -184,17 +184,25 @@ const SHOW_ACTS = false;
 /**
  * The two closing screenshots — the admin calendar and the marketing screen.
  *
- * ⚠ Both frames carry real production data. The calendar shows real customer
- * names legible at the source file's full 715px, a staff email address, and the live admin subdomain; the marketing
- * frame adds real booking and audience counts. The gallery renders them at
- * ~388px, where the names are too small to read, but the source file ships
- * intact and this repository is public — so anyone can open the asset directly.
+ * ⚠ Both frames carry real production data. The calendar shows several real
+ * customer names legible at the source file's full 715px, a staff email address
+ * and the live admin subdomain; the marketing frame adds real booking and
+ * audience counts. The gallery renders them at ~388px, where the names are too
+ * small to read, but the source file would ship intact and this repository is
+ * public, so anyone could open the asset directly.
  *
  * This case study's own copy says these customers "are private about why they
- * are there." Publishing their names contradicts that, and they never agreed to
- * it. Re-capture with anonymised names before this goes live, or set the flag
- * back to false. Kept true because the images were explicitly asked for; the
- * switch is one word.
+ * are there." Publishing their names contradicts the thing the case study is
+ * about, and they never agreed to it.
+ *
+ * So the flag is false and the two PNGs are deliberately NOT committed. Both
+ * conditions matter: the flag stops them rendering, and leaving them untracked
+ * is what keeps them out of git history, which a later deletion would not undo.
+ * To ship them, re-capture with anonymised names, add the files, flip this.
+ *
+ * (This note previously quoted two of the names as evidence, which republished
+ * exactly what it was arguing against. Describe the risk; never restate the
+ * data.)
  */
 const SHOW_CLOSING_IMAGES = false;
 
