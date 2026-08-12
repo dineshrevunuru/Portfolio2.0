@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node test/run.mjs",
+    "check:keys": "node scripts/check-keys.mjs"
   },
   "dependencies": {
     "next": "16.2.4",
