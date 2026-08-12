@@ -410,7 +410,12 @@ export default function Home() {
           The subhead does the honest framing once, so no individual card has to
           hedge. Saying "designed and prototyped" here is what lets each line
           below state scope plainly without implying it shipped. */}
-      <section className="pad-cards mx-auto w-full max-w-[1440px] pt-20 sm:pt-24">
+      {/* id is a redirect target, not decoration. Three retired WordPress URLs
+          (/three-stripes-generative-ai, /neuron-7-ai, /employee-onboarding) land
+          here rather than at the top of the page, so an inbound visitor arrives
+          at the section that names the work they were looking for. Renaming this
+          id silently breaks those three. */}
+      <section id="enterprise" className="pad-cards mx-auto w-full max-w-[1440px] pt-20 sm:pt-24">
         <h3 className="t-section-head">Enterprise work at Neudesic</h3>
         <p className="mt-4 max-w-[620px] t-body">
           Designed and prototyped for Microsoft, Adani and Learning Care Group.
