@@ -49,13 +49,13 @@ const prototypeSections = [
 
 export default function B2BDockCaseStudy() {
   return (
-    <main className="w-full cs-theme-b2b">
+    <main className="w-full cs-theme-b2b" data-seq-group>
       <SiteNav active="case-study" />
 
       <CaseStudyHero
         title={
           <>
-            A B2B Platform for
+            A B2B Platform for{" "}
             <br />
             Brands and Resellers
           </>

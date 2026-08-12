@@ -1,15 +1,3 @@
-type Props = {
-  label: string;
-  number?: string;
-};
-
-export default function CaseStudyPhase({ label, number }: Props) {
-  return (
-    <div className="w-full cs-phase-wrapper">
-      <div className="cs-container py-10 sm:py-12 text-center">
-        {number && <p className="cs-phase-number">Phase {number}</p>}
-        <h2 className="cs-phase-label">{label}</h2>
-      </div>
-    </div>
-  );
-}
+// Re-export from the design-system package — single source of truth.
+export { default } from "../../../packages/ds/src/components/case-study/CaseStudyPhase";
+export type { CaseStudyPhaseProps } from "../../../packages/ds/src/components/case-study/CaseStudyPhase";

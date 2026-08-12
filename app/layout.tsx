@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import "./components/lorem/lorem.css";
+import SeqReveal from "./components/SeqReveal";
+import ScrollProgressPill from "./components/case-study/ScrollProgressPill";
 
 const poppins = Poppins({
   variable: "--font-sans",
@@ -15,9 +18,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Dinesh Revunuru — UI/UX Designer Portfolio | Ex-IBM | 2025",
+  title: "Dinesh Revunuru — AI Product Designer",
   description:
-    "Hey there! This Dinesh Revunuru, UI UX Designer, Ex-IBM. Currently pursuing my masters degree in Human Computer Interaction in USA.",
+    "Portfolio of Dinesh Revunuru, AI Product Designer. HCI grad student at DePaul; earlier Generative A.I at Neudesic (an IBM Company).",
 };
 
 export default function RootLayout({
@@ -32,6 +35,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white text-neutral-900">
         {children}
+        <SeqReveal />
+        {/* Self-scoping: renders null unless the page has a cs-theme-* wrapper,
+            so all four case studies get it without each page mounting it. */}
+        <ScrollProgressPill />
       </body>
     </html>
   );

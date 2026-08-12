@@ -29,13 +29,13 @@ export default function CaseStudyTemplate() {
   return (
     // Add a matching `.cs-theme-<slug>` rule in globals.css if the project
     // needs custom brand tokens (--cs-brand-dark, --cs-accent-bg, etc).
-    <main className="w-full cs-theme-template">
+    <main className="w-full cs-theme-template" data-seq-group>
       <SiteNav active="case-study" />
 
       <CaseStudyHero
         title={
           <>
-            One-line punchy
+            One-line punchy{" "}
             <br />
             project headline
           </>

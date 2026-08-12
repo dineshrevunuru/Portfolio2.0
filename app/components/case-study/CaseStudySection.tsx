@@ -1,34 +1,3 @@
-import type { ReactNode } from "react";
-
-type Props = {
-  heading?: string;
-  subheading?: string;
-  children: ReactNode;
-  spacing?: "default" | "tight";
-  headingVariant?: "default" | "prototype";
-};
-
-export default function CaseStudySection({
-  heading,
-  subheading,
-  children,
-  spacing = "default",
-  headingVariant = "default",
-}: Props) {
-  const topPad = spacing === "tight" ? "pt-6 sm:pt-8" : "pt-12 sm:pt-16";
-  const headClass =
-    headingVariant === "prototype"
-      ? "cs-section-head-prototype"
-      : "cs-section-head";
-  return (
-    <section className={`cs-container ${topPad}`}>
-      {heading && <h3 className={headClass}>{heading}</h3>}
-      {subheading && (
-        <p className="mt-2 cs-meta-label">{subheading}</p>
-      )}
-      <div className={`${heading || subheading ? "mt-3" : ""} cs-prose`}>
-        {children}
-      </div>
-    </section>
-  );
-}
+// Re-export from the design-system package — single source of truth.
+export { default } from "../../../packages/ds/src/components/case-study/CaseStudySection";
+export type { CaseStudySectionProps } from "../../../packages/ds/src/components/case-study/CaseStudySection";

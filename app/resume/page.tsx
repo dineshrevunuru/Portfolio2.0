@@ -1,10 +1,10 @@
 import Image from "next/image";
-import Link from "next/link";
+import type { CSSProperties } from "react";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
 
 type Experience = {
-  slug: "neudesic" | "maxcreepers" | "b2b";
+  slug: "hss" | "neudesic" | "maxcreepers" | "b2b";
   company: string;
   role: string;
   dates: string;
@@ -27,47 +27,82 @@ type Endorsement = {
 const skills = [
   "User research",
   "User interviews",
-  "Empathy mapping",
-  "Personas",
+  "Empathy mapping & Personas",
   "User journey mapping",
   "Competitive analysis",
   "Story boarding",
   "Site maps and user flows",
-  "Information Architecture",
-  "Sketching",
-  "Wireframing",
-  "Interactive prototyping",
-  "User testing & usability studies",
+  "Sketching & wireframing",
+  "Design pixel-perfect screens",
+  "Develop prototypes in code",
+  "User testing and evals",
+  "Deployment & version control",
 ];
 
 const tools = [
   "Figma",
-  "Adobe XD",
-  "Zeplin",
-  "Principle & Framer X",
-  "Photoshop",
+  "Claude & Claude Code",
+  "Codex & Open models",
+  "Firebase",
+  "MCP, & API",
   "Paper and pencil",
 ];
 
-const code = ["HTML & CSS", "Javascript", "C programming language"];
+const code = ["React, React Native & Angular", "HTML, CSS & Next.js", "C & Python",];
 
-const industries = [
-  "Healthcare",
-  "Retail",
-  "Fintech",
-  "Hospitality & Gaming",
-  "Media & Entertainment",
-  "Non-Profit",
+/* Replaced the Industries card 2026-08-12. Industries listed Healthcare,
+   Retail, Fintech, Hospitality & Gaming, Media & Entertainment and Non-Profit,
+   none of which traces to a verified project in the capability intake — the
+   evidenced set is enterprise software, manufacturing, education, beauty and
+   B2B commerce. An unbacked card next to an AI-builder positioning was spending
+   a slot on the weakest claim on the page.
+
+   Each line below points at something that exists:
+   - Agent & conversation design  → Tara (live) and Mirage (MS Surface concept)
+   - Prompt & context engineering → the HSS assistant and Lorem system prompts
+   - Model evals & guardrails     → test/guardrail.test.mjs, convo.mjs,
+                                    simulate.mjs — a guardrail that rejects any
+                                    number the fact store cannot back
+   - Human-in-the-loop design     → that guardrail's handoff to a person
+   - RAG & retrieval              → the HSS assistant's fact-store retrieval
+   - Workflow automation          → the HSS Shopify migration, built in n8n */
+const aiCapabilities = [
+  "Agent & conversation design",
+  "Prompt & context engineering",
+  "Model evals & guardrails",
+  "Human-in-the-loop design",
+  "RAG & retrieval",
+  "Workflow automation",
 ];
 
 const languages = ["English", "Hindi", "Telugu & Kannada"];
 
 const experiences: Experience[] = [
   {
+    slug: "hss",
+    company: "Hair System Salons",
+    /* "AI Product Designer" is the functional title for the work — owning
+       digital UX and shipping the AI products. The formal designation is a
+       part-time CPT internship; that belongs on an application form, not on the
+       face of a resume. Keep LinkedIn matching this. */
+    role: "AI Product Designer",
+    dates: "APR 2026 — PRESENT",
+    /* Both figures are the audited ones from the case study, measured in Google
+       Ads and the client's own booking data and reviewed with the owners. Do
+       not add the conversion rate here — it is the one number whose denominator
+       was never settled. */
+    description:
+      "I own digital UX and growth for a hair-replacement business. I designed and built an AI assistant that answers questions and books appointments on its own, the booking platform underneath it, and the email and SMS follow-up that earns the second visit. Cost per new customer fell from $105 to $40, and the share of new customers who came back moved from 40% to 72%. Built in Next.js, React, TypeScript and Supabase, with every line reviewed before it ships.",
+  },
+  {
     slug: "neudesic",
     company: "Neudesic (an IBM Company)",
     role: "UI UX Designer",
-    dates: "MAY 2022 — PRESENT",
+    /* Corrected from "PRESENT" on 2026-08-11. The role ended Jul 2024 (P1
+       capability intake, confirmed). Left as-is it claimed a current job at an
+       IBM company, and adding the entry above would have put two current roles
+       on one resume. */
+    dates: "MAY 2022 — JUL 2024",
     description:
       "Designing and creating digital products on a contract basis to help them build better products for their users. And collaborating with developer teams to improve product UX. Working on user-centered design, building rapid prototypes, User research, and business development for startups.",
   },
@@ -140,37 +175,30 @@ const endorsements: Endorsement[] = [
   },
 ];
 
-function Arrow() {
+function WArrow() {
   return (
-    <svg
-      className="ml-1.5 inline-block transition-transform duration-300 group-hover:translate-x-1"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
+    <span className="warrow" aria-hidden="true">
+      &rarr;
+    </span>
   );
 }
 
 function MiniCard({
   title,
   items,
-  className = "",
+  span2 = false,
+  sd,
 }: {
   title: string;
   items: string[];
-  className?: string;
+  span2?: boolean;
+  sd: string;
 }) {
   return (
-    <div className={`resume-skills-card ${className}`}>
+    <div
+      className={`resume-skills-card seq${span2 ? " span2" : ""}`}
+      style={{ "--sd": sd } as CSSProperties}
+    >
       <h4 className="resume-mini-head">{title}</h4>
       <ul className="resume-list">
         {items.map((item) => (
@@ -187,123 +215,129 @@ export default function Resume() {
       <SiteNav active="resume" />
 
       {/* Header */}
-      <section className="pad-section mx-auto w-full max-w-[1440px] pt-10 sm:pt-14">
-        <h1 className="t-serif-hero text-[color:var(--color-ink)]">
+      <section
+        className="rhead gut seq mx-auto w-full max-w-[1440px] pt-10"
+        style={{ "--sd": "120ms" } as CSSProperties}
+      >
+        <h1>
           Dinesh
           <br />
           Revunuru
         </h1>
-        <h2 className="mt-2 t-sans-hero text-[color:var(--color-accent)]">
-          UX UI Designer
-        </h2>
-        <div className="mt-6 space-y-1 t-body">
-          <p>
-            <a
-              href="mailto:dineshrevunuru@gmail.com"
-              className="hover:opacity-70"
-            >
-              dineshrevunuru@gmail.com
-            </a>
-          </p>
-          <p>+1 (312) 838-4876</p>
+        <h2>Senior Product Designer</h2>
+        <div className="c">
+          <a href="mailto:dineshrevunuru@gmail.com">dineshrevunuru@gmail.com</a>
+          <br />
+          +1 (312) 838-4876
         </div>
-        <p className="mt-6">
-          <Link
+        <p style={{ margin: "24px 0 0" }}>
+          <a
             href="https://www.linkedin.com/in/dinesh-revunuru/"
-            className="group inline-flex items-center t-cta text-[color:var(--color-brand-blue)] hover:opacity-70"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center t-cta text-[color:var(--color-brand-blue)]"
           >
             My Linkedin profile
-            <Arrow />
-          </Link>
+            <WArrow />
+          </a>
         </p>
       </section>
 
       {/* Skills / Tools / Industries / Code / Languages */}
-      <section className="pad-section mx-auto w-full max-w-[1440px] pt-12 sm:pt-16">
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          <MiniCard
-            title="Skills"
-            items={skills}
-            className="md:col-span-2 lg:col-span-1 lg:row-span-2"
-          />
-          <MiniCard title="Tools" items={tools} />
-          <MiniCard title="Industries" items={industries} />
-          <MiniCard title="Code" items={code} />
-          <MiniCard title="Languages" items={languages} />
+      <section className="gut mx-auto w-full max-w-[1440px] pt-14">
+        <div className="skills-grid">
+          <MiniCard title="Skills" items={skills} span2 sd="220ms" />
+          <MiniCard title="Tools" items={tools} sd="310ms" />
+          <MiniCard title="AI capabilities" items={aiCapabilities} sd="400ms" />
+          <MiniCard title="Code" items={code} sd="490ms" />
+          <MiniCard title="Languages" items={languages} sd="580ms" />
         </div>
       </section>
 
       {/* Work Experience */}
-      <section>
-        {experiences.map((exp, i) => {
-          const filled = i % 2 === 1;
-          return (
-            <div
-              key={exp.slug}
-              className={`resume-exp-band ${
-                filled ? "resume-exp-band--filled" : ""
-              }`}
-            >
-              <article className="resume-exp-entry">
-                <h3 className="t-serif-title">{exp.company}</h3>
-                <p className="mt-2 resume-meta-label">
-                  {exp.role} · {exp.dates}
-                </p>
-                <p className="mt-6 t-body">{exp.description}</p>
-              </article>
-            </div>
-          );
-        })}
+      <section className="mt-16">
+        {experiences.map((exp, i) => (
+          <div
+            key={exp.slug}
+            className={`resume-exp-band seq${
+              i % 2 === 1 ? " resume-exp-band--filled" : ""
+            }`}
+          >
+            <article className="resume-exp-entry">
+              <h3>{exp.company}</h3>
+              <p className="exp-meta">
+                {exp.role} &middot; {exp.dates}
+              </p>
+              <p className="b">{exp.description}</p>
+            </article>
+          </div>
+        ))}
       </section>
 
-      {/* Education */}
-      <section className="mx-auto w-full max-w-[800px] px-4 pt-16 sm:pt-20">
-        <h3 className="t-section-head">Education</h3>
-        <p className="mt-6 resume-meta-label">
-          Computer Science and Engineering
-        </p>
-        <p className="mt-2 resume-meta-label">2016 to 2020</p>
+      {/* Education — most recent first.
+
+          Two levels per entry, matching Certifications below: the degree in
+          serif, then school and dates on one meta line. School and dates are
+          joined with a middot rather than stacked, which is the same idiom the
+          work-experience meta uses ("role · dates") and drops each entry from
+          three identical lines to two distinct ones.
+
+          Dated "2024 to 2026" rather than "expected August 2026": the degree
+          completes on 2026-08-21, so the range is accurate within days of this
+          going live and stays accurate afterwards. */}
+      <section className="narrow seq">
+        <h3 className="t-sec">Education</h3>
+        <div className="resume-edu-list">
+          <div>
+            <p className="resume-edu-degree">
+              Master of Science in Human-Computer Interaction
+            </p>
+            <p className="resume-edu-meta">DePaul University, Chicago &middot; 2024 to 2026</p>
+          </div>
+          <div>
+            <p className="resume-edu-degree">Computer Science and Engineering</p>
+            <p className="resume-edu-meta">2016 to 2020</p>
+          </div>
+        </div>
         <hr className="resume-divider" />
       </section>
 
       {/* Certifications */}
-      <section className="mx-auto w-full max-w-[800px] px-4 pt-16 sm:pt-20">
-        <h3 className="t-section-head">Certifications</h3>
-        <ul className="mt-6 space-y-6">
+      <section className="narrow seq">
+        <h3 className="t-sec">Certifications</h3>
+        <div className="certs" data-seq-group>
           {certifications.map((cert, i) => (
-            <li key={`${cert.name}-${i}`} className="flex items-start gap-5">
-              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-white">
+            <div key={`${cert.name}-${i}`} className="cert">
+              <span className="logo" style={{ background: "#fff" }}>
                 <Image
                   src={cert.logo}
                   alt={cert.logoAlt}
                   width={40}
                   height={40}
-                  className="h-10 w-10 object-contain"
+                  className="h-full w-full object-contain"
                 />
-              </div>
+              </span>
               <div>
-                <p className="t-serif-title text-[20px] leading-tight">
-                  {cert.name}
-                </p>
-                <p className="mt-1 t-body">{cert.issuer}</p>
+                <p className="nm">{cert.name}</p>
+                <p className="is">{cert.issuer}</p>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
         <hr className="resume-divider" />
       </section>
 
       {/* Memberships */}
-      <section className="mx-auto w-full max-w-[800px] px-4 pt-16 sm:pt-20">
-        <h3 className="t-section-head">Memeberships</h3>
-        <p className="mt-6 t-body">Member of Interaction Design Foundation</p>
+      <section className="narrow seq">
+        <h3 className="t-sec">Memberships</h3>
+        <p className="body-p">Member of Interaction Design Foundation</p>
       </section>
 
       {/* Honors and Awards */}
-      <section className="mx-auto w-full max-w-[800px] px-4 pt-12 sm:pt-16">
-        <h3 className="t-section-head">Honors and Awards</h3>
-        <p className="mt-6 t-body max-w-[720px]">
-          have organised UI UX design workshops and events for students. I love
+      <section className="narrow seq" style={{ paddingTop: 48 }}>
+        <h3 className="t-sec">Honors and Awards</h3>
+        <p className="body-p">
+          I have organised UI UX design workshops and events for students. I love
           to inspire students to explore the field of design. Achieved
           appreciation from many faculty for helping college in design-related
           works. Also organiser of design club and been a lead member in
@@ -312,12 +346,15 @@ export default function Resume() {
         <hr className="resume-divider" />
       </section>
 
-      {/* Endorsements */}
-      <section className="pad-section mx-auto w-full max-w-[1440px] pt-16 sm:pt-20 pb-20">
-        <div className="mx-auto w-full max-w-[800px] px-4">
-          <h3 className="t-section-head">Endorsements</h3>
+      {/* Endorsements — real images fill the board's placeholder tiles */}
+      <section
+        className="pad-section seq mx-auto w-full max-w-[1440px]"
+        style={{ paddingTop: 64, paddingBottom: 20 }}
+      >
+        <div className="narrow" style={{ padding: "0 16px" }}>
+          <h3 className="t-sec">Endorsements</h3>
         </div>
-        <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
+        <div className="endo-grid" data-seq-group>
           {endorsements.map((e) => (
             <article key={e.slug}>
               <Image
@@ -325,7 +362,7 @@ export default function Resume() {
                 alt={e.alt}
                 width={775}
                 height={1024}
-                className="h-auto w-full object-contain"
+                className="h-auto w-full rounded-[12px] object-contain"
               />
             </article>
           ))}

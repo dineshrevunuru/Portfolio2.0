@@ -46,13 +46,13 @@ const userInsights = [
 
 export default function UniquefitCaseStudy() {
   return (
-    <main className="w-full cs-theme-uniquefit">
+    <main className="w-full cs-theme-uniquefit" data-seq-group>
       <SiteNav active="case-study" />
 
       <CaseStudyHero
         title={
           <>
-            The future of custom
+            The future of custom{" "}
             <br />
             clothing made easy
           </>
