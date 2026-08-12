@@ -1,0 +1,826 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { Aurora } from "./Aurora";
+import { Caption } from "./Caption";
+import { MicOrb, type MicOrbState } from "./MicOrb";
+import { Surface, type FactLookup, type QuoteLookup } from "./Surface";
+import type { Block } from "./protocol";
+import { useSpeech } from "./useSpeech";
+import { beginVisit, daysSince, forgetVisitor, rememberName, type Visitor } from "./memory";
+import { icebreakerHint, pickIcebreakers } from "./icebreakers";
+
+/* ── Types ────────────────────────────────────────────────────────────────── */
+
+type Phase = "greet" | "capturing" | "thinking" | "answering";
+
+type Turn = {
+  asked: string;
+  say: string;
+  show: Block[];
+  facts: FactLookup;
+  quotes: QuoteLookup;
+  chips: string[];
+};
+
+/** Back-stack entries carry the model memory as it stood while that turn was
+ *  on screen, so Back rewinds the conversation, not just the pixels — without
+ *  this, "and the other one?" after Back resolves against an answer that is no
+ *  longer visible. */
+type StackEntry = {
+  turn: Turn;
+  history: { role: "user" | "assistant"; content: string }[];
+};
+
+export interface LoremHomeProps {
+  /** Speak answers aloud. On by default — this is a voice-first surface. */
+  speak?: boolean;
+  /** Skip the tap-to-start gate. Dev only: it also disables TTS, which needs the gesture. */
+  skipGate?: boolean;
+  /** Timing multiplier for the entrance beats (0.5–2). */
+  pace?: number;
+}
+
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+
+/* ── Component ────────────────────────────────────────────────────────────── */
+
+/**
+ * LoremHome — a conversation that draws.
+ *
+ * The interaction problem: speech is serial and it evaporates. Ask a voice
+ * assistant about a project and by the third sentence you are holding a number,
+ * a comparison and a timeline in your head at once, and you drop two of them.
+ * Adding a screen doesn't fix that on its own — a screen that just prints the
+ * transcript is the same load with extra steps.
+ *
+ * So Lorem answers on two tracks. It *says* the narrative and it *shows* the parts
+ * the ear can't keep, and the model chooses the split per turn from the actual
+ * question. No prewritten screens: `/api/lorem` returns a small list of design-system
+ * blocks that `Surface` assembles. The deeper the conversation goes, the more of
+ * the answer moves onto the glass — which is exactly when the visitor has the
+ * least room left to hold it.
+ *
+ * The one thing the model does not get to improvise is a number. See `facts.ts`.
+ */
+export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: LoremHomeProps) {
+  const [gate, setGate] = useState(true);
+  const [gone, setGone] = useState(false);
+  const [phase, setPhase] = useState<Phase>("greet");
+  const [turn, setTurn] = useState<Turn | null>(null);
+  const [status, setStatus] = useState("");
+  const [hint, setHint] = useState<string | null>(null);
+  const [kOpen, setKOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+  const [log, setLog] = useState<Turn[]>([]);
+  const [touch, setTouch] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [errorSay, setErrorSay] = useState<string | null>(null);
+  const [pending, setPending] = useState("");
+  const [offline, setOffline] = useState(false);
+  /** Who we met last time. Read once on mount — null until then so SSR and the
+   *  first client render agree and nothing flickers. */
+  const [visitor, setVisitor] = useState<Visitor | null>(null);
+  const [greetedName, setGreetedName] = useState<string | undefined>(undefined);
+
+  const kinRef = useRef<HTMLInputElement | null>(null);
+  const screenRef = useRef<HTMLDivElement | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const transcriptBtnRef = useRef<HTMLButtonElement | null>(null);
+  const stack = useRef<StackEntry[]>([]);
+  /** Normalised questions already asked — stops the `rec` chip re-recommending
+   *  something the visitor has already heard. */
+  const askedBefore = useRef<Set<string>>(new Set());
+  /** Lorem's memory. Sent whole each turn; the server is stateless by design. */
+  const history = useRef<{ role: "user" | "assistant"; content: string }[]>([]);
+  const inflight = useRef<AbortController | null>(null);
+  const gateDone = useRef(false);
+  const touchRef = useRef(false);
+
+  // modK is only meaningful where a keyboard exists; on coarse pointers every
+  // "press ⌘K" string becomes "tap" (navigator.platform reports iPhone/iPad as
+  // Mac-family, so the old check happily told phones to press ⌘K).
+  const isMac =
+    typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform || "");
+  const modK = isMac ? "⌘K" : "Ctrl+K";
+  const typeHint = touch ? "tap to type" : `press ${modK} to type`;
+
+  /* ── Asking ───────────────────────────────────────────────────────────── */
+
+  const ask = useCallback(
+    // `mode` is how the question arrived, not how the answer is delivered — a
+    // spoken question wants a shorter answer with more on the glass, because a
+    // listener can't scroll back. Chips count as typed: they were read.
+    async (question: string, mode: "voice" | "text" = "text") => {
+      const q = question.trim();
+      if (!q) return;
+
+      // Lorem is useless offline — recognition, TTS voices and the model all need
+      // the network. Say so before spending a request on a guaranteed failure,
+      // and restore the phase: a voice turn has already flipped to "capturing",
+      // which would otherwise freeze the stage on the dead caption.
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        setOffline(true);
+        setHint("You're offline — Lorem needs a connection to answer.");
+        setStatus("");
+        setPhase(turnRef.current ? "answering" : "greet");
+        return;
+      }
+
+      inflight.current?.abort();
+      const ctl = new AbortController();
+      inflight.current = ctl;
+
+      setFailed(false);
+      setPending(q);
+      askedBefore.current.add(norm(q));
+      setPhase("thinking");
+      setStatus("Thinking…");
+
+      let res: Response;
+      try {
+        res = await fetch("/api/lorem", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message: q, history: history.current, mode }),
+          signal: ctl.signal,
+        });
+      } catch (e) {
+        if ((e as Error)?.name === "AbortError") return;
+        const msg = "I lost my connection there. Try me again?";
+        setFailed(true);
+        setErrorSay(msg);
+        setPhase("answering");
+        setStatus("");
+        speechRef.current?.say(msg);
+        return;
+      }
+
+      const data = (await res.json().catch(() => null)) as
+        | (Turn & { error?: string; facts?: FactLookup; quotes?: QuoteLookup })
+        | null;
+      if (ctl.signal.aborted) return;
+
+      // An error response still carries a friendly `say`, so speak it — but it
+      // is not an answer. It must never enter history, the transcript, or the
+      // back stack, or the next turn's context would contain Lorem apologising
+      // for its own outage. `data.error` also catches the route's no_tool path.
+      if (!res.ok || data?.error || !data?.say) {
+        const msg = data?.say ?? "Something went wrong on my end. Try me again?";
+        setFailed(true);
+        setErrorSay(msg);
+        setPhase("answering");
+        setStatus("");
+        speechRef.current?.say(msg, () => setStatus(""));
+        return;
+      }
+      setErrorSay(null);
+
+      // A name only ever arrives because the visitor said it. memory.ts trims
+      // anything that doesn't look like one, and returns null if unsure.
+      const memo = data as { rememberName?: string; forgetName?: boolean };
+      if (memo.forgetName) {
+        // Retraction beats capture. Someone saying "that's not me" in the same
+        // breath they were misidentified must end up forgotten, not re-stored.
+        forgetVisitor();
+        setGreetedName(undefined);
+      } else if (memo.rememberName) {
+        const stored = rememberName(memo.rememberName);
+        if (stored) setGreetedName(stored);
+      }
+
+      const next: Turn = {
+        asked: q,
+        say: data.say,
+        show: Array.isArray(data.show) ? data.show : [],
+        facts: data.facts ?? {},
+        quotes: data.quotes ?? {},
+        chips: Array.isArray(data.chips) ? data.chips : [],
+      };
+
+      // Back-stack push happens HERE, outside any state updater — an updater
+      // must stay pure (Strict Mode double-invokes it, pushing every turn
+      // twice) — and BEFORE the new q/a enters memory, so the snapshot is the
+      // conversation exactly as it stood while the previous turn was up.
+      const prev = turnRef.current;
+      if (prev) stack.current.push({ turn: prev, history: [...history.current] });
+
+      // Memory: what was asked and what Lorem actually said, so follow-ups like
+      // "and the other one?" resolve.
+      history.current = [
+        ...history.current,
+        { role: "user" as const, content: q },
+        { role: "assistant" as const, content: next.say },
+      ].slice(-16);
+
+      setTurn(next);
+      setLog((l) => [...l, next]);
+      setPhase("answering");
+      setStatus("Speaking");
+      speechRef.current?.say(next.say, () => setStatus(""));
+    },
+    [],
+  );
+
+  const askRef = useRef(ask);
+  askRef.current = ask;
+
+  /* ── Voice ────────────────────────────────────────────────────────────── */
+
+  const voice = useSpeech({
+    speak: speak && !skipGate,
+    onFinal: (text) => {
+      void askRef.current(text, "voice");
+    },
+    onEmpty: (reason) => {
+      setPhase(turnRef.current ? "answering" : "greet");
+      // "Didn't catch that" blames the visitor — only say it when that is
+      // actually what happened.
+      setStatus(
+        reason === "network"
+          ? "Speech service hiccup — try again in a moment"
+          : reason === "audio-capture"
+            ? "No microphone found — type instead"
+            : "Didn't catch that — try again?",
+      );
+      window.setTimeout(() => setStatus(""), 2600 / (pace || 1));
+    },
+    onHint: (h) => setHint(h),
+  });
+
+  const speechRef = useRef(voice);
+  speechRef.current = voice;
+  const turnRef = useRef(turn);
+  turnRef.current = turn;
+
+  // Scribe transcribes after release, so there is a beat with no words on the
+  // stage. Name it rather than letting the caption sit frozen.
+  useEffect(() => {
+    if (voice.transcribing) setStatus("Getting that down…");
+  }, [voice.transcribing]);
+
+  useEffect(() => {
+    if (voice.listening) {
+      setPhase("capturing");
+      // Truthful per mode: "release to send" is a lie when they tapped the orb.
+      setStatus(
+        voice.listenMode === "hold"
+          ? "Listening… release to send"
+          : "Listening… tap the orb to send",
+      );
+    }
+  }, [voice.listening, voice.listenMode]);
+
+  /* ── Start ────────────────────────────────────────────────────────────── */
+
+  const start = useCallback(() => {
+    if (gateDone.current) return; // Space fires both the gate handler and the window one
+    gateDone.current = true;
+    setGone(true);
+    void speechRef.current.unlock();
+    setStatus("Speaking");
+    // Open with something usable, not with a self-description. A visitor who
+    // knows they're talking to software discounts warmth and doesn't discount
+    // accuracy, so the first turn spends its credit on a fact.
+    //
+    // The stored name deliberately does NOT appear here. It stays on screen
+    // beside its own Forget control — disclosure the visitor can see and undo.
+    // Spoken aloud unprompted it's recall they can't trace, which is the one
+    // form of personalisation that reliably backfires.
+    const back = greetedName ? "Welcome back. " : "";
+    // The spoken instructions must match the device — phones have no Space bar.
+    const how = touchRef.current ? "Tap the orb and talk, or tap a suggestion." : "Hold Space and talk, or type.";
+    const greeting =
+      `${back}He designed and built a booking system for a client in Chicago — research through code. ` +
+      `That's what most people ask about, but I'm not only here for the portfolio. ${how}`;
+    speechRef.current.say(greeting, () => setStatus(""));
+    window.setTimeout(() => setGate(false), 520 / (pace || 1));
+  }, [pace, greetedName]);
+
+  const startRef = useRef(start);
+  startRef.current = start;
+
+  /* ── Keyboard ─────────────────────────────────────────────────────────── */
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!gateDone.current) {
+        if (e.key === "Enter" || e.code === "Space") {
+          e.preventDefault();
+          startRef.current();
+        }
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        setKOpen((v) => {
+          if (!v) requestAnimationFrame(() => kinRef.current?.focus());
+          return !v;
+        });
+        return;
+      }
+      if (e.key === "Escape") {
+        setLogOpen(false);
+        setKOpen(false);
+        kinRef.current?.blur();
+        return;
+      }
+      if ((e.target as HTMLElement | null)?.tagName === "INPUT") return;
+      if (e.code === "Space" && !e.repeat) {
+        e.preventDefault();
+        speechRef.current.listenStart("hold");
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Space" && gateDone.current) {
+        e.preventDefault();
+        speechRef.current.listenEnd();
+      }
+    };
+    // Alt-tab while holding Space means keyup never fires; without this the
+    // recognizer auto-restarts forever with the window in the background.
+    const onBlur = () => speechRef.current.listenEnd();
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
+  /* ── Environment ──────────────────────────────────────────────────────── */
+
+  useEffect(() => {
+    const compact = window.matchMedia("(max-height:700px)");
+    const coarse = window.matchMedia("(pointer:coarse)");
+    const sync = () => {
+      setTouch(coarse.matches);
+      touchRef.current = coarse.matches;
+      const n = screenRef.current;
+      if (!n) return;
+      n.style.setProperty("--ai", compact.matches ? "14px" : "40px");
+      n.style.setProperty(
+        "--ptt",
+        coarse.matches || speechRef.current.micState !== "ok" ? "none" : "inline",
+      );
+    };
+    // localStorage is only safe to touch after mount — see memory.ts for why
+    // this is storage and not a cookie.
+    const prev = beginVisit();
+    setVisitor(prev);
+    setGreetedName(prev.name);
+
+    sync();
+    compact.addEventListener("change", sync);
+    coarse.addEventListener("change", sync);
+
+    const goOffline = () => {
+      setOffline(true);
+      setHint("You're offline — Lorem needs a connection to answer.");
+    };
+    const goOnline = () => {
+      setOffline(false);
+      // Only clear our own message — a mic-permission hint must survive a
+      // connectivity flap.
+      setHint((h) => (h?.startsWith("You're offline") ? null : h));
+    };
+    window.addEventListener("offline", goOffline);
+    window.addEventListener("online", goOnline);
+    if (typeof navigator !== "undefined" && navigator.onLine === false) goOffline();
+    if (skipGate) {
+      gateDone.current = true;
+      setGate(false);
+      setGone(true);
+    }
+    return () => {
+      compact.removeEventListener("change", sync);
+      coarse.removeEventListener("change", sync);
+      window.removeEventListener("offline", goOffline);
+      window.removeEventListener("online", goOnline);
+      inflight.current?.abort();
+    };
+  }, [skipGate]);
+
+  useEffect(() => {
+    const n = screenRef.current;
+    if (!n) return;
+    n.style.setProperty("--ptt", touch || voice.micState !== "ok" ? "none" : "inline");
+  }, [touch, voice.micState]);
+
+  // The transcript claims aria-modal; move focus in and put it back after, or
+  // the claim is a lie for keyboard and screen-reader visitors.
+  const logWasOpen = useRef(false);
+  useEffect(() => {
+    if (logOpen) {
+      logWasOpen.current = true;
+      closeBtnRef.current?.focus();
+    } else if (logWasOpen.current) {
+      logWasOpen.current = false;
+      transcriptBtnRef.current?.focus();
+    }
+  }, [logOpen]);
+
+  /* ── Controls ─────────────────────────────────────────────────────────── */
+
+  const back = () => {
+    speechRef.current.hush();
+    setFailed(false);
+    const entry = stack.current.pop();
+    if (entry) {
+      history.current = entry.history; // rewind memory with the pixels
+      setTurn(entry.turn);
+      setPhase("answering");
+    } else {
+      history.current = [];
+      setTurn(null);
+      setPhase("greet");
+    }
+    setStatus("");
+  };
+
+  const replay = () => {
+    if (!turn) return;
+    setStatus("Speaking");
+    speechRef.current.say(turn.say, () => setStatus(""));
+  };
+
+  const jumpTo = (t: Turn) => {
+    // Jumping is a navigation like any other: push where we are so Back
+    // returns here instead of somewhere the visitor never was.
+    const prev = turnRef.current;
+    if (prev && prev !== t) stack.current.push({ turn: prev, history: [...history.current] });
+    setLogOpen(false);
+    setFailed(false);
+    setTurn(t);
+    setPhase("answering");
+  };
+
+  /* ── Derived ──────────────────────────────────────────────────────────── */
+
+  // `thinking` sits above `blocked` on purpose: while a request is in flight the
+  // orb should report what Lorem is doing, not re-report a mic permission the
+  // status line and hint pill already cover. Transcribing counts as thinking —
+  // from the visitor's side it is the same wait.
+  // Activity outranks permission. `blocked` is a *resting* state — it says "you
+  // have no mic", which is only worth saying when nothing else is happening.
+  // Ranked above speaking (as it was) it meant a visitor who denied the mic
+  // watched a dead grey orb through every answer Lorem gave. Transcribing counts
+  // as thinking: from the visitor's side it is the same wait.
+  const orb: MicOrbState = voice.listening
+    ? "listening"
+    : phase === "thinking" || voice.transcribing
+      ? "thinking"
+      : voice.ttsSpeaking
+        ? "speaking"
+        : voice.micState === "denied"
+          ? "blocked"
+          : "muted";
+
+  // The wave field is Lorem's voice made visible, so it has to track a real
+  // signal in both directions: the visitor's mic while listening, and Lorem's
+  // own audio while speaking. A flat constant while speaking is what made it
+  // read as decoration — it moved for six seconds regardless of what was said.
+  // (The browser-synth fallback exposes no audio node; it holds a mid level.)
+  const energy = voice.listening
+    // Half the swing the MicOrb bars get. The bars are a meter — twitch is
+    // information there. A 52px-amplitude wave field twitching per syllable
+    // just reads as broken.
+    ? 0.3 + voice.level * 0.3
+    : voice.ttsSpeaking
+      ? 0.42 + (voice.outLevel || 0.3) * 0.42
+      : phase === "thinking"
+        ? 0.35
+        : 0.08;
+
+  // Chip fallbacks, in order of preference: the model's own follow-ups; the
+  // openers when nothing is on screen; the not-yet-asked openers when the model
+  // omitted chips mid-conversation. An empty suggestion row next to a blocked
+  // mic is a dead end.
+  // Rotated by visit count, so a return visit doesn't open on the same row.
+  const openers = pickIcebreakers(visitor?.visits ?? 0);
+  const openerPool = openers.filter((o) => !askedBefore.current.has(norm(o)));
+  const chips = turn?.chips.length ? turn.chips : !turn ? openers : openerPool;
+
+  // The spinning `rec` border is a strong attention magnet, so it has to earn
+  // its place: it points at the first suggestion the visitor has NOT already
+  // asked, and it retires once they've had a few turns and clearly don't need
+  // steering. A permanently-spinning chip is just noise with no payoff.
+  const recIndex =
+    log.length < 3 ? chips.findIndex((c) => !askedBefore.current.has(norm(c))) : -1;
+
+  const restingStatus = offline
+    ? "Offline — Lorem needs a connection"
+    : voice.micState === "denied"
+      ? `Mic blocked — ${typeHint}`
+      : voice.micState === "unsupported"
+        ? `No voice in this browser — ${typeHint}`
+        : "Ask me anything";
+
+  return (
+    <div className="lorem-home" style={{ height: "100dvh" }} data-screen-label="Lorem">
+      <div className="lorem-home-aurora">
+        {/* grain={false}: smooth gradient waves. The DS default stays grainy —
+            this surface is the exception, not a change to the component. */}
+        <Aurora energy={energy} grain={false} />
+      </div>
+      <a className="lorem-via" href="/">
+        dinesh &middot; voice portfolio
+      </a>
+      {/* Mirrors .lorem-via across the top. Points at the plain-text portfolio —
+          the convention agents look for. One href to change if you meant
+          something else by "agents". */}
+      <a className="lorem-agents" href="/llms.txt">
+        For agents?
+      </a>
+
+      <div className="lorem-screen" ref={screenRef}>
+        <div className="lorem-stage">
+          {phase === "greet" && !turn && (
+            <div className="lorem-stage-center">
+              {/* pace scales the JS timers, so it has to scale the CSS beats
+                  too or they desync at 0.5x / 2x. */}
+              <div style={{ animation: `lorem-beatin ${(0.7 / (pace || 1)).toFixed(2)}s both` }}>
+                <h1 className="lorem-h" style={{ fontSize: 44 }}>
+                  {greetedName ? `Hey ${greetedName}.` : "Hi. I\u2019m Lorem."}
+                </h1>
+                <p className="lorem-p" style={{ margin: "14px auto 0" }}>
+                  {icebreakerHint(Boolean(visitor?.visits))}
+                </p>
+                {/* Mechanics move to their own quiet line. Mixed into the
+                    permission line they buried it — someone who has gone blank
+                    needs to know what they're allowed to say, not which key to
+                    hold. */}
+                {greetedName && (
+                  // The control belongs next to the data it governs. In the
+                  // transcript alone it was unreachable until after a turn —
+                  // so someone greeted by name couldn't opt out until they'd
+                  // already talked, which is exactly backwards.
+                  <p className="lorem-forget lorem-forget--greet">
+                    Not you, or rather not remembered?{" "}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        forgetVisitor();
+                        setGreetedName(undefined);
+                      }}
+                    >
+                      Forget me
+                    </button>
+                  </p>
+                )}
+                <p className="lorem-howto">
+                  {touch ? (
+                    "Tap the orb and talk"
+                  ) : voice.micState !== "ok" ? (
+                    <>
+                      <b style={{ fontWeight: 600 }}>{modK}</b> to type
+                    </>
+                  ) : (
+                    <>
+                      Hold <b style={{ fontWeight: 600 }}>Space</b> to talk
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {phase === "capturing" && (
+            <div className="lorem-stage-center">
+              <Caption confirmed={voice.confirmed} interim={voice.interim} />
+            </div>
+          )}
+
+          {/* Hold the question on screen while Lorem thinks — the visitor should
+              never wonder whether it heard them. */}
+          {phase === "thinking" && (
+            <div className="lorem-stage-center">
+              <Caption confirmed={pending} interim="" caret />
+            </div>
+          )}
+
+          {phase === "answering" && !failed && turn && (
+            <Surface
+              blocks={turn.show}
+              facts={turn.facts}
+              quotes={turn.quotes}
+              asked={turn.asked}
+              say={turn.say}
+              pace={pace || 1}
+            />
+          )}
+
+          {/* Failure replaces the stage even when an old answer exists —
+              leaving the previous answer up while the spoken error refers to
+              the new question is worse than showing nothing. */}
+          {phase === "answering" && failed && (
+            <div className="lorem-stage-center">
+              <div>
+                {pending && <div className="lorem-asked">you asked &middot; {pending}</div>}
+                <p className="lorem-p">
+                  {errorSay ?? "I couldn't reach my model just then."} In the meantime the
+                  written version is at <a href="/hss-case-study">the case study</a>.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="lorem-dock">
+          {(turn || log.length > 0) && (
+            <div className="lorem-controls" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {turn && (
+                <button className="lorem-chip go" style={ctlStyle} onClick={back}>
+                  &larr; Back
+                </button>
+              )}
+              {turn && (
+                <button className="lorem-chip go" style={ctlStyle} onClick={replay}>
+                  Say it again
+                </button>
+              )}
+              {/* Gated on log, not turn — Back to the greet must not make the
+                  accumulated conversation unreachable. */}
+              {log.length > 0 && (
+                <button
+                  ref={transcriptBtnRef}
+                  className="lorem-chip go"
+                  style={ctlStyle}
+                  onClick={() => setLogOpen(true)}
+                >
+                  Transcript ({log.length})
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className="lorem-chips">
+            {chips.map((c, i) => (
+              <button
+                key={`${c}-${i}`}
+                className={`lorem-chip ${i === recIndex ? "rec" : "go"}`}
+                style={{ fontFamily: "inherit" }}
+                onClick={() => void ask(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+
+          <div className="lorem-vstatus" aria-live="polite">
+            {status || restingStatus}
+          </div>
+
+          <MicOrb
+            state={orb}
+            level={voice.listening ? voice.level : undefined}
+            onClick={() =>
+              voice.listening
+                ? voice.listenEnd()
+                : voice.ttsSpeaking
+                  ? (voice.hush(), setStatus(""))
+                  : voice.listenStart("tap")
+            }
+          />
+
+          <div className="lorem-cmdbar">
+            <input
+              className={`kin${kOpen ? "" : " closed"}`}
+              placeholder="type a question, press Enter"
+              aria-label="Type a question"
+              ref={kinRef}
+              onKeyDown={(e) => {
+                // Blur on both exits: the collapsed input is width:0, not
+                // display:none, so it keeps DOM focus — and the window handler
+                // ignores Space while an INPUT has focus, silently killing
+                // push-to-talk after the first typed question.
+                if (e.key === "Escape") {
+                  setKOpen(false);
+                  (e.target as HTMLInputElement).blur();
+                  return;
+                }
+                if (e.key === "Enter") {
+                  const el = e.target as HTMLInputElement;
+                  const v = el.value.trim();
+                  if (!v) return;
+                  el.value = "";
+                  el.blur();
+                  setKOpen(false);
+                  void ask(v);
+                }
+              }}
+            />
+            <button
+              type="button"
+              className="khint"
+              onClick={() => {
+                setKOpen((v) => {
+                  if (!v) requestAnimationFrame(() => kinRef.current?.focus());
+                  return !v;
+                });
+              }}
+            >
+              {touch ? "tap to type" : (
+                <>
+                  <kbd>{modK}</kbd> to type
+                </>
+              )}
+            </button>
+            <span className="ptthint" style={{ display: "var(--ptt, none)" }}>
+              <kbd>Space</kbd> hold to talk
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {hint && (
+        <div className="lorem-hintwrap">
+          <div className="lorem-browserhint">
+            <span>{hint}</span>
+            <button type="button" aria-label="Dismiss" onClick={() => setHint(null)}>
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+
+      {logOpen && (
+        <div
+          className="lorem-logov"
+          role="dialog"
+          aria-modal="true"
+          aria-label="This conversation"
+        >
+          <div className="lorem-logov-head">
+            <div className="lorem-logov-title">This conversation</div>
+            <button
+              ref={closeBtnRef}
+              className="lorem-chip go"
+              style={ctlStyle}
+              onClick={() => setLogOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+          <div className="lorem-logov-body">
+            {log.map((t, i) => (
+              <button key={i} className="lorem-logrow" onClick={() => jumpTo(t)}>
+                <span className="lorem-bubble u">{t.asked}</span>
+                <span className="lorem-bubble them">{t.say}</span>
+              </button>
+            ))}
+            {!log.length && (
+              <div className="lorem-p" style={{ textAlign: "center", fontSize: 15 }}>
+                Nothing yet &mdash; ask something first.
+              </div>
+            )}
+            {greetedName && (
+              // Storing someone's name without an obvious way to undo it is the
+              // part that turns a nice touch into a creepy one.
+              <div className="lorem-forget">
+                I remember you as <b>{greetedName}</b>, in this browser only.{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    forgetVisitor();
+                    setGreetedName(undefined);
+                  }}
+                >
+                  Forget me
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {gate && (
+        <div
+          className={`lorem-startgate${gone ? " gone" : ""}`}
+          role="button"
+          tabIndex={0}
+          aria-label="Start the voice portfolio"
+          // The fade must track the same pace as the 520ms unmount timer.
+          style={{ transition: `opacity ${(0.5 / (pace || 1)).toFixed(2)}s` }}
+          onClick={start}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              start();
+            }
+          }}
+        >
+          <div className="b" />
+          <div className="t">Tap to start</div>
+          <div className="s">
+            voice-first &middot; sound on &middot; or {typeHint}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const ctlStyle: CSSProperties = { fontFamily: "inherit", fontSize: 13, padding: "7px 14px" };
