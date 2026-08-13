@@ -7,13 +7,13 @@
   ],
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/check-public.mjs",
+    "prebuild": "npm run check:public",
     "build": "next build",
     "start": "next start",
     "test": "node test/run.mjs",
     "check:keys": "node scripts/check-keys.mjs",
     "check:public": "node scripts/check-public.mjs",
-    "deploy": "node scripts/check-public.mjs && vercel deploy --prod"
+    "deploy": "npm run check:public && vercel deploy --prod"
   },
   "dependencies": {
     "next": "16.2.4",

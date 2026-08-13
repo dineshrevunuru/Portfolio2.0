@@ -1,56 +1,60 @@
 import Script from "next/script";
-import { SITE_URL } from "../site";
+import { IS_CANONICAL_HOST } from "../site";
 
 /**
  * Microsoft Clarity — session recordings, heatmaps, and rage/dead-click
  * detection.
  *
- * Installed as the raw tag rather than the @microsoft/clarity npm package. The
- * package is a thin wrapper that injects this same script from the same CDN, so
- * the dependency buys a typed init() and nothing else. next/script with
- * afterInteractive is the part that actually matters: it holds the request until
- * after hydration, so the analytics tag can never delay first paint on a
- * portfolio whose argument is craft.
+ * Loaded as a plain external script rather than Clarity's inline IIFE snippet.
+ * The snippet's only addition is a window.clarity command queue for calls made
+ * before the CDN script arrives — and nothing in this repo calls
+ * window.clarity() at all, so the queue was an untyped, unlintable string
+ * buying nothing. A src-prop Script fetches the identical file with identical
+ * afterInteractive timing in checked TSX, and removes the one injection seam
+ * the inline form had (interpolating the id into markup). If a consent API or
+ * custom tags are ever needed, that is the moment to bring the queue back.
  *
- * Two gates, both of which must pass before anything loads.
+ * Three gates, all of which must pass before anything loads.
  *
  * 1. NEXT_PUBLIC_CLARITY_PROJECT_ID must be set. Absent, this renders null —
  *    so a clone of the repo with no env file is silently un-tracked rather than
  *    throwing or, worse, posting to a garbage project id.
  *
- * 2. The origin must be the real domain. Keyed off SITE_URL exactly as robots.ts
- *    is, and for the same reason: a *.vercel.app preview is a full public copy
- *    of the site, and every preview visit and every `next start` on localhost
- *    would otherwise land in the same heatmap as real traffic. Dinesh reloading
- *    his own hero forty times while tuning it is precisely the signal that would
- *    make the numbers useless, and it is indistinguishable from a visitor after
- *    the fact.
+ * 2. The id must look like a Clarity project id (short alphanumeric token).
+ *    The id becomes part of a URL in served HTML; a malformed value from a
+ *    mis-templated env file should fail to nothing, not ship.
+ *
+ * 3. IS_CANONICAL_HOST — the shared predicate from site.ts, which fails closed:
+ *    previews and localhost identify as themselves and refuse the tag, so
+ *    Dinesh reloading his own hero forty times while tuning it can never land
+ *    in the same heatmap as a real visitor.
  *
  * PRIVACY. Clarity masks the contents of every input box and dropdown in all
- * masking modes — that is not configurable, so what a visitor types into the HSS
- * demo (email, mobile, verification code) is never sent. The default Balanced
- * mode additionally masks numbers and email addresses wherever they appear.
- * What Balanced does NOT mask is an ordinary name in ordinary body text, and the
- * demo echoes the visitor's first name back into the transcript on confirmation.
- * That is why the transcript carries an explicit data-clarity-mask in
- * hss-demo/chat-client.tsx rather than relying on the dashboard setting: the
- * attribute lives with the markup and survives someone flipping the project to
- * Relaxed a year from now.
+ * masking modes — that is not configurable, so what a visitor types into the
+ * HSS demo (email, mobile, verification code) is never sent. The default
+ * Balanced mode additionally masks numbers and email addresses wherever they
+ * appear. What Balanced does NOT mask is ordinary text a page echoes back —
+ * a first name in a chat bubble, spoken words in a live caption. Every surface
+ * that renders visitor-supplied text therefore carries an explicit
+ * data-clarity-mask in its own markup (the HSS demo transcript in
+ * hss-demo/chat-client.tsx; the Lorem caption, question echo, greeting, and
+ * transcript in components/lorem/) rather than relying on a dashboard setting:
+ * the attribute lives with the markup and survives someone flipping the
+ * project to Relaxed a year from now.
  * https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-masking
  */
 const PROJECT_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
-const IS_CANONICAL_HOST = SITE_URL.includes("dineshrevunuru.com");
+const ID_SHAPE = /^[a-z0-9]{6,16}$/i;
 
 export default function Clarity() {
-  if (!PROJECT_ID || !IS_CANONICAL_HOST) return null;
+  if (!PROJECT_ID || !ID_SHAPE.test(PROJECT_ID) || !IS_CANONICAL_HOST) {
+    return null;
+  }
 
   return (
-    <Script id="ms-clarity" strategy="afterInteractive">
-      {`(function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", ${JSON.stringify(PROJECT_ID)});`}
-    </Script>
+    <Script
+      src={`https://www.clarity.ms/tag/${PROJECT_ID}`}
+      strategy="afterInteractive"
+    />
   );
 }

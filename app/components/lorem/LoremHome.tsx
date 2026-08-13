@@ -542,7 +542,13 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
               {/* pace scales the JS timers, so it has to scale the CSS beats
                   too or they desync at 0.5x / 2x. */}
               <div style={{ animation: `lorem-beatin ${(0.7 / (pace || 1)).toFixed(2)}s both` }}>
-                <h1 className="lorem-h" style={{ fontSize: 44 }}>
+                {/* Masked from Clarity replays when it greets by name \u2014 see
+                    app/components/Clarity.tsx. */}
+                <h1
+                  className="lorem-h"
+                  style={{ fontSize: 44 }}
+                  data-clarity-mask="True"
+                >
                   {greetedName ? `Hey ${greetedName}.` : "Hi. I\u2019m Lorem."}
                 </h1>
                 <p className="lorem-p" style={{ margin: "14px auto 0" }}>
@@ -764,7 +770,11 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
               Close
             </button>
           </div>
-          <div className="lorem-logov-body">
+          {/* Masked from Clarity replays: every visitor question lands here
+              verbatim, plus the remembered name — see app/components/Clarity.tsx.
+              The questions themselves are still readable server-side via
+              /api/lorem, which is the right place to learn what people ask. */}
+          <div className="lorem-logov-body" data-clarity-mask="True">
             {log.map((t, i) => (
               <button key={i} className="lorem-logrow" onClick={() => jumpTo(t)}>
                 <span className="lorem-bubble u">{t.asked}</span>

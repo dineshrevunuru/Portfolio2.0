@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "./site";
+import { IS_CANONICAL_HOST, SITE_URL } from "./site";
 
 /**
  * robots.txt, generated rather than static so it points at the same origin the
@@ -25,12 +25,10 @@ import { SITE_URL } from "./site";
  * deployment of a project is classed as production, so that safety net does not
  * cover this case.
  *
- * Keyed off the host rather than NODE_ENV, because a preview is a production
- * build by every other measure. VERCEL_ENV would only distinguish preview from
- * production, and this deployment is neither in the way that matters.
+ * The predicate itself lives in site.ts next to SITE_URL — one definition,
+ * shared with the Clarity gate, exact-hostname rather than substring, and
+ * failing closed when SITE_URL cannot identify itself as the real domain.
  */
-const IS_CANONICAL_HOST = SITE_URL.includes("dineshrevunuru.com");
-
 export default function robots(): MetadataRoute.Robots {
   if (!IS_CANONICAL_HOST) {
     return { rules: [{ userAgent: "*", disallow: "/" }] };

@@ -58,7 +58,11 @@ export function Surface({ blocks, facts, quotes, asked, say, pace = 1 }: Surface
         // Pinned: when a long answer scrolls, the question must not scroll away
         // with it — losing the question is the exact failure the echo exists for.
         <div className="lorem-asked-pin" style={beat(0, pace)}>
-          <div className="lorem-asked">you asked &middot; {asked}</div>
+          {/* Masked from Clarity replays: this echoes the visitor's own words,
+              which can carry a name or employer — see app/components/Clarity.tsx. */}
+          <div className="lorem-asked" data-clarity-mask="True">
+            you asked &middot; {asked}
+          </div>
         </div>
       )}
       {fallbackSay && (
