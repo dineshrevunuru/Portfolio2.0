@@ -17,8 +17,18 @@
  * not willing to commit is a file that must not be in public/ at all. Keep the
  * unredacted original outside the repo.
  *
- * Runs as prebuild, so it guards `vercel --prod`, CI, and a local `npm run
- * build` identically. There is no path to a production bundle that skips it.
+ * WHERE THIS ACTUALLY RUNS — and where it does not. As prebuild it guards a
+ * local `npm run build`. It does NOT guard `vercel deploy --prod`: that command
+ * uploads the working tree first and builds it on Vercel, where there is no
+ * .git directory, so the check below takes its not-a-git-checkout branch and
+ * skips. The upload — the step that leaks — has already happened by then.
+ *
+ * That is precisely the path the incident came in on, so deploy through
+ * `npm run deploy`, which runs this check locally before handing off to Vercel.
+ *
+ * The durable fix is structural rather than a script: point production at a git
+ * branch so Vercel builds from a commit and an uncommitted file is unreachable
+ * by construction. Until that switch happens, this is the guard.
  */
 import { execFileSync } from "node:child_process";
 
