@@ -698,7 +698,18 @@ export function ChatClient() {
         </button>
       </header>
 
-      <div ref={scrollRef} style={S.scroll} role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with Tara">
+      {/* data-clarity-mask: Microsoft Clarity records session replays, and this
+          transcript is ordinary DOM text, so it IS captured — unlike the input
+          boxes below, which Clarity masks in every mode and cannot be
+          configured to reveal. Clarity's default Balanced mode masks numbers and
+          email addresses but not a plain first name, and the confirmation step
+          echoes the visitor's name back into a bubble here. Masking the whole
+          log is the honest call: the useful signal from this demo is where
+          people drop out, which the heatmap and the funnel give us without
+          reading anyone's booking back to them. The attribute overrides the
+          dashboard setting, so this holds even if the project is later set to
+          Relaxed. */}
+      <div ref={scrollRef} data-clarity-mask="True" style={S.scroll} role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with Tara">
         {log.map((it) => <LogRow key={it.id} item={it} onChip={runChip} />)}
         {aiThinking && <Bubble who="bot"><TypingDots /></Bubble>}
         {streaming !== null && (

@@ -4,6 +4,7 @@ import "./globals.css";
 import "./components/lorem/lorem.css";
 import SeqReveal from "./components/SeqReveal";
 import ScrollProgressPill from "./components/case-study/ScrollProgressPill";
+import Clarity from "./components/Clarity";
 import { SITE_URL } from "./site";
 
 const poppins = Poppins({
@@ -72,6 +73,9 @@ export default function RootLayout({
         {/* Self-scoping: renders null unless the page has a cs-theme-* wrapper,
             so all four case studies get it without each page mounting it. */}
         <ScrollProgressPill />
+        {/* Also self-scoping: renders null off the real domain or with no
+            project id, so previews and localhost stay out of the heatmaps. */}
+        <Clarity />
       </body>
     </html>
   );
