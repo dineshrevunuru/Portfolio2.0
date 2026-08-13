@@ -35,13 +35,13 @@ const stakeholders = [
 
 export default function ReportersCaseStudy() {
   return (
-    <main className="w-full cs-theme-reporters">
+    <main className="w-full cs-theme-reporters" data-seq-group>
       <SiteNav active="case-study" />
 
       <CaseStudyHero
         title={
           <>
-            A platform to connect freelance
+            A platform to connect freelance{" "}
             <br />
             journalists and media houses
           </>

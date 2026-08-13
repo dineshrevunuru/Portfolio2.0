@@ -1,0 +1,224 @@
+/* =========================================================
+   Typography utilities
+   ========================================================= */
+@layer components {
+  .t-serif-hero {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 48px;
+    line-height: 50px;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+  }
+  .t-sans-hero {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 48px;
+    line-height: 50px;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+  .t-serif-title {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 38px;
+    line-height: 50px;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+  .t-section-head {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 24px;
+    line-height: 24px;
+    font-weight: 500;
+    color: var(--color-head-ink);
+  }
+  .t-body-lg {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: 0.2px;
+    font-weight: 400;
+  }
+  .t-body {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 22px;
+    letter-spacing: 0.2px;
+    font-weight: 400;
+  }
+  .t-body-fun {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.2px;
+    font-weight: 300;
+  }
+  .t-cta {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 16px;
+    letter-spacing: 0.6px;
+    font-weight: 500;
+  }
+  .t-fun-title {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 22px;
+    line-height: 22px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+  .t-footer-brand {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 32px;
+    line-height: 32px;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+  }
+  .t-footer-role {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 18px;
+    letter-spacing: 0.8px;
+    font-weight: 400;
+  }
+  .t-footer-meta {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0.8px;
+    font-weight: 400;
+  }
+  .t-footer-contact {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.8px;
+    font-weight: 400;
+  }
+  .t-footer-social {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0.6px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  /* Tablet — <=1024 */
+  @media (max-width: 1024px) {
+    .t-serif-hero {
+      font-size: 52px;
+    }
+    .t-sans-hero {
+      font-size: 40px;
+      line-height: 44px;
+    }
+    .t-serif-title {
+      font-size: 32px;
+      line-height: 40px;
+    }
+    .t-footer-brand {
+      font-size: 28px;
+      line-height: 28px;
+    }
+  }
+
+  /* Mobile — <=640 */
+  @media (max-width: 640px) {
+    .t-serif-hero {
+      font-size: 36px;
+    }
+    .t-sans-hero {
+      font-size: 32px;
+      line-height: 36px;
+    }
+    .t-serif-title {
+      font-size: 26px;
+      line-height: 34px;
+    }
+    .t-body-lg {
+      font-size: 16px;
+      line-height: 26px;
+    }
+    .t-section-head {
+      font-size: 20px;
+      line-height: 20px;
+    }
+    .t-footer-brand {
+      font-size: 26px;
+      line-height: 26px;
+    }
+    .t-footer-social {
+      font-size: 14px;
+    }
+  }
+}
+
+/* =========================================================
+   Section paddings — responsive
+   ========================================================= */
+@layer components {
+  .pad-nav {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  .pad-hero {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  .pad-section {
+    padding-left: 130px;
+    padding-right: 130px;
+  }
+  .pad-cards {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  .pad-footer-inner {
+    padding: 120px 155px;
+  }
+
+  @media (max-width: 1024px) {
+    .pad-nav {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-hero {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-section {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-cards {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+    .pad-footer-inner {
+      padding: 80px 60px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .pad-nav {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-hero {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-section {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-cards {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .pad-footer-inner {
+      padding: 60px 24px;
+    }
+  }
+}

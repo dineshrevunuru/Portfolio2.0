@@ -13,6 +13,12 @@ type Props = {
   muted?: boolean;
   width?: number;
   height?: number;
+  /** Show native controls. Use for anything long enough to have a beginning:
+      an autoplaying loop drops the reader into the middle of the story. */
+  controls?: boolean;
+  /** "none" keeps a heavy clip off the wire until the reader asks for it.
+      The poster still paints, so the slot is never empty. */
+  preload?: "none" | "metadata" | "auto";
 };
 
 export default function CaseStudyVideo({
@@ -28,6 +34,8 @@ export default function CaseStudyVideo({
   muted = true,
   width,
   height,
+  controls = false,
+  preload,
 }: Props) {
   const containerClass = wide ? "cs-container-full" : "cs-container";
   const isGif = src.toLowerCase().endsWith(".gif");
@@ -57,6 +65,8 @@ export default function CaseStudyVideo({
           autoPlay={autoPlay}
           loop={loop}
           muted={muted}
+          controls={controls}
+          preload={preload}
           playsInline
           aria-label={alt}
           style={{ aspectRatio }}

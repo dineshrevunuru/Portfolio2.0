@@ -1,23 +1,3 @@
-type MetaField = {
-  label: string;
-  value: string;
-};
-
-type Props = {
-  fields: MetaField[];
-};
-
-export default function CaseStudyMeta({ fields }: Props) {
-  return (
-    <section className="cs-container pb-12 sm:pb-16">
-      <dl className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-        {fields.map((f) => (
-          <div key={f.label}>
-            <dt className="cs-meta-label">{f.label}</dt>
-            <dd className="cs-meta-value">{f.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
-  );
-}
+// Re-export from the design-system package — single source of truth.
+export { default } from "../../../packages/ds/src/components/case-study/CaseStudyMeta";
+export type { CaseStudyMetaProps, MetaField } from "../../../packages/ds/src/components/case-study/CaseStudyMeta";

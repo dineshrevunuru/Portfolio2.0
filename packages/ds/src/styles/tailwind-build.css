@@ -1,0 +1,37 @@
+/* =========================================================
+   Tailwind build entry — compiled by the CLI into dist/ds.css.
+   The components mix hand-written DS classes (t-*, cs-*, pad-*,
+   card-*) with Tailwind utilities (flex, grid, mt-*, text-white,
+   bg-[color:var(--…)]). Scanning the component + preview source
+   here bakes exactly the utilities they use into the shipped
+   stylesheet, so the DS renders correctly with NO Tailwind at
+   the consumer end.
+   ========================================================= */
+@import "tailwindcss";
+
+/* Emit only the utilities actually referenced by the DS surface. */
+@source "../components/**/*.{ts,tsx}";
+@source "../../.design-sync/previews/**/*.tsx";
+
+/* Brand tokens (:root) + the hand-written utility/pattern layers. */
+@import "./tokens.css";
+@import "./utilities.css";
+@import "./patterns.css";
+
+/* Expose the brand tokens as Tailwind theme values too. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+
+  --color-accent: var(--color-accent);
+  --color-brand-blue: var(--color-brand-blue);
+  --color-footer-blue: var(--color-footer-blue);
+  --color-ink: var(--color-ink);
+  --color-head-ink: var(--color-head-ink);
+  --color-body-ink: var(--color-body-ink);
+  --color-hero-bg: var(--color-hero-bg);
+  --color-fun-bg: var(--color-fun-bg);
+  --color-fun-ink: var(--color-fun-ink);
+}

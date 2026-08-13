@@ -1,0 +1,25 @@
+/* =========================================================
+   Optional Tailwind v4 bridge. Consumers using Tailwind can
+   `@import "@portfolio/ds/styles/tailwind-theme.css"` after
+   `@import "tailwindcss"` to expose the brand tokens as
+   Tailwind theme values (bg-accent, text-brand-blue, …).
+   Plain-CSS consumers do NOT need this file.
+   ========================================================= */
+@import "./tokens.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+
+  --color-accent: var(--color-accent);
+  --color-brand-blue: var(--color-brand-blue);
+  --color-footer-blue: var(--color-footer-blue);
+  --color-ink: var(--color-ink);
+  --color-head-ink: var(--color-head-ink);
+  --color-body-ink: var(--color-body-ink);
+  --color-hero-bg: var(--color-hero-bg);
+  --color-fun-bg: var(--color-fun-bg);
+  --color-fun-ink: var(--color-fun-ink);
+}

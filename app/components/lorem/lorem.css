@@ -1,0 +1,363 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ============================================================
+   Lorem Design System — full stylesheet
+   Ported verbatim from the finalized AI OS portfolio (aria-portfolio,
+   commit d289b8e). Top-level #id / .class selectors renamed to namespaced
+   .lorem-* classes; scoped child classes (.v, .lt, .qt…) kept as-is.
+   Colors, radii, motion curves, and values are unchanged.
+   Entry-reveal initial states (opacity:0 / data-cue) are dropped — DS
+   components render in their resting state; motion stays for interaction.
+   ============================================================ */
+:root{
+  --accent:#1C7CF5; --accent-soft:#EAF2FF; --accent-ink:#0E5AD6;
+  --ink:#181D27; --mut:#727A86; --faint:#AEB4BE; --line:#EEF0F3;
+  --green:#22C55E; --danger:#B42318; --success:#15803D;
+  --surface-1:#F7F9FC; --surface-2:#F7F8FA; --surface-3:#F5F7FA;
+  --ink-dark:#16181D;
+}
+[class^="lorem-"]{box-sizing:border-box}
+[class^="lorem-"] *{box-sizing:border-box}
+[class^="lorem-"]{font-family:'Inter',-apple-system,sans-serif}
+
+@keyframes lorem-blink{50%{opacity:0}}
+
+/* ============================ CHROME ============================ */
+
+/* ---- Aurora: the voice-reactive wave field (decorative background) ----
+   Original was position:fixed to viewport bottom; as a reusable component it
+   fills its nearest positioned ancestor instead. */
+.lorem-aurora{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.lorem-aurora canvas{width:100%;height:100%;display:block}
+.lorem-aurora .lorem-grain{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.5;
+  -webkit-mask-image:linear-gradient(transparent,#000 55%);mask-image:linear-gradient(transparent,#000 55%);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---- MicOrb: the dock control (#vcenter) with its 4 states ---- */
+.lorem-micorb{width:62px;height:62px;border-radius:50%;background:var(--ink-dark);display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:transform .15s,background .3s;box-shadow:0 8px 24px rgba(20,25,35,.16)}
+.lorem-micorb:active{transform:scale(.93)}
+.lorem-micorb i{width:4px;height:6px;border-radius:2px;background:#fff;transition:height .09s linear,background .3s}
+.lorem-micorb.muted{background:#EDEFF2;box-shadow:0 2px 10px rgba(20,25,35,.06)}
+.lorem-micorb.muted i{background:#AEB4BE;height:4px!important}
+.lorem-micorb .micoff{display:none}
+.lorem-micorb .micoff *{fill:none;stroke:#9AA1AC;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lorem-micorb.blocked{background:#EDEFF2;box-shadow:0 2px 10px rgba(20,25,35,.06)}
+.lorem-micorb.blocked i{display:none}
+.lorem-micorb.blocked .micoff{display:block}
+.lorem-micorb.listening{animation:lorem-ring 2.6s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes lorem-ring{0%{box-shadow:0 8px 24px rgba(20,25,35,.16),0 0 0 0 rgba(28,124,245,.20)}55%{box-shadow:0 8px 24px rgba(20,25,35,.16),0 0 0 10px rgba(28,124,245,0)}100%{box-shadow:0 8px 24px rgba(20,25,35,.16),0 0 0 0 rgba(28,124,245,0)}}
+.lorem-micorb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---- StartGate: the entry overlay (#startov) ---- */
+.lorem-startgate{position:absolute;inset:0;z-index:10;background:rgba(255,255,255,.76);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;cursor:pointer;transition:opacity .5s}
+.lorem-startgate.gone{opacity:0;pointer-events:none}
+.lorem-startgate .b{width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 36% 30%,#EAF4FF,#5EA8FF 42%,#1C7CF5 78%);box-shadow:0 12px 32px rgba(28,124,245,.35);animation:lorem-bob 3.4s ease-in-out infinite}
+@keyframes lorem-bob{50%{transform:translateY(-6px)}}
+.lorem-startgate .t{font-size:19px;color:var(--ink);font-weight:500}
+.lorem-startgate .s{font-size:13px;color:var(--mut)}
+.lorem-startgate .copylink{margin-top:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;padding:9px 20px;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s}
+.lorem-startgate .copylink:hover{background:#F7FAFF;border-color:#C9D4E4}
+@media (prefers-reduced-motion: reduce){.lorem-startgate .b{animation:none}}
+
+/* ---- CommandBar: the ⌘K / push-to-talk dock (#kbar) ---- */
+.lorem-cmdbar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--faint)}
+.lorem-cmdbar .kin{opacity:1;border:none;outline:none;font:inherit;font-size:14px;color:var(--ink);background:var(--surface-2);border-radius:999px;padding:9px 15px;width:min(360px,72vw);transition:width .3s,opacity .3s,padding .3s}
+.lorem-cmdbar .kin.closed{width:0;opacity:0;padding:0}
+.lorem-cmdbar .khint{border:0;background:none;font:inherit;font-size:13px;color:#5F6773;cursor:pointer;padding:0;transition:color .2s cubic-bezier(.4,0,.2,1)}
+.lorem-cmdbar .khint:hover{color:var(--ink)}
+.lorem-cmdbar .ptthint{font-size:13px;color:#5F6773}
+.lorem-cmdbar kbd{font:inherit;font-size:12px;color:var(--ink);border:1px solid #D9DEE6;border-radius:5px;padding:1px 6px;background:var(--surface-2);margin-right:3px}
+.lorem-cmdbar .khint:focus-visible,.lorem-cmdbar .kin:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---- Caption: the STT read-out (#cap) with interim-ink words ---- */
+.lorem-caption{font-size:26px;font-weight:500;color:var(--mut);text-align:center;letter-spacing:-.01em;font-family:'Inter',sans-serif}
+.lorem-caption .w{transition:opacity .25s cubic-bezier(0,0,.2,1),color .25s cubic-bezier(0,0,.2,1),filter .25s cubic-bezier(0,0,.2,1)}
+.lorem-caption .wnew{opacity:.5;color:var(--faint);filter:blur(.5px)}
+.lorem-caption .wset{opacity:1;color:var(--ink);filter:none}
+.lorem-caption .car{display:inline-block;width:2px;height:25px;background:var(--accent);vertical-align:-4px;margin-left:2px;animation:lorem-blink 1s steps(1) infinite}
+@media (prefers-reduced-motion: reduce){.lorem-caption .car{animation:none}}
+
+/* ---- Voice cues: browser nudge, mic-permission arrow, sound hint ---- */
+.lorem-browserhint{display:inline-flex;align-items:center;gap:11px;font-size:12.5px;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 8px 8px 16px;box-shadow:0 6px 22px rgba(20,25,35,.09)}
+.lorem-browserhint b{color:var(--ink);font-weight:600}
+.lorem-browserhint button{border:0;background:#F1F3F6;color:var(--mut);width:19px;height:19px;border-radius:50%;cursor:pointer;font-size:11px;line-height:1;display:grid;place-items:center;padding:0;transition:background .18s,color .18s}
+.lorem-browserhint button:hover{background:#E6E9EE;color:var(--ink)}
+.lorem-permarrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--accent-ink)}
+.lorem-permarrow svg{animation:lorem-nudge 1.6s ease-in-out infinite}
+@keyframes lorem-nudge{50%{transform:translateY(-4px)}}
+.lorem-soundhint{display:inline-flex;font-size:12.5px;color:var(--accent-ink);background:var(--accent-soft);padding:7px 14px;border-radius:999px}
+@media (prefers-reduced-motion: reduce){.lorem-permarrow svg{animation:none}}
+
+/* ============================ CONTENT ============================ */
+
+/* ---- Beat: the reveal wrapper for a unit of answer content ---- */
+.lorem-beat{margin-bottom:34px}
+
+/* ---- Heading (.h) + Paragraph (.p) + inline caret ---- */
+.lorem-h{font-family:'Instrument Sans',sans-serif;font-size:37px;font-weight:600;line-height:1.18;letter-spacing:-.022em;color:var(--ink);margin:0}
+.lorem-p{font-size:17px;color:var(--mut);line-height:1.7;margin:0;max-width:36em}
+.lorem-caret-sm{display:inline-block;width:2px;height:17px;background:var(--accent);vertical-align:-3px;margin-left:1px;animation:lorem-blink 1s steps(1) infinite}
+@media (prefers-reduced-motion: reduce){.lorem-caret-sm{animation:none}}
+
+/* ---- Proof: the evidence pill (.proof) ---- */
+.lorem-proof{display:inline-flex;align-items:center;gap:9px;font-size:14px;color:var(--mut);background:var(--surface-2);border-radius:14px;padding:10px 16px;width:max-content}
+
+/* ---- Metric (.metric) + Metrics grid (.metrics) ---- */
+.lorem-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.lorem-metric{text-align:center;padding:22px 8px;border-radius:22px;background:var(--surface-1)}
+.lorem-metric .v{font-family:'Instrument Sans',sans-serif;font-size:36px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.lorem-metric .k{font-size:12.5px;color:var(--mut);margin-top:5px}
+
+/* ---- Chips container ---- */
+.lorem-chips{display:flex;flex-wrap:wrap;gap:10px}
+
+/* ---- Chip: the answer/suggestion pill (resting state) ---- */
+@property --spin{syntax:'<angle>';initial-value:0deg;inherits:false}
+.lorem-chip{display:inline-flex;align-items:center;font-size:14px;color:var(--ink);padding:9px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);
+  transition:background .18s cubic-bezier(.4,0,.2,1),border-color .18s cubic-bezier(.4,0,.2,1),color .18s cubic-bezier(.4,0,.2,1),box-shadow .22s cubic-bezier(.4,0,.2,1),transform .1s}
+.lorem-chip.go{cursor:pointer}
+.lorem-chip.go:hover{background:#F7FAFF;border-color:#C9D4E4}
+.lorem-chip.go:active{transform:scale(.96)}
+.lorem-chip.rec{position:relative;border-color:rgba(28,124,245,.45);box-shadow:0 0 0 3px rgba(28,124,245,.10),0 4px 16px rgba(28,124,245,.20)}
+.lorem-chip.rec::before{content:'';position:absolute;inset:-3px;border-radius:999px;padding:2.5px;pointer-events:none;
+  background:conic-gradient(from var(--spin),rgba(28,124,245,0) 0%,rgba(28,124,245,.9) 14%,rgba(94,168,255,.45) 30%,rgba(28,124,245,0) 52%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  animation:lorem-recspin 2.8s linear infinite}
+@keyframes lorem-recspin{to{--spin:360deg}}
+.lorem-chip.rec:hover{border-color:var(--accent);background:#F7FAFF;box-shadow:0 0 0 3px rgba(28,124,245,.18),0 6px 20px rgba(28,124,245,.3)}
+.lorem-chip.tag{background:transparent;border-color:transparent;color:var(--mut)}
+.lorem-chip .cw{color:var(--mut)}
+.lorem-chip.copied{background:#EAF9F0;border-color:#BBE5C8;color:var(--success)}
+.lorem-chip.copied .cw{color:var(--success)}
+.lorem-chip .ck{vertical-align:-1px;margin-left:2px}
+.lorem-chip .ck path{stroke:var(--success);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10;stroke-dashoffset:10;transition:stroke-dashoffset .2s cubic-bezier(0,0,.2,1) .1s}
+.lorem-chip.copied .ck path{stroke-dashoffset:0}
+.lorem-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.lorem-chip.rec::before{animation:none}}
+
+/* ---- LiveChat (.live) + Bubble (.bub) ---- */
+.lorem-live{border-radius:24px;background:var(--surface-1);padding:20px;max-width:32em}
+.lorem-live .lh{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);margin-bottom:14px;font-weight:500}
+.lorem-live .lh .g{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(34,197,94,.16)}
+.lorem-live .livenote{margin-top:8px;font-size:12px;color:var(--faint)}
+.lorem-bubble{font-size:14px;border-radius:15px;padding:9px 14px;margin-bottom:8px;max-width:82%;line-height:1.5}
+.lorem-bubble.them{background:#fff;color:var(--ink);box-shadow:0 2px 10px rgba(20,25,35,.05)}
+.lorem-bubble.u{background:var(--accent);color:#fff;margin-left:auto}
+
+/* ---- Problem (.problem) ---- */
+.lorem-problem{padding:26px 28px;border-radius:22px;background:var(--surface-1);max-width:36em}
+.lorem-problem .st{font-family:'Instrument Sans',sans-serif;font-size:21px;font-weight:600;line-height:1.4;letter-spacing:-.012em;color:var(--ink)}
+.lorem-problem .cost{margin-top:14px;font-size:14px;color:var(--mut);line-height:1.6}
+.lorem-problem .cost b{color:var(--danger);font-weight:600}
+
+/* ---- Quote (.qcard) + container (.qwrap) ---- */
+.lorem-quotes{display:flex;flex-direction:column;gap:10px}
+.lorem-quote{background:#fff;border-radius:18px;padding:16px 20px;box-shadow:0 2px 14px rgba(20,25,35,.06);max-width:34em}
+.lorem-quote .qt{font-size:15.5px;line-height:1.55;color:var(--ink)}
+.lorem-quote .qt::before{content:'\201C';color:var(--accent);font-family:'Instrument Sans',sans-serif;font-weight:700;margin-right:2px}
+.lorem-quote .qby{margin-top:8px;font-size:12.5px;color:var(--mut)}
+
+/* ---- Persona (.pcard) + Personas grid (.personas) ---- */
+.lorem-personas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lorem-persona{background:var(--surface-1);border-radius:18px;padding:16px 15px}
+.lorem-persona .pn{font-family:'Instrument Sans',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.lorem-persona .pd{margin-top:6px;font-size:12.5px;color:var(--mut);line-height:1.5}
+.lorem-persona .ps{margin-top:10px;font-size:12.5px;color:var(--accent-ink);line-height:1.45}
+
+/* ---- Lane (.lane) + Split (.split) ---- */
+.lorem-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:34em}
+.lorem-lane{border-radius:20px;padding:20px 18px}
+.lorem-lane .lt{font-family:'Instrument Sans',sans-serif;font-size:17px;font-weight:600;letter-spacing:-.012em}
+.lorem-lane .ld{margin-top:8px;font-size:13px;line-height:1.55}
+.lorem-lane.a{background:var(--accent-soft)}
+.lorem-lane.a .lt{color:var(--accent-ink)}
+.lorem-lane.a .ld{color:var(--accent-ink);opacity:.72}
+.lorem-lane.b{background:var(--ink-dark)}
+.lorem-lane.b .lt{color:#fff}
+.lorem-lane.b .ld{color:#AEB4BE}
+
+/* ---- ArcRail (.arcrail) + Phase (.phase) ---- */
+.lorem-arcrail{display:flex;gap:10px;max-width:34em}
+.lorem-phase{flex:1;text-align:center;padding:13px 6px;border-radius:14px;background:var(--surface-3);font-size:13px;color:var(--mut)}
+.lorem-phase.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:500}
+
+/* ---- Steps (.stepsrow) + Step (.stepn) ---- */
+.lorem-steps{display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:36em}
+.lorem-step{font-size:12.5px;color:var(--ink);background:var(--surface-3);border-radius:999px;padding:7px 12px}
+.lorem-steparr{color:var(--faint);font-size:11px}
+
+/* ---- CACChart (.cacwrap) ---- */
+.lorem-cac{max-width:34em}
+.lorem-cac svg{width:100%;height:auto;display:block}
+.lorem-cac .caclab{font-size:11.5px;fill:var(--mut);font-family:'Inter',sans-serif}
+.lorem-cac .caclab.hot{fill:var(--danger)}
+.lorem-cac .caclab.win{fill:var(--success)}
+
+/* ============================ SCREEN SHELL ============================ */
+/* LoremHome — the assembled screen: Aurora pinned to the bottom, a Stage that
+   holds the caption/answer, and the Dock (chips · status · MicOrb · CommandBar).
+   Ported from the portfolio's #screen / #stage / #answer / #dock. */
+.lorem-home{position:relative;width:100%;height:100%;min-height:520px;background:#fff;overflow:hidden;display:flex;flex-direction:column;font-family:'Inter',-apple-system,sans-serif;color:var(--ink)}
+.lorem-home-aurora{position:absolute;left:0;right:0;bottom:0;height:52%;z-index:0;pointer-events:none}
+.lorem-via{position:absolute;top:16px;left:20px;z-index:6;font-size:11px;color:var(--faint);letter-spacing:.02em}
+.lorem-screen{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:0}
+.lorem-stage{flex:1;position:relative;overflow:hidden}
+.lorem-answer{position:absolute;inset:40px 0;width:min(660px,90%);margin:0 auto;left:0;right:0;display:flex;flex-direction:column;justify-content:center;overflow-y:auto;scrollbar-width:none}
+.lorem-answer::-webkit-scrollbar{display:none}
+.lorem-answer > * + *{margin-top:22px}
+.lorem-stage-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 60px;text-align:center}
+.lorem-dock{position:relative;z-index:1;flex:none;display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0 34px}
+.lorem-dock .lorem-chips{justify-content:center;max-width:640px}
+.lorem-vstatus{display:grid;place-items:center;font-size:15px;color:var(--mut);min-height:20px;text-align:center}
+
+/* ============ UX / A11Y REVIEW PATCH (upstream, 2026-07-20) ============
+   Each rule overrides one above. Kept numbered so the next /design-sync can
+   diff. NOTE: upstream also *deletes* @keyframes lorem-recspin (it moved into
+   _ds_bundle.js, which this app never loads) — that deletion is deliberately
+   NOT applied here; it would freeze the rec-chip border sweep at 0deg. */
+
+/* 1 · Keyboard focus was invisible on the entry overlay and its pill buttons */
+.lorem-startgate:focus-visible,.lorem-startgate .copylink:focus-visible,.lorem-browserhint button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* 2 · BrowserHint dismiss: 19px hit target → 24px visual, ~40px touch area */
+.lorem-browserhint button{width:24px;height:24px;font-size:12px;position:relative}
+.lorem-browserhint button::after{content:'';position:absolute;inset:-8px;border-radius:50%}
+
+/* 3 · Contrast: --faint (#AEB4BE, 2.2:1 on white) was carrying real copy */
+.lorem-via{color:var(--mut)}
+.lorem-live .livenote{color:var(--mut)}
+
+/* 4 · User bubble: white on --accent is 4.0:1 at 14px (AA fail) → --accent-ink */
+.lorem-bubble.u{background:var(--accent-ink)}
+
+/* 5 · Fixed 3-up grids cramped on narrow screens → auto-fit (3-up at full width) */
+.lorem-metrics{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.lorem-personas{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+@media (max-width:480px){.lorem-split{grid-template-columns:1fr}}
+
+/* 6 · justify-content:center clipped the top of overflowing answers; auto
+   margins centre short content AND scroll correctly when it overflows */
+.lorem-answer{justify-content:flex-start}
+.lorem-answer > :first-child{margin-top:auto}
+.lorem-answer > :last-child{margin-bottom:auto}
+
+/* 7 · Reduced motion: static ring, so a listening orb is still distinguishable */
+@media (prefers-reduced-motion:reduce){.lorem-micorb.listening{animation:none;box-shadow:0 8px 24px rgba(20,25,35,.16),0 0 0 4px rgba(28,124,245,.20)}}
+
+/* 8 · Interactive chips are ~38px tall → invisible ::after reaches 44px+ */
+.lorem-chip.go,.lorem-chip.rec{position:relative}
+.lorem-chip.go::after{content:'';position:absolute;inset:-4px 0;border-radius:999px}
+.lorem-chip.rec::after{content:'';position:absolute;inset:-4px 0;border-radius:999px}
+
+/* 9 · Answer question-echo line */
+.lorem-asked{font-size:13px;color:var(--mut);letter-spacing:.01em;margin-bottom:10px}
+
+/* ================= LOCAL ADDITIONS (push upstream next sync) =================
+   10 · .lorem-chip.rec has no cursor and no :active anywhere upstream — the one
+   chip the design steers people toward was the only one with no press feedback.
+   Patch 8 adds position:relative only, so it does not cover this. */
+.lorem-chip.rec{cursor:pointer}
+.lorem-chip.rec:active{transform:scale(.96)}
+
+/* 11 · The control row shrinks chips to ~31px; patch 8's -4px was sized for the
+   default 9px/16px chip, so the row still lands under 44px without this. */
+.lorem-controls .lorem-chip.go::after{inset:-7px 0}
+
+/* 12 · BrowserHint placement — upstream leaves this to the template. */
+.lorem-hintwrap{position:absolute;left:0;right:0;bottom:14px;z-index:8;display:flex;justify-content:center;pointer-events:none}
+.lorem-hintwrap > *{pointer-events:auto}
+
+/* 13 · Transcript overlay. Upstream ships this inline in the template with no
+   dialog semantics; as a real dialog it needs its own surface. */
+.lorem-logov{position:absolute;inset:0;z-index:9;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;flex-direction:column}
+.lorem-logov-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 12px}
+.lorem-logov-title{font-family:'Instrument Sans',sans-serif;font-size:17px;font-weight:600}
+.lorem-logov-body{flex:1;overflow-y:auto;padding:4px 24px 28px;display:flex;flex-direction:column;gap:12px;width:min(620px,100%);margin:0 auto}
+.lorem-logrow{display:flex;flex-direction:column;gap:10px;cursor:pointer;background:none;border:0;padding:0;text-align:left;font:inherit;border-radius:16px}
+.lorem-logrow:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.lorem-logrow .lorem-bubble{display:block}
+
+/* 14 · Chat bubbles in a generated block sit in normal flow, not a chat log. */
+.lorem-live .lorem-bubble.u{margin-left:auto}
+
+/* 15 · auto-fit stretches a lone metric to the full 660px answer column, which
+   reads as a banner rather than a figure. Cap and centre the single case. */
+.lorem-metrics:has(> :only-child){max-width:340px;margin-inline:auto}
+
+/* 16 · Sticky question echo — the wrapper is a direct child of the .lorem-answer
+   scroll container, so sticky works; translucent bg keeps text legible as
+   blocks pass beneath. */
+.lorem-asked-pin{position:sticky;top:0;z-index:2;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+
+/* 17 · Short viewports: the dock (~283px) is what eats the stage, not the
+   answer inset. Compact it under 700px; drop the shell's min-height floor on
+   landscape phones so the dock stays above the fold. */
+@media (max-height:700px){
+  .lorem-dock{gap:8px;padding:4px 0 14px}
+  .lorem-micorb{width:48px;height:48px}
+}
+@media (max-height:559px){
+  .lorem-home{min-height:0}
+}
+
+/* 18 · Controls vs suggestions — these were both .lorem-chip and read as one
+   undifferentiated pill field taking two rows. Suggestions are the primary
+   affordance (what you'd say next); Back / Say it again / Transcript are
+   utilities. Demote the utilities to quiet text buttons so the eye lands on
+   the suggestions, and reclaim the vertical space that made the dock heavy. */
+.lorem-controls .lorem-chip,
+.lorem-controls .lorem-chip.go {
+  background: transparent;
+  border-color: transparent;
+  color: var(--mut);
+  padding: 4px 8px !important;
+  font-size: 12.5px !important;
+}
+.lorem-controls .lorem-chip.go:hover {
+  background: var(--surface-2);
+  border-color: transparent;
+  color: var(--ink);
+}
+.lorem-controls .lorem-chip.go::after { inset: -6px 0; }
+
+/* Suggestions keep the pill, but stop competing with each other: cap the row
+   so three chips don't sprawl the full width, and tighten the dock stack. */
+.lorem-dock { gap: 10px; padding-top: 4px; }
+.lorem-dock .lorem-chips { max-width: 560px; gap: 8px; }
+.lorem-dock .lorem-chips .lorem-chip { font-size: 13.5px; padding: 8px 14px; }
+.lorem-vstatus { min-height: 18px; font-size: 14px; }
+
+/* 19 · Thinking — its own state. It previously fell through to `muted`, so
+   "working on it" and "idle" were the same grey orb. Accent-tinted with a soft
+   halo: related to listening's ring, clearly not speaking's dark orb. */
+.lorem-micorb.thinking{background:var(--accent-soft);box-shadow:0 2px 10px rgba(28,124,245,.10),0 0 0 0 rgba(28,124,245,.22);animation:lorem-think 1.9s cubic-bezier(.4,0,.2,1) infinite}
+.lorem-micorb.thinking i{background:var(--accent-ink)}
+@keyframes lorem-think{
+  0%  {box-shadow:0 2px 10px rgba(28,124,245,.10),0 0 0 0   rgba(28,124,245,.22)}
+  60% {box-shadow:0 2px 10px rgba(28,124,245,.10),0 0 0 9px rgba(28,124,245,0)}
+  100%{box-shadow:0 2px 10px rgba(28,124,245,.10),0 0 0 0   rgba(28,124,245,0)}
+}
+@media (prefers-reduced-motion:reduce){
+  .lorem-micorb.thinking{animation:none;box-shadow:0 2px 10px rgba(28,124,245,.10),0 0 0 4px rgba(28,124,245,.18)}
+}
+
+/* 20 · Top-right counterpart to .lorem-via — same register, same weight, so the
+   two read as a pair of quiet corner labels rather than a nav bar. */
+.lorem-agents{position:absolute;top:16px;right:20px;z-index:6;font-size:11px;color:var(--mut);letter-spacing:.02em;text-decoration:none;transition:color .18s cubic-bezier(.4,0,.2,1)}
+.lorem-agents:hover{color:var(--ink)}
+.lorem-agents:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* 21 · "Forget me" — quiet, but never hidden. Anything that stores a visitor's
+   name has to show them it did and let them undo it in one click. */
+.lorem-forget{margin-top:18px;text-align:center;font-size:12.5px;color:var(--mut);line-height:1.6}
+.lorem-forget b{color:var(--ink);font-weight:600}
+.lorem-forget button{border:0;background:none;font:inherit;color:var(--accent-ink);cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
+.lorem-forget button:hover{color:var(--ink)}
+.lorem-forget button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* 22 · The how-to line, demoted below the permission line. */
+.lorem-howto{margin:10px auto 0;font-size:13px;color:var(--faint);font-family:'Inter',-apple-system,sans-serif}
+.lorem-howto b{color:var(--mut)}
+
+/* 22b · On the greet screen the forget line sits under the greeting itself. */
+.lorem-forget--greet{margin-top:14px;font-size:12.5px}
