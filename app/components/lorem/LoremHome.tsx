@@ -121,6 +121,30 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   const modK = isMac ? "⌘K" : "Ctrl+K";
   const typeHint = touch ? "tap to type" : `press ${modK} to type`;
 
+  /**
+   * The landing sequence. Nothing else appears until the orb has settled into
+   * the dock; then the screen assembles line by line — h1, invitation,
+   * mechanics, chips, status, command bar — each on its own beat.
+   *
+   * entryBeat: for content that MOUNTS at landing (the greet block, which is
+   * gated on `!gate`). `both` keeps a delayed line invisible until its turn.
+   *
+   * dockBeat: for the dock's children, which must stay MOUNTED through the
+   * gate — the flight measures its landing seat off this layout, so hiding
+   * them with display:none would move the target between measurement and
+   * touchdown. visibility keeps the geometry and hides the pixels; when the
+   * gate clears, the style gains an animation, which is what starts one.
+   *
+   * Inline styles on purpose: the reduced-motion guard in globals.css matches
+   * [style*="lorem-beatin"], so every beat here is silenced by the same rule
+   * that silences the answer blocks.
+   */
+  const entryBeat = (delay: number): CSSProperties => ({
+    animation: `lorem-beatin ${(0.55 / (pace || 1)).toFixed(2)}s ${(delay / (pace || 1)).toFixed(2)}s both`,
+  });
+  const dockBeat = (delay: number): CSSProperties =>
+    gate ? { visibility: "hidden" } : entryBeat(delay);
+
   /* ── Asking ───────────────────────────────────────────────────────────── */
 
   const ask = useCallback(
@@ -618,21 +642,25 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
       <div className="lorem-screen" ref={screenRef}>
         <div className="lorem-stage">
-          {phase === "greet" && !turn && (
+          {/* Gated on `!gate` as well: the greet must not pre-exist behind the
+              blur. It mounts at the moment the orb lands, and each line takes
+              its own beat — the h1 first, then the invitation, then mechanics.
+              The dock's children below join the same timeline. */}
+          {phase === "greet" && !turn && !gate && (
             <div className="lorem-stage-center">
               {/* pace scales the JS timers, so it has to scale the CSS beats
                   too or they desync at 0.5x / 2x. */}
-              <div style={{ animation: `lorem-beatin ${(0.7 / (pace || 1)).toFixed(2)}s both` }}>
+              <div>
                 {/* Masked from Clarity replays when it greets by name \u2014 see
                     app/components/Clarity.tsx. */}
                 <h1
                   className="lorem-h"
-                  style={{ fontSize: 44 }}
+                  style={{ fontSize: 44, ...entryBeat(0) }}
                   data-clarity-mask="True"
                 >
                   {greetedName ? `Hey ${greetedName}.` : "Hi. I\u2019m Lorem."}
                 </h1>
-                <p className="lorem-p" style={{ margin: "14px auto 0" }}>
+                <p className="lorem-p" style={{ margin: "14px auto 0", ...entryBeat(0.16) }}>
                   {icebreakerHint(Boolean(visitor?.visits))}
                 </p>
                 {/* Mechanics move to their own quiet line. Mixed into the
@@ -644,7 +672,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
                   // transcript alone it was unreachable until after a turn —
                   // so someone greeted by name couldn't opt out until they'd
                   // already talked, which is exactly backwards.
-                  <p className="lorem-forget lorem-forget--greet">
+                  <p className="lorem-forget lorem-forget--greet" style={entryBeat(0.28)}>
                     Not you, or rather not remembered?{" "}
                     <button
                       type="button"
@@ -657,7 +685,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
                     </button>
                   </p>
                 )}
-                <p className="lorem-howto">
+                <p className="lorem-howto" style={entryBeat(0.34)}>
                   {touch ? (
                     "Tap the orb and talk"
                   ) : voice.micState !== "ok" ? (
@@ -743,7 +771,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             </div>
           )}
 
-          <div className="lorem-chips">
+          <div className="lorem-chips" style={dockBeat(0.46)}>
             {chips.map((c, i) => (
               <button
                 key={`${c}-${i}`}
@@ -756,7 +784,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             ))}
           </div>
 
-          <div className="lorem-vstatus" aria-live="polite">
+          <div className="lorem-vstatus" aria-live="polite" style={dockBeat(0.58)}>
             {status || restingStatus}
           </div>
 
@@ -777,7 +805,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             />
           </div>
 
-          <div className="lorem-cmdbar">
+          <div className="lorem-cmdbar" style={dockBeat(0.66)}>
             <input
               className={`kin${kOpen ? "" : " closed"}`}
               placeholder="type a question, press Enter"
