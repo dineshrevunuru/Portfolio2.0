@@ -82,6 +82,20 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
    *  first client render agree and nothing flickers. */
   const [visitor, setVisitor] = useState<Visitor | null>(null);
   const [greetedName, setGreetedName] = useState<string | undefined>(undefined);
+  /**
+   * True when this browser is not Chrome — drives the one line of expectation-
+   * setting on the gate. Detected in an effect, never during render: the server
+   * has no user agent to agree with, and a hydration mismatch on the first
+   * screen is the worst place to have one. Defaults false, so Chrome (the
+   * majority) and the server render identical gates and everyone else gains a
+   * line after mount.
+   *
+   * iOS is deliberately treated as Chrome-equivalent and excluded: every iOS
+   * browser is WebKit underneath, so "best in Chrome" would be a claim with
+   * nothing behind it there.
+   */
+  const [notChrome, setNotChrome] = useState(false);
+
   /** The gate-orb flight: measured start rect plus the translation to the dock
    *  seat. `go` flips one frame after mount so the transition has a from-state. */
   const [fly, setFly] = useState<{
@@ -458,6 +472,23 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   /* ── Environment ──────────────────────────────────────────────────────── */
 
   useEffect(() => {
+    // Which browser is this, really. userAgentData's brand list is the honest
+    // source where it exists (Chromium ships "Google Chrome" only in actual
+    // Chrome, so Edge/Opera/Brave classify correctly); the UA-string fallback
+    // has to exclude the Chromium cosplayers by hand. CriOS is Chrome on iOS,
+    // which is WebKit in a coat — it goes with iOS below, not with Chrome.
+    const ua = navigator.userAgent;
+    const brands = (
+      navigator as Navigator & { userAgentData?: { brands?: { brand: string }[] } }
+    ).userAgentData?.brands;
+    const isChrome = brands
+      ? brands.some((b) => b.brand === "Google Chrome")
+      : /Chrome\//.test(ua) && !/Edg\/|OPR\/|SamsungBrowser|CriOS\//.test(ua);
+    const isIOS =
+      /iPhone|iPad|iPod/.test(ua) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (!isChrome && !isIOS) setNotChrome(true);
+
     const compact = window.matchMedia("(max-height:700px)");
     const coarse = window.matchMedia("(pointer:coarse)");
     const sync = () => {
@@ -988,6 +1019,11 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             <MicOrb state="speaking" decorative />
           </span>
           <div className="t">Tap to start</div>
+          {/* Expectation-setting for everyone off Chrome, where voice input
+              leans on fallbacks. Two beats, honest both ways: it does work
+              here, and it is better there. Absent on Chrome and on iOS — every
+              iOS browser is WebKit, so the claim would be empty there. */}
+          {notChrome && <div className="gnote">Works everywhere. Best in Chrome.</div>}
         </button>
       )}
 

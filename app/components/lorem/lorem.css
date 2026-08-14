@@ -64,6 +64,9 @@
    corner. */
 .lorem-orbfly{position:fixed;z-index:11;pointer-events:none;will-change:transform;transform-origin:top left}
 .lorem-startgate .t{font-size:19px;color:var(--ink);font-weight:500}
+/* The non-Chrome note. Quiet on purpose: it sets expectations, it does not
+   nag — anyone reading it has already decided which browser they are in. */
+.lorem-startgate .gnote{font-size:13px;color:var(--mut)}
 /* The gate orb at 1.5x (62 → 93). The bar heights are set inline by MicOrb's
    rAF loop, so a bigger box would leave 62px bars rattling inside it — scaling
    the whole orb is the only thing that keeps the proportions the component was
