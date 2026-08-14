@@ -1019,11 +1019,25 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             <MicOrb state="speaking" decorative />
           </span>
           <div className="t">Tap to start</div>
-          {/* Expectation-setting for everyone off Chrome, where voice input
-              leans on fallbacks. Two beats, honest both ways: it does work
-              here, and it is better there. Absent on Chrome and on iOS — every
-              iOS browser is WebKit, so the claim would be empty there. */}
-          {notChrome && <div className="gnote">Works everywhere. Best in Chrome.</div>}
+          {/* Expectation-setting for everyone off Chrome. Names the actual
+              difference rather than waving at "best experience": the live
+              caption is driven solely by the Web Speech recognizer's onresult,
+              which is Chrome's. Voice itself still works anywhere, because
+              Scribe transcribes server-side. So both halves are literally true
+              and the visitor can weigh them.
+
+              It arrives on a beat of its own, ~0.9s after the gate settles,
+              because motion on an otherwise still screen is what earns a look.
+              A quiet grey line here got read as decoration. No dismiss control:
+              tapping the gate is the dismissal, so it cannot nag.
+
+              Absent on Chrome and on iOS — every iOS browser is WebKit, Chrome
+              included, so the claim would have nothing behind it there. */}
+          {notChrome && (
+            <div className="gnote" style={entryBeat(0.9)} role="note">
+              Voice works here. Chrome adds live captions.
+            </div>
+          )}
         </button>
       )}
 
