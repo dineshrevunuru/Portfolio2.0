@@ -13,7 +13,10 @@
     "test": "node test/run.mjs",
     "check:keys": "node scripts/check-keys.mjs",
     "check:public": "node scripts/check-public.mjs",
-    "deploy": "npm run check:public && vercel deploy --prod"
+    "deploy": "npm run check:public && vercel deploy --prod",
+    "gym": "node test/gym/run.mjs",
+    "gym:review": "node test/gym/bench.mjs",
+    "gym:distill": "node test/gym/distill.mjs"
   },
   "dependencies": {
     "next": "16.2.4",

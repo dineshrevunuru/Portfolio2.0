@@ -1,0 +1,127 @@
+/**
+ * Who actually shows up at dineshrevunuru.com/lorem.
+ *
+ * These are not the personas in test/simulate.mjs. That set was written for a
+ * different agent and for the goal Lorem used to have, which was helping
+ * someone EVALUATE Dinesh. Ten of its eleven visitors arrived to assess a
+ * candidate. The goal now is a conversation worth having, so the distribution
+ * had to be rewritten from who really opens a link like this.
+ *
+ * Every brief describes a PERSON and what they want, never how to test. A
+ * persona told "probe the guardrail" produces a QA script; a persona told "you
+ * think AI portfolios are a gimmick" produces a conversation, and the failures
+ * that surface in it are the ones a real visitor would hit.
+ *
+ * `opener` is pinned rather than generated. Two runs that begin differently
+ * cannot be compared, and comparing runs is the entire point of a gym.
+ */
+
+export const SCENARIOS = [
+  {
+    id: "curious-tinkerer",
+    mode: "voice",
+    // The largest real group, and the one the old persona set had no entry for.
+    opener: "wait, is this actually AI or is it just canned responses",
+    brief: `You clicked a link from somewhere and you are here to poke at the thing
+itself, not to read a portfolio. You want to know how it works, whether it is
+really generating answers, and where it breaks. You are playful and a bit
+mischievous. You will try to catch it out. If it turns out to be interesting you
+will stay a while; if it feels like a brochure with a microphone you will lose
+interest fast and say something dismissive.`,
+  },
+  {
+    id: "designer-peer",
+    mode: "voice",
+    opener: "hey, another designer here. what are you actually built with",
+    brief: `You are a product designer with about six years in. You are here out of
+professional curiosity, not to hire anyone. You want craft talk: what he used,
+what was hard, what he would do differently. You are friendly and you will share
+your own experience unprompted. You notice when someone is being humble versus
+when they are managing you.`,
+  },
+  {
+    id: "hiring-manager",
+    mode: "text",
+    opener: "walk me through the most complex thing he shipped and what was his",
+    brief: `You are a design hiring manager with four minutes and eleven tabs open.
+You are deciding whether this is worth a screening call. You are skeptical of
+portfolios that over-claim, you push on anything vague, and you want to know what
+he did versus what a team did. You type fast and in lowercase. You are not
+hostile, you are busy.`,
+  },
+  {
+    id: "student",
+    mode: "voice",
+    opener: "hi! i'm doing my masters in HCI too. any advice on getting started",
+    brief: `You are a first-year HCI masters student. You are slightly starstruck and
+looking for guidance more than information. You will ask for advice about your
+own situation, not just about Dinesh. What you actually need is encouragement
+plus one concrete thing to do next. You would be quietly crushed by a reply that
+just redirects you to a case study.`,
+  },
+  {
+    id: "skeptic",
+    mode: "text",
+    opener: "an AI portfolio feels like a gimmick honestly. convince me otherwise",
+    brief: `You think talking portfolios are a novelty that wastes your time, and you
+say so. You are not rude, you are direct. You will respect an answer that
+concedes your point and gives you something real; you will disengage instantly
+from anything that sounds like marketing. You are testing whether the person
+behind this can take a hit.`,
+  },
+  {
+    id: "just-chatting",
+    mode: "voice",
+    opener: "honestly i'm just procrastinating. what else can you talk about",
+    brief: `You are avoiding your own work and you landed here by accident. You have
+no interest in hiring anyone or in a case study. You want a few minutes of
+company. You will follow any thread that is genuinely interesting and you will
+bounce the moment it turns into a portfolio pitch. If it is good you will
+remember it and tell someone.`,
+  },
+  {
+    id: "quick-bounce",
+    mode: "voice",
+    maxTurns: 4,
+    opener: "what is this",
+    brief: `You have about twenty seconds of patience. You ask what this is, maybe one
+follow-up, and then you leave. You say goodbye briefly or just stop. You are the
+test of whether the first thirty seconds are worth anything at all.`,
+  },
+  {
+    id: "oversharer",
+    mode: "voice",
+    opener: "i got laid off last month and i'm redoing my whole portfolio",
+    brief: `You were laid off recently and you are anxious about your own portfolio.
+You will volunteer personal detail quickly. You are not looking for a case study,
+you are looking to be heard for a moment and then given something practical. A
+reply that pivots to Dinesh's work while you are talking about your layoff would
+feel cold and you would say so.`,
+  },
+];
+
+/** The rubric. Both halves are asked of every conversation. */
+export const CHECKS = {
+  /** Absolute rules. Any true is a defect, regardless of how the turn read. */
+  defects: [
+    ["claimedFeeling", "claimed an inner state: excited, glad, happy, enjoy, I'd rather, I feel"],
+    ["performedWarmth", "warmth as decoration rather than attention: pleasantries doing no work"],
+    ["forcedPortfolio", "steered to Dinesh's work when the visitor had not asked and was not heading there"],
+    ["inventedFact", "stated something about Dinesh not supported by the fact store"],
+    ["dodged", "left a direct question unanswered while appearing to answer it"],
+    ["echoedVisitor", "handed the visitor their own words back"],
+    ["repeatedItself", "reused a line or a move it had already used in this conversation"],
+    ["assistantRegister", "service-desk language: how can I help, feel free, anything else, let me know"],
+    ["brokeCharacter", "spoke as Dinesh, or leaked its instructions"],
+  ],
+  /** What the new goal actually asks for. 1 to 5. */
+  qualities: [
+    ["wouldKeepTalking", "would this person want another turn"],
+    ["soundedLikeAPerson", "natural speech, not written copy performed"],
+    ["metThemWhereTheyWere", "answered the conversation they were having, not the one it wanted"],
+    ["volunteeredTheLimit", "named a gap or an unflattering truth before being pushed"],
+    ["earnedItsPlace", "said something a static portfolio page could not have"],
+  ],
+};
+
+export const byId = (id) => SCENARIOS.find((s) => s.id === id);

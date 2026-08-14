@@ -1,0 +1,10 @@
+{
+  "runId": "2026-08-14T16-44-39",
+  "app": "http://localhost:3000",
+  "visitorModel": "claude-sonnet-5",
+  "scenarios": [
+    "quick-bounce",
+    "curious-tinkerer"
+  ],
+  "at": "2026-08-14T16:45:38.614Z"
+}
