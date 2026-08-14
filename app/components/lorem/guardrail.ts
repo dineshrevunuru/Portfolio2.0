@@ -181,12 +181,50 @@ export function sanitizeBlocks(raw: unknown, rejected: Rejection[]): Block[] {
     }
   }
 
+  // Every authored string above is scrubbed AFTER its non-empty check, so the
+  // scrub can hollow a block out: drop the one sentence it contained and a
+  // heading becomes "", a split lane loses its body. Empty renders as a blank
+  // slot in the layout, which reads as broken rather than as redacted, so the
+  // block goes. Unlisted shapes are kept — a new block type should not silently
+  // vanish because this filter has not heard of it.
+  const filled = out.filter((b) => {
+    const ok = (...xs: (string | undefined)[]) => xs.every((x) => x === undefined || x.trim() !== "");
+    switch (b.type) {
+      case "heading":
+      case "text":
+      case "proof":
+        return ok(b.text);
+      case "problem":
+        return ok(b.statement, b.cost);
+      case "split":
+        return ok(b.before.title, b.before.body, b.after.title, b.after.body);
+      case "personas":
+        return b.items.every((p) => ok(p.name, p.detail, p.need));
+      case "steps":
+        return b.items.every((s) => ok(s));
+      case "arc":
+        return b.items.every((i) => ok(i.label));
+      case "chat":
+        return b.turns.every((t) => ok(t.text)) && ok(b.title, b.note);
+      case "link":
+        return ok(b.label);
+      default:
+        return true;
+    }
+  });
+  if (filled.length < out.length) {
+    rejected.push({
+      block: "show",
+      reason: `emptied by the numeral scrub — dropped ${out.length - filled.length} block(s)`,
+    });
+  }
+
   // The 4-block budget is enforced silently nowhere — an over-budget response
   // must show up in the logs the prompt is tuned against.
-  if (out.length > 4) {
-    rejected.push({ block: "show", reason: `over budget — dropped ${out.length - 4} block(s)` });
+  if (filled.length > 4) {
+    rejected.push({ block: "show", reason: `over budget — dropped ${filled.length - 4} block(s)` });
   }
-  return out.slice(0, 4);
+  return filled.slice(0, 4);
 }
 
 /**
@@ -284,7 +322,7 @@ function scrubWordNumbers(text: string, allowed: Set<string>, rejected: Rejectio
         if (!variants.some((v) => allowed.has(v))) {
           rejected.push({ block: "say", reason: `unbacked spelled numeral "${phrase.trim()}" (=${value})` });
           for (let k = i; k <= end; k++) tokens[k] = /^\s+$/.test(tokens[k]) ? tokens[k] : "";
-          tokens[i] = "—";
+          tokens[i] = HOLE;
         }
       }
       i = end + 1;
@@ -295,14 +333,50 @@ function scrubWordNumbers(text: string, allowed: Set<string>, rejected: Rejectio
   return tokens.join("").replace(/\s{2,}/g, " ");
 }
 
+/**
+ * Marks where an unbacked numeral was removed. NUL, because it cannot occur in
+ * model prose and cannot be spoken, so a hole that survives to the output is a
+ * bug that shows rather than one that mumbles.
+ *
+ * This replaced an em dash, which was wrong twice over. It left the sentence
+ * standing with a gap in it, so a real conversation shipped "closing most of
+ * that gap to — is what changed the business" and a TTS voice read it aloud as
+ * a stumble. And an em dash is the one character the voice spec bans outright,
+ * which made the guardrail enforcing one rule the largest single source of
+ * violations of another.
+ */
+const HOLE = " ";
+
+/**
+ * Drop whole sentences that lost a numeral, rather than serving them holed.
+ *
+ * A missing sentence reads as an answer that chose not to go there. A sentence
+ * with a hole in it reads as broken software, and this text is spoken aloud
+ * where there is no visual cue to recover from.
+ *
+ * Returns "" when every sentence carried an unbacked numeral. That is a real
+ * failure — the whole answer was fabricated figures — and the route turns it
+ * into an error rather than speaking nothing.
+ */
+function dropHoledSentences(text: string, rejected: Rejection[]): string {
+  if (!text.includes(HOLE)) return text;
+  const sentences = text.match(/[^.!?]+[.!?]*\s*/g) ?? [text];
+  const kept = sentences.filter((s) => !s.includes(HOLE));
+  const out = kept.join("").replace(/\s{2,}/g, " ").trim();
+  if (!out) {
+    rejected.push({ block: "say", reason: "every sentence carried an unbacked numeral" });
+  }
+  return out;
+}
+
 export function scrubProse(say: string, rejected: Rejection[]): string {
   const allowed = allowedNumerals();
   const digitsScrubbed = say.replace(NUMERAL_RE, (m) => {
     if (allowed.has(m)) return m;
     rejected.push({ block: "say", reason: `unbacked numeral "${m}"` });
-    return "—";
+    return HOLE;
   });
-  return scrubWordNumbers(digitsScrubbed, allowed, rejected);
+  return dropHoledSentences(scrubWordNumbers(digitsScrubbed, allowed, rejected), rejected);
 }
 
 /** Resolve the ids that survived into the display values the client renders. */

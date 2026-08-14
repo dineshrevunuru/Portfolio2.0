@@ -165,5 +165,18 @@ export async function POST(req: Request) {
     console.warn("[lorem] guardrail rejections", rejected);
   }
 
+  // The scrub drops whole sentences that carried an unbacked numeral, so it can
+  // empty `say` outright: every sentence was fabricated figures. That is a real
+  // failure, not an answer, and it takes the same path as a missing tool call —
+  // speaking an empty string would leave the orb silent with no explanation,
+  // and letting it into history would record a blank Lorem turn.
+  if (!turn.say.trim()) {
+    console.error("[lorem] say was emptied by the guardrail", rejected);
+    return NextResponse.json(
+      { error: "scrubbed", say: "I got that one wrong. Ask me again?" },
+      { status: 502 },
+    );
+  }
+
   return NextResponse.json({ ...turn, ...resolve(turn.show) });
 }

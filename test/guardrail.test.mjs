@@ -7,14 +7,31 @@ import { sanitizeBlocks, scrubProse, resolve } from "../.test-build/components/l
 
 const rejected = [];
 
-/* 1 ─ prose numerals that no fact backs are neutralised */
+/* 1 ─ prose numerals that no fact backs are neutralised, and the sentence that
+      carried them is dropped WHOLE rather than served with a hole in it.
+      This text is spoken aloud. The old behaviour substituted an em dash in
+      place, which shipped "closing most of that gap to — is what changed the
+      business" into a live transcript: a stumble with no visual cue to recover
+      from, and an em dash, which the voice spec bans outright.
+      The cost is deliberate and worth stating: a verified figure sharing a
+      sentence with a fabricated one goes down with it. Hence two sentences
+      here — the dirty one vanishes, the clean one survives whole. */
 const say = scrubProse(
-  "The work cut cost to $12 a booking and lifted retention to 95%, beating the $40 target.",
+  "The work cut cost to $12 a booking and lifted retention to 95%. The $40 target came from the client.",
   rejected,
 );
 assert.ok(!say.includes("12"), "invented $12 survived into prose");
 assert.ok(!say.includes("95"), "invented 95% survived into prose");
-assert.ok(say.includes("40"), "the real $40 was wrongly scrubbed");
+assert.ok(say.includes("40"), "a clean sentence was dropped alongside the dirty one");
+assert.ok(!say.includes("—"), "the scrub emitted an em dash, which the voice spec bans");
+assert.ok(!/\bcut cost to\b/.test(say), "the holed sentence was served instead of dropped");
+
+/* 1b ─ the exact live-transcript failure: a sentence whose numeral sits
+       mid-clause must not survive as a fragment. */
+const r1b = [];
+const holed = scrubProse("Closing most of that gap to 61% is what changed the business.", r1b);
+assert.equal(holed, "", "a mid-clause hole left a fragment instead of dropping the sentence");
+assert.ok(r1b.length > 0, "the dropped sentence was not logged");
 
 /* 2 ─ block-level substitution and rejection */
 const blocks = sanitizeBlocks(
@@ -63,11 +80,15 @@ for (const needle of ['"12"', '"95%"', "madeUpMetric", "conversionRate", "ownerR
 const r5 = [];
 const b5 = sanitizeBlocks(
   [
-    { type: "text", text: "He cut acquisition cost by 87% across 12 markets in 2019." },
+    // Two sentences on purpose: the fabricated figures take their own sentence
+    // down, and the sentence-final year has to survive intact beside it.
+    { type: "text", text: "He cut acquisition cost by 87% across 12 markets. The work started in 2019." },
     { type: "proof", text: "10,000+ users on the Surface portal" },
     {
       type: "split",
-      before: { title: "Before", body: "They lost $9,999 a week." },
+      // Second sentence keeps the lane alive after the fabricated figure takes
+      // the first one down, so the assertions below still test a real lane.
+      before: { title: "Before", body: "They lost $9,999 a week. Every no-show went unchased." },
       after: { title: "After", body: "The 40% return rate climbed." },
     },
   ],
@@ -86,6 +107,22 @@ assert.equal(
 const s5 = b5.find((b) => b.type === "split");
 assert.ok(!s5.before.body.includes("9,999"), "invented $9,999 survived in a split lane");
 assert.ok(s5.after.body.includes("40%"), "the verified 40% was wrongly scrubbed from a split lane");
+assert.ok(s5.before.body.includes("no-show"), "the surviving sentence was lost from the lane");
+
+/* 5b ─ a block the scrub empties completely is DROPPED, not shipped blank.
+       The non-empty checks run before the scrub, so without this a heading
+       whose only sentence carried a fabricated numeral renders as a blank slot. */
+const r5b = [];
+const b5b = sanitizeBlocks(
+  [
+    { type: "heading", text: "Revenue tripled to $9,412 a month." },
+    { type: "split", before: { title: "Before", body: "They lost $8,888 a week." }, after: { title: "After", body: "It held." } },
+    { type: "text", text: "The migration ran for weeks." },
+  ],
+  r5b,
+);
+assert.deepEqual(b5b.map((b) => b.type), ["text"], "an emptied block was shipped blank");
+assert.ok(r5b.some((r) => r.reason.includes("emptied by the numeral scrub")), "emptied-block drop was silent");
 
 /* 6 ─ links are an allowlist, not a scheme filter — protocol-relative and
       arbitrary mailto both begin with the "safe" characters */
