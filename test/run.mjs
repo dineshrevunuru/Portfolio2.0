@@ -11,3 +11,4 @@ import { build } from "./build.mjs";
 build();
 
 execFileSync("node", ["test/guardrail.test.mjs"], { stdio: "inherit" });
+execFileSync("node", ["test/closing.test.mjs"], { stdio: "inherit" });

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolve, sanitizeBlocks, scrubProse, type Rejection } from "../../components/lorem/guardrail";
+import { isEcho, isFarewell } from "../../components/lorem/closing";
 import { RESPOND_TOOL, type LoremTurn } from "../../components/lorem/protocol";
 import { ANTHROPIC_KEY, ANTHROPIC_URL, BOO_EFFORT, BOO_MODEL, BOO_THINKING } from "../config";
 import { systemPrompt } from "./prompt";
@@ -82,6 +83,22 @@ export async function POST(req: Request) {
     .slice(-MAX_HISTORY_TURNS)
     .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_CHARS) }));
 
+  // ── Terminal close ──────────────────────────────────────────────────────
+  // The recruiter transcript ends with "Bye." five times, which is the last
+  // thing the highest-value visitor sees. The cause is structural rather than
+  // stylistic: every visitor turn produces a model call, and a model handed
+  // "bye" for the fourth time has nothing left but to say bye again. No prompt
+  // wording fixes a loop the architecture guarantees.
+  //
+  // So the SECOND farewell is answered by not answering. The first still gets a
+  // real reply from the model, because ignoring someone's first goodbye is its
+  // own kind of rude. Detection runs before the upstream call, so a goodbye
+  // loop costs neither a model call nor a TTS render.
+  const lastAssistant = [...priorTurns].reverse().find((t) => t.role === "assistant");
+  if (isFarewell(message) && lastAssistant && isFarewell(lastAssistant.content)) {
+    return NextResponse.json({ closed: true, say: "", show: [], chips: [] });
+  }
+
   const messages = [
     ...priorTurns,
     { role: "user" as const, content: message.slice(0, MAX_MESSAGE_CHARS) },
@@ -163,6 +180,26 @@ export async function POST(req: Request) {
     // Visible in `vercel logs`. A recurring rejection means the prompt needs
     // work — not that the guardrail does.
     console.warn("[lorem] guardrail rejections", rejected);
+  }
+
+  // ── Echo ────────────────────────────────────────────────────────────────
+  // skeptic.md:60 has the visitor say "That's the tab I'll actually use." and
+  // Lorem reply with that sentence, verbatim. It is the same failure as the
+  // goodbye loop wearing different clothes: a model with nothing left to add,
+  // handed a statement rather than a question, returns the input.
+  //
+  // Reading someone's own words back to them is strictly worse than silence, so
+  // it never ships. Which path depends on what they were doing: someone signing
+  // off gets the close, and someone who asked a real question gets an honest
+  // failure they can retry, because leaving them at a dead end would be worse.
+  if (isEcho(turn.say, message)) {
+    console.warn("[lorem] model echoed the visitor verbatim");
+    return isFarewell(message)
+      ? NextResponse.json({ closed: true, say: "", show: [], chips: [] })
+      : NextResponse.json(
+          { error: "echo", say: "That came back wrong. Ask me again?" },
+          { status: 502 },
+        );
   }
 
   // The scrub drops whole sentences that carried an unbacked numeral, so it can

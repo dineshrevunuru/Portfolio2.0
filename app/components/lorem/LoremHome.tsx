@@ -211,9 +211,23 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
       }
 
       const data = (await res.json().catch(() => null)) as
-        | (Turn & { error?: string; facts?: FactLookup; quotes?: QuoteLookup })
+        | (Turn & { error?: string; closed?: boolean; facts?: FactLookup; quotes?: QuoteLookup })
         | null;
       if (ctl.signal.aborted) return;
+
+      // The conversation is over and the server declined to add to it: a second
+      // goodbye, or a turn that came back as the visitor's own words. Say
+      // nothing and render nothing.
+      //
+      // Checked before the error branch on purpose, because a closed turn is a
+      // deliberately empty `say` and would otherwise be read as a failure and
+      // answered with an apology, which is the loop again with worse manners.
+      // Nothing enters history or the transcript either: silence is not a turn.
+      if (data?.closed) {
+        setStatus("");
+        setPhase(turnRef.current ? "answering" : "greet");
+        return;
+      }
 
       // An error response still carries a friendly `say`, so speak it — but it
       // is not an answer. It must never enter history, the transcript, or the

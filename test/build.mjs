@@ -19,6 +19,7 @@ export function build() {
     [
       "tsc",
       "app/components/lorem/guardrail.ts",
+      "app/components/lorem/closing.ts",
       "app/components/lorem/protocol.ts",
       "app/api/lorem/prompt.ts",
       "--outDir", OUT,
