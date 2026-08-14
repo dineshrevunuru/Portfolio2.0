@@ -58,9 +58,15 @@
 .lorem-startgate.gone{opacity:0;pointer-events:none}
 /* The gate orb's flight to the dock. Fixed so the rects measured from both
    ends line up regardless of scroll; eased to decelerate into the seat. */
-.lorem-orbfly{position:fixed;z-index:11;pointer-events:none;will-change:transform;transition-property:transform;transition-timing-function:cubic-bezier(.22,.85,.25,1)}
+.lorem-orbfly{position:fixed;z-index:11;pointer-events:none;will-change:transform;transform-origin:top left;transition-property:transform;transition-timing-function:cubic-bezier(.22,.85,.25,1)}
 .lorem-startgate .t{font-size:19px;color:var(--ink);font-weight:500}
-.lorem-startgate .s{font-size:13px;color:var(--mut)}
+/* The gate orb at 2x. The bar heights are set inline by MicOrb's rAF loop, so
+   a bigger box would leave 62px bars rattling inside it — scaling the whole
+   orb is the only thing that keeps the proportions the component was drawn at.
+   The wrapper carries the real 124px so the flex column still reserves the
+   space; only the orb inside is transformed. */
+.lorem-gateorb{width:124px;height:124px;display:grid;place-items:center}
+.lorem-gateorb .lorem-micorb{transform:scale(2)}
 .lorem-startgate .copylink{margin-top:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;padding:9px 20px;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s}
 .lorem-startgate .copylink:hover{background:#F7FAFF;border-color:#C9D4E4}
 

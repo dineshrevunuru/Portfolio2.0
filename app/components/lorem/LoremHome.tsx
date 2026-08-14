@@ -91,6 +91,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
     h: number;
     dx: number;
     dy: number;
+    scale: number;
     go: boolean;
   } | null>(null);
 
@@ -330,13 +331,17 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
       return;
     }
 
+    // Laid out at the destination's size and scaled up to the gate's, with a
+    // top-left origin so both the position and the scale resolve against the
+    // same corner — measure, then let one transform carry both.
     setFly({
       x: from.left,
       y: from.top,
-      w: from.width,
-      h: from.height,
+      w: to.width,
+      h: to.height,
       dx: to.left - from.left,
       dy: to.top - from.top,
+      scale: from.width / to.width,
       go: false,
     });
     // Two frames: one to mount the clone at rest, one to arm the transition.
@@ -887,14 +892,12 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
               the one the tap hands you.) */}
           <span
             ref={gateOrbRef}
-            style={{ display: "inline-flex", visibility: fly ? "hidden" : undefined }}
+            className="lorem-gateorb"
+            style={{ visibility: fly ? "hidden" : undefined }}
           >
             <MicOrb state="speaking" decorative />
           </span>
           <div className="t">Tap to start</div>
-          <div className="s">
-            voice-first &middot; sound on &middot; or {typeHint}
-          </div>
         </button>
       )}
 
@@ -902,7 +905,13 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
           it occupies for the rest of the session, and only when it lands does
           Lorem start talking. A fixed-position clone does the travelling (the
           gate itself is fading), the dock's real orb stays hidden until
-          touchdown, and the whole flight is skipped under reduced motion. */}
+          touchdown, and the whole flight is skipped under reduced motion.
+
+          The clone is laid out at the DESTINATION size and scaled up to the
+          gate's, so the flight shrinks it into its seat as it goes. Both
+          transforms keep the same function list — translate then scale — so
+          the browser interpolates component-wise instead of falling back to
+          matrix decomposition, which visibly wobbles on a large scale delta. */}
       {fly && (
         <div
           className="lorem-orbfly"
@@ -911,7 +920,9 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             top: fly.y,
             width: fly.w,
             height: fly.h,
-            transform: fly.go ? `translate(${fly.dx}px, ${fly.dy}px)` : "translate(0, 0)",
+            transform: fly.go
+              ? `translate(${fly.dx}px, ${fly.dy}px) scale(1)`
+              : `translate(0px, 0px) scale(${fly.scale})`,
             transitionDuration: `${(0.68 / (pace || 1)).toFixed(2)}s`,
           }}
         >
