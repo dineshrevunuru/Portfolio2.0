@@ -150,3 +150,6 @@ export const byId = (id) => SCENARIOS.find((s) => s.id === id);
  */
 export const WORK_TALK =
   /\b(dinesh|work|portfolio|project|built|build|shipped|ship|case stud(?:y|ies)|design|hci|neudesic|resume|hire|hiring)\b/i;
+
+/** Wider, for chips only. See CHIP_WORK_TALK in closing.ts for why. */
+export const CHIP_WORK_TALK = new RegExp(`${WORK_TALK.source}|\\b(he|his|him|he's|hes)\\b`, "i");

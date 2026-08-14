@@ -79,11 +79,29 @@ export function isEcho(say: string, message: string): boolean {
 export const WORK_TALK =
   /\b(dinesh|work|portfolio|project|built|build|shipped|ship|case stud(?:y|ies)|design|hci|neudesic|resume|hire|hiring)\b/i;
 
+/**
+ * The chip side is deliberately WIDER than the visitor side, because the two
+ * errors cost different amounts. A false positive on the visitor side opens
+ * the gate to someone who never asked; a false negative on the chip side ships
+ * a pitch. So the chip test also catches third-person reference: a live run
+ * served "what's he bad at?" to a visitor whose every turn was "poking
+ * around", "just some page", "no pressure either way" — no work word anywhere,
+ * so the shared list passed a chip that is plainly about Dinesh.
+ *
+ * "he/his/him" would be far too broad on the visitor side, where it usually
+ * means a friend, a manager, a director. In a model-authored three-word chip
+ * on this site it means Dinesh.
+ */
+export const CHIP_WORK_TALK = new RegExp(
+  `${WORK_TALK.source}|\\b(he|his|him|he's|hes)\\b`,
+  "i",
+);
+
 export function visitorSteeredToWork(visitorMessages: string[]): boolean {
   return visitorMessages.some((m) => WORK_TALK.test(m));
 }
 
 export function gateChips(chips: string[], steered: boolean): string[] {
   if (steered) return chips;
-  return chips.filter((c) => !WORK_TALK.test(c));
+  return chips.filter((c) => !CHIP_WORK_TALK.test(c));
 }

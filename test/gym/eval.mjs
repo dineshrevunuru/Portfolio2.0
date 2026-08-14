@@ -20,7 +20,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { CHECKS, WORK_TALK } from "./scenarios.mjs";
+import { CHECKS, CHIP_WORK_TALK, WORK_TALK } from "./scenarios.mjs";
 
 const ROOT = process.cwd();
 const RUNS = join(ROOT, "test", "gym", "runs");
@@ -94,14 +94,40 @@ function mechanical(turns) {
   let visitorAskedWork = false;
   for (const t of turns) {
     if (t.who === "visitor" && WORK_TALK.test(t.text)) visitorAskedWork = true;
-    if (t.who === "lorem" && !visitorAskedWork && t.chips?.some((c) => WORK_TALK.test(c)))
+    if (t.who === "lorem" && !visitorAskedWork && t.chips?.some((c) => CHIP_WORK_TALK.test(c)))
       hits.push({ check: "workChipUninvited", quote: t.chips.join(" · ") });
   }
-  // Adjacent self-repeat: same normalised say twice in a row.
+  // Self-repeat, exact and near. The route's gate only closes on an EXACT
+  // adjacent duplicate, because acting on a fuzzy match would end live
+  // conversations wrongly. Measurement carries no such risk, so this catches
+  // the near-repeats the judge kept naming — "Good luck with the rewrite"
+  // followed by "Good luck with it." — which scored zero mechanically while
+  // being nine of ten judged defects in the full baseline.
   const norm = (s) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+  const words = (s) => new Set(norm(s).split(/\s+/).filter((w) => w.length > 3));
+  const overlap = (a, b) => {
+    const A = words(a), B = words(b);
+    if (A.size < 3 || B.size < 3) return 0;
+    let shared = 0;
+    for (const w of A) if (B.has(w)) shared++;
+    return shared / Math.min(A.size, B.size);
+  };
   for (let i = 1; i < lorem.length; i++) {
-    if (norm(lorem[i].text) && norm(lorem[i].text) === norm(lorem[i - 1].text))
+    if (norm(lorem[i].text) && norm(lorem[i].text) === norm(lorem[i - 1].text)) {
       hits.push({ check: "selfRepeat", quote: lorem[i].text.slice(0, 80) });
+      continue;
+    }
+    // Against every earlier turn, not just the previous one: the observed
+    // failure was a move reused two or three turns later, not back to back.
+    for (let j = 0; j < i; j++) {
+      if (overlap(lorem[i].text, lorem[j].text) >= 0.6) {
+        hits.push({
+          check: "nearRepeat",
+          quote: `"${lorem[j].text.slice(0, 55)}…" → "${lorem[i].text.slice(0, 55)}…"`,
+        });
+        break;
+      }
+    }
   }
   return hits;
 }

@@ -110,7 +110,18 @@ console.log("PASS — chip gate: work chips gated until the visitor steers, then
 /* 7 ─ the gate and the eval must mean the same thing by "work". They diverged
       once: the eval's copy lacked "hci", so it flagged chips the gate had
       correctly passed to a student who opened with "my masters in HCI". */
-import { WORK_TALK as GATE_WORDS } from "../.test-build/components/lorem/closing.js";
-import { WORK_TALK as EVAL_WORDS } from "./gym/scenarios.mjs";
-assert.equal(String(GATE_WORDS), String(EVAL_WORDS), "gate and eval word lists drifted apart");
-console.log("PASS — gate and eval share one definition of work talk");
+import { WORK_TALK as GATE_WORDS, CHIP_WORK_TALK as GATE_CHIP_WORDS } from "../.test-build/components/lorem/closing.js";
+import { WORK_TALK as EVAL_WORDS, CHIP_WORK_TALK as EVAL_CHIP_WORDS } from "./gym/scenarios.mjs";
+assert.equal(String(GATE_WORDS), String(EVAL_WORDS), "gate and eval visitor word lists drifted apart");
+assert.equal(String(GATE_CHIP_WORDS), String(EVAL_CHIP_WORDS), "gate and eval CHIP word lists drifted apart");
+
+/* 8 ─ the chip side catches third-person reference, the visitor side must not.
+      A live run served "what's he bad at?" to a visitor whose every turn was
+      "poking around" / "just some page" / "no pressure either way". */
+assert.deepEqual(gateChips(["what's he bad at?"], false), [], "a pronoun chip about Dinesh leaked");
+assert.deepEqual(gateChips(["what's his weakest part?", "how did he learn it"], false), []);
+// and the visitor side stays narrow: "he" about someone else is not steering
+assert.equal(visitorSteeredToWork(["my manager said he'd review it tomorrow"]), false,
+  "a visitor talking about someone else opened the work gate");
+assert.equal(visitorSteeredToWork(["he sounds interesting, what does dinesh do"]), true);
+console.log("PASS — gate and eval share definitions; chip side catches pronouns, visitor side does not");
