@@ -98,12 +98,16 @@
 .lorem-browserhint b{color:var(--ink);font-weight:600}
 .lorem-browserhint button{border:0;background:#F1F3F6;color:var(--mut);width:19px;height:19px;border-radius:50%;cursor:pointer;font-size:11px;line-height:1;display:grid;place-items:center;padding:0;transition:background .18s,color .18s}
 .lorem-browserhint button:hover{background:#E6E9EE;color:var(--ink)}
-/* Anchored top-left, under the Homepage link, because that is where Chrome,
-   Edge and Firefox hang the mic prompt off the address bar. z-index clears the
-   start gate (10): the prompt fires the instant the gate is tapped, so the
-   pointer has to outrank the thing that triggered it or it argues with a blur
-   for the one moment it matters. */
-.lorem-permarrow{position:absolute;top:44px;left:20px;z-index:12;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--accent-ink)}
+/* Anchored to where the prompt actually hangs: Chrome, Edge and Firefox all
+   drop the mic bubble from the site-info chip at the LEFT EDGE of the address
+   bar — about 110px in, at the very top of the viewport. So the arrow sits on
+   the same row as the Homepage link (left:112 keeps it clear of that link's
+   expanded hit area, which reaches x≈109) and points straight up at the chip,
+   rather than a polite row below where the geometry goes vague. Safari shows a
+   centred sheet nobody misses, so imprecision there costs nothing. z-index
+   clears the start gate (10): the prompt fires the instant the gate is tapped,
+   so the pointer has to outrank the thing that triggered it. */
+.lorem-permarrow{position:absolute;top:14px;left:112px;z-index:12;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--accent-ink)}
 .lorem-permarrow svg{animation:lorem-nudge 1.6s ease-in-out infinite}
 @keyframes lorem-nudge{50%{transform:translateY(-4px)}}
 .lorem-soundhint{display:inline-flex;font-size:12.5px;color:var(--accent-ink);background:var(--accent-soft);padding:7px 14px;border-radius:999px}
