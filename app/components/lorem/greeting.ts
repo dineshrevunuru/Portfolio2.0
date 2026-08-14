@@ -35,26 +35,39 @@ const how = (touch: boolean) =>
   touch ? "Tap the orb when you want to talk." : "Hold Space when you want to talk.";
 
 /**
- * The opening line.
+ * The opening line. Dinesh's call, and it opens like a person rather than a
+ * directory: a greeting, a question about them, then how to answer it.
  *
- * ⚠ PLACEHOLDER. The copy below is not settled. A previous draft opened "This
- * is a conversation, not a search box", which was rejected for defining itself
- * by negation and for being knowingly self-aware about being software, the
- * exact AI tell the anti-slop reference exists to kill. Eight replacements were
- * drafted and adversarially reviewed; none passed all three critics, and the
- * strongest objection was structural rather than stylistic: an opener that asks
- * a visitor about themselves before saying what Dinesh shipped misreads a
- * recruiter, who is the visitor that matters most.
+ * The question comes first on purpose. An earlier round of drafts was reviewed
+ * against a recruiter lens that objected to exactly this, on the grounds that a
+ * visitor with four minutes wants the work before the pleasantries. That
+ * objection was overruled, and the reasoning is sound: splitting visitors into
+ * "recruiter" and "everyone else" means guessing from a referrer that is often
+ * stripped, and a mis-guessed register is worse than one conversation that
+ * treats everybody the same. Anyone in a hurry can say so in their first breath
+ * and get answered.
  *
- * So this stays deliberately plain until the register question is settled. It
- * states what is true, offers a way in, and claims nothing.
+ * ⚠ WHAT IS NOT HERE, AND WHY. The line Dinesh drafted ended "I'm very much
+ * excited to have you here today." That claims an inner state, which is the
+ * one prohibition this agent cannot trade away: it is disclosed software, so a
+ * declared feeling is not warmth, it is the fastest way to lose the trust the
+ * rest of the design spends its effort earning. The simulation harness already
+ * scores claimed feelings as a defect and caught them in three of eleven
+ * conversations; a greeting that claims one would open every future run with
+ * the thing the eval counts as a bug.
+ *
+ * The warmth is not lost, it moved. PRERENDER_TAG puts [warm] on the v3 render,
+ * so the line is DELIVERED warmly instead of asserting that it is. That is
+ * where a person keeps warmth too: in how the sentence sounds, not in a
+ * sentence about their feelings.
+ *
+ * "Welcome back" replaces the introduction rather than preceding it. A returning
+ * visitor being told the name again reads as an agent that did not remember,
+ * which is the opposite of what remembering them is for.
  */
 export function buildGreeting({ returning, touch }: GreetingVars): string {
-  const back = returning ? "Welcome back. " : "";
-  return (
-    `${back}I'm Lorem. Ask me about Dinesh's work, the numbers behind it, ` +
-    `or the parts that did not go well. ${how(touch)}`
-  );
+  const open = returning ? "Welcome back." : "Hi, I'm Lorem.";
+  return `${open} How are you doing today? ${how(touch)}`;
 }
 
 /**

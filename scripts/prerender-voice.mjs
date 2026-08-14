@@ -58,16 +58,14 @@ const src = readFileSync(join(ROOT, "app/components/lorem/greeting.ts"), "utf8")
 const howOf = (touch) =>
   touch ? "Tap the orb when you want to talk." : "Hold Space when you want to talk.";
 const build = ({ returning, touch }) =>
-  `${returning ? "Welcome back. " : ""}I'm Lorem. Ask me about Dinesh's work, the numbers behind it, ` +
-  `or the parts that did not go well. ${howOf(touch)}`;
+  `${returning ? "Welcome back." : "Hi, I'm Lorem."} How are you doing today? ${howOf(touch)}`;
 
 // Guard: every literal this script depends on must still be present in the TS.
 for (const needle of [
-  "I'm Lorem. Ask me about Dinesh's work, the numbers behind it, ",
-  "or the parts that did not go well. ",
+  'const open = returning ? "Welcome back." : "Hi, I\'m Lorem.";',
+  "How are you doing today?",
   "Tap the orb when you want to talk.",
   "Hold Space when you want to talk.",
-  "Welcome back. ",
 ]) {
   if (!src.includes(needle)) {
     console.error(
