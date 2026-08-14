@@ -630,8 +630,23 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             this surface is the exception, not a change to the component. */}
         <Aurora energy={energy} grain={false} />
       </div>
-      <a className="lorem-via" href="/">
-        dinesh &middot; voice portfolio
+      {/* The way out. It read as a caption before ("dinesh · voice portfolio"),
+          so the only exit from a full-screen voice takeover looked like a label.
+          It names its destination rather than saying "Back", because the dock
+          already renders a "← Back" chip meaning the previous answer, and two
+          bare arrows on one screen meaning different things is the ambiguity.
+          Naming it also makes it safe for a cold arrival: /lorem is in the
+          sitemap and shareable, so history.back() could leave the site entirely,
+          while this always lands somewhere known.
+
+          Deliberately a plain <a>, not next/link: the hard navigation tears
+          down the speech synthesis and the mic stream on the way out, which a
+          client-side route change does not guarantee. */}
+      <a className="lorem-via" href="/" aria-label="Back to the homepage">
+        <span className="varrow" aria-hidden="true">
+          &larr;
+        </span>
+        Homepage
       </a>
       {/* Mirrors .lorem-via across the top. Points at the plain-text portfolio —
           the convention agents look for. One href to change if you meant

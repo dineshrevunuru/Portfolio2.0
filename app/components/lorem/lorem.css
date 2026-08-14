@@ -215,7 +215,20 @@
    Ported from the portfolio's #screen / #stage / #answer / #dock. */
 .lorem-home{position:relative;width:100%;height:100%;min-height:520px;background:#fff;overflow:hidden;display:flex;flex-direction:column;font-family:'Inter',-apple-system,sans-serif;color:var(--ink)}
 .lorem-home-aurora{position:absolute;left:0;right:0;bottom:0;height:52%;z-index:0;pointer-events:none}
-.lorem-via{position:absolute;top:16px;left:20px;z-index:6;font-size:11px;color:var(--faint);letter-spacing:.02em}
+.lorem-via{position:absolute;top:16px;left:20px;z-index:6;display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--faint);letter-spacing:.02em;text-decoration:none;transition:color .18s cubic-bezier(.4,0,.2,1)}
+/* Hover and focus were missing entirely here while .lorem-agents opposite had
+   both, so the only exit on the screen was the one control that never
+   acknowledged the pointer or the keyboard. Mirrors that rule now. */
+.lorem-via:hover{color:var(--ink)}
+.lorem-via:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+/* 11px type gives a 17px-tall target. Same treatment patch 2 gives the hint
+   dismiss: keep the type quiet, push the hit area out to a thumb. */
+.lorem-via::after{content:'';position:absolute;inset:-11px -14px}
+/* Same easing and travel as .warrow on the marketing pages, reversed: that
+   arrow points forward and slides right, this one points back and slides left. */
+.lorem-via .varrow{display:inline-block;transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.lorem-via:hover .varrow{transform:translateX(-4px)}
+@media (prefers-reduced-motion: reduce){.lorem-via .varrow{transition:none}.lorem-via:hover .varrow{transform:none}}
 .lorem-screen{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:0}
 .lorem-stage{flex:1;position:relative;overflow:hidden}
 .lorem-answer{position:absolute;inset:40px 0;width:min(660px,90%);margin:0 auto;left:0;right:0;display:flex;flex-direction:column;justify-content:center;overflow-y:auto;scrollbar-width:none}
