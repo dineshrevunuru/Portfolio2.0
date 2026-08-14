@@ -16,7 +16,8 @@
     "deploy": "npm run check:public && vercel deploy --prod",
     "gym": "node test/gym/run.mjs",
     "gym:review": "node test/gym/bench.mjs",
-    "gym:distill": "node test/gym/distill.mjs"
+    "gym:distill": "node test/gym/distill.mjs",
+    "gym:eval": "node test/gym/eval.mjs"
   },
   "dependencies": {
     "next": "16.2.4",

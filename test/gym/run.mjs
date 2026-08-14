@@ -77,12 +77,22 @@ async function visitorSays(scenario, transcript) {
 
 /* ── Lorem, through the real route ───────────────────────────────────────── */
 async function loremSays(history, message, mode) {
-  const res = await fetch(`${APP}/api/lorem`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ message, history, mode }),
-  });
-  const j = await res.json().catch(() => null);
+  let res, j;
+  // The route rate-limits at 12/minute per IP, and a nine-scenario run is 60+
+  // calls from one IP — the first full run burned its budget two conversations
+  // in and the other seven died at two turns. The limiter is doing its job;
+  // the gym waits out the window instead of failing through it.
+  for (let attempt = 0; ; attempt++) {
+    res = await fetch(`${APP}/api/lorem`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message, history, mode }),
+    });
+    j = await res.json().catch(() => null);
+    if (res.status !== 429 || attempt >= 5) break;
+    process.stdout.write("⏳");
+    await new Promise((r) => setTimeout(r, 22_000));
+  }
   // A closed turn is a real outcome, not a failure: the route decided the
   // conversation was over. It has to appear in the transcript as silence, or
   // the goodbye behaviour we built is invisible to review.
