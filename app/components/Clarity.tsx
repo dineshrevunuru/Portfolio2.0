@@ -5,14 +5,22 @@ import { IS_CANONICAL_HOST } from "../site";
  * Microsoft Clarity — session recordings, heatmaps, and rage/dead-click
  * detection.
  *
- * Loaded as a plain external script rather than Clarity's inline IIFE snippet.
- * The snippet's only addition is a window.clarity command queue for calls made
- * before the CDN script arrives — and nothing in this repo calls
- * window.clarity() at all, so the queue was an untyped, unlintable string
- * buying nothing. A src-prop Script fetches the identical file with identical
- * afterInteractive timing in checked TSX, and removes the one injection seam
- * the inline form had (interpolating the id into markup). If a consent API or
- * custom tags are ever needed, that is the moment to bring the queue back.
+ * ⚠ THE INLINE SNIPPET IS LOAD-BEARING. DO NOT REPLACE IT WITH <Script src>.
+ *
+ * It looks like boilerplate whose only job is queueing window.clarity() calls
+ * until the CDN script lands, and since nothing in this repo ever calls
+ * window.clarity(), it reads as removable. It was removed on exactly that
+ * reasoning and it broke Clarity in production, silently: tag present in the
+ * HTML, network request fine, zero data collected.
+ *
+ * The queue is not for our code. It is for Clarity's own tag file, whose first
+ * executable statement is a[c]("metadata", ...) — that is window.clarity(...).
+ * The stub below is what defines it. Without it the fetched tag throws
+ * `TypeError: a[c] is not a function` on its first line and never initializes.
+ *
+ * Verify after any change here by loading the site and checking that
+ * window.clarity is a function and a _clck cookie is set. "The script tag is in
+ * the HTML" proves nothing; that was true the whole time it was broken.
  *
  * Three gates, all of which must pass before anything loads.
  *
@@ -52,9 +60,12 @@ export default function Clarity() {
   }
 
   return (
-    <Script
-      src={`https://www.clarity.ms/tag/${PROJECT_ID}`}
-      strategy="afterInteractive"
-    />
+    <Script id="ms-clarity" strategy="afterInteractive">
+      {`(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", ${JSON.stringify(PROJECT_ID)});`}
+    </Script>
   );
 }
