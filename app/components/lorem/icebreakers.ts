@@ -53,13 +53,23 @@ const POOL: Icebreaker[] = [
  * doesn't open on the identical row. Deterministic — no Math.random, so server
  * and client agree and nothing flickers on hydration.
  *
- * Order is load-bearing: proof, then candor. Proof first because it's what
- * most people came for; candor second because it's the one that changes what
- * they think this is, and it needs to be read, not buried in slot three.
+ * Order is load-bearing, and it flipped once the evidence came in. The first
+ * visit used to open proof-candor-social — three portfolio queries — on the
+ * theory that proof is what people came for. The simulation transcripts said
+ * otherwise: ten of eleven personas arrived to poke at the thing itself, and
+ * the register built for them (`meta`) was unreachable until a return visit
+ * most people never make. So a first visit now leads with meta, and proof
+ * sits directly beside it — the recruiter's next move is still exactly one
+ * tap. Candor holds the third slot on visit 0 because it's the register that
+ * changes what they think this is; returns rotate through the rest.
  */
 export function pickIcebreakers(visit = 0): string[] {
   const order: Icebreaker["register"][] =
-    visit % 2 === 0 ? ["proof", "candor", "social"] : ["proof", "candor", "meta"];
+    visit === 0
+      ? ["meta", "proof", "candor"]
+      : visit % 2 === 0
+        ? ["proof", "candor", "social"]
+        : ["proof", "candor", "meta"];
 
   return order.map((register, slot) => {
     const options = POOL.filter((o) => o.register === register);
