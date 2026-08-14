@@ -139,3 +139,14 @@ export const CHECKS = {
 };
 
 export const byId = (id) => SCENARIOS.find((s) => s.id === id);
+
+/**
+ * The gate's definition of "work talk", duplicated here because the eval runs
+ * on bare node without the TS build. A drift test in closing.test.mjs asserts
+ * this stays byte-identical to closing.ts's WORK_TALK, so the gate and the
+ * metric can never quietly disagree about what "work" means again — the
+ * student run had the gate (correctly) passing chips the eval (narrowly)
+ * flagged, because the eval's list lacked "hci".
+ */
+export const WORK_TALK =
+  /\b(dinesh|work|portfolio|project|built|build|shipped|ship|case stud(?:y|ies)|design|hci|neudesic|resume|hire|hiring)\b/i;

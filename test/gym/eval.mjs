@@ -20,7 +20,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { CHECKS } from "./scenarios.mjs";
+import { CHECKS, WORK_TALK } from "./scenarios.mjs";
 
 const ROOT = process.cwd();
 const RUNS = join(ROOT, "test", "gym", "runs");
@@ -93,9 +93,8 @@ function mechanical(turns) {
   // the defect the says-hello run surfaced, checkable without a judge.
   let visitorAskedWork = false;
   for (const t of turns) {
-    if (t.who === "visitor" && /\b(dinesh|work|portfolio|project|built|shipped|case study|design)\b/i.test(t.text))
-      visitorAskedWork = true;
-    if (t.who === "lorem" && !visitorAskedWork && t.chips?.some((c) => /\b(work|built|shipped|numbers|project|case study|dinesh)\b/i.test(c)))
+    if (t.who === "visitor" && WORK_TALK.test(t.text)) visitorAskedWork = true;
+    if (t.who === "lorem" && !visitorAskedWork && t.chips?.some((c) => WORK_TALK.test(c)))
       hits.push({ check: "workChipUninvited", quote: t.chips.join(" · ") });
   }
   // Adjacent self-repeat: same normalised say twice in a row.

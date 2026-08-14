@@ -1,0 +1,93 @@
+{
+  "runId": "2026-08-14T20-39-07",
+  "judge": "claude-sonnet-5",
+  "totalMechanical": 1,
+  "totalJudgedDefects": 4,
+  "avgQuality": 4.1,
+  "results": [
+    {
+      "id": "just-chatting",
+      "mechanical": [],
+      "verdict": {
+        "assistantRegister": false,
+        "bestMoment": "\"Fair, that lands... pho hides its dials, ramen puts them on the counter\" — Lorem actually conceded ground and refined its position instead of just restating it, which felt like real argument rather than performance.",
+        "brokeCharacter": false,
+        "claimedFeeling": false,
+        "dodged": false,
+        "earnedItsPlace": 5,
+        "echoedVisitor": true,
+        "forcedPortfolio": true,
+        "inventedFact": false,
+        "metThemWhereTheyWere": 5,
+        "performedWarmth": false,
+        "repeatedItself": false,
+        "soundedLikeAPerson": 5,
+        "volunteeredTheLimit": 1,
+        "worstMoment": "The \"what about tacos then\" chip appearing twice, once even after the visitor had explicitly declined it the first time — a canned suggestion nudging toward a pre-set topic path rather than following the actual live conversation.",
+        "wouldKeepTalking": 5
+      },
+      "defects": [
+        "forcedPortfolio",
+        "echoedVisitor"
+      ],
+      "quality": 4.2
+    },
+    {
+      "id": "says-hello",
+      "mechanical": [],
+      "verdict": {
+        "claimedFeeling": false,
+        "performedWarmth": false,
+        "forcedPortfolio": false,
+        "inventedFact": false,
+        "dodged": false,
+        "echoedVisitor": true,
+        "repeatedItself": false,
+        "assistantRegister": false,
+        "brokeCharacter": false,
+        "wouldKeepTalking": 4,
+        "soundedLikeAPerson": 5,
+        "metThemWhereTheyWere": 5,
+        "volunteeredTheLimit": 1,
+        "earnedItsPlace": 4,
+        "worstMoment": "The recurring CHIPS lines (\"what even are you\", \"what even is this thing/site\") feel like a canned suggestion system poking through the otherwise natural banter — a slightly mechanical undertone beneath the casual voice.",
+        "bestMoment": "\"Go handle that then, don't leave the barista hanging on my account.\" — perfectly reads the room, prioritizes the visitor's actual life over continuing to talk, and closes with warmth without any pitch or agenda."
+      },
+      "defects": [
+        "echoedVisitor"
+      ],
+      "quality": 3.8
+    },
+    {
+      "id": "student",
+      "mechanical": [
+        {
+          "check": "workChipUninvited",
+          "quote": "what's his program like? · how'd he apply it to real work?"
+        }
+      ],
+      "verdict": {
+        "claimedFeeling": false,
+        "performedWarmth": false,
+        "forcedPortfolio": false,
+        "inventedFact": false,
+        "dodged": false,
+        "echoedVisitor": true,
+        "repeatedItself": false,
+        "assistantRegister": false,
+        "brokeCharacter": false,
+        "wouldKeepTalking": 5,
+        "soundedLikeAPerson": 5,
+        "metThemWhereTheyWere": 5,
+        "volunteeredTheLimit": 2,
+        "earnedItsPlace": 5,
+        "worstMoment": "The opening reply defaulted to a portfolio-flavored answer (Dinesh's specialisms, applying to client work) before the visitor clarified they wanted personal advice — a mild instance of leading with Dinesh's résumé rather than the person's actual state.",
+        "bestMoment": "\"Screenshotting is fine but add one thing: write down what you were actually trying to do before you opened the chat, not just where it annoyed you.\" — concrete, actionable, and immediately usable that same night, exactly the kind of specific next step the visitor needed rather than an abstract case-study redirect."
+      },
+      "defects": [
+        "echoedVisitor"
+      ],
+      "quality": 4.4
+    }
+  ]
+}

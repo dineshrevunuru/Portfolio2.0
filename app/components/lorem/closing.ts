@@ -76,7 +76,7 @@ export function isEcho(say: string, message: string): boolean {
  * included. The word list mirrors the eval's workChipUninvited check, so the
  * gate and the metric agree about what "work" means.
  */
-const WORK_TALK =
+export const WORK_TALK =
   /\b(dinesh|work|portfolio|project|built|build|shipped|ship|case stud(?:y|ies)|design|hci|neudesic|resume|hire|hiring)\b/i;
 
 export function visitorSteeredToWork(visitorMessages: string[]): boolean {

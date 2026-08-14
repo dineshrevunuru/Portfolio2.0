@@ -106,3 +106,11 @@ for (const bad of ["what's dinesh's take on food", "what's his HCI focus?", "wha
 }
 
 console.log("PASS — chip gate: work chips gated until the visitor steers, then untouched");
+
+/* 7 ─ the gate and the eval must mean the same thing by "work". They diverged
+      once: the eval's copy lacked "hci", so it flagged chips the gate had
+      correctly passed to a student who opened with "my masters in HCI". */
+import { WORK_TALK as GATE_WORDS } from "../.test-build/components/lorem/closing.js";
+import { WORK_TALK as EVAL_WORDS } from "./gym/scenarios.mjs";
+assert.equal(String(GATE_WORDS), String(EVAL_WORDS), "gate and eval word lists drifted apart");
+console.log("PASS — gate and eval share one definition of work talk");
