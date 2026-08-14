@@ -8,6 +8,7 @@ import { Surface, type FactLookup, type QuoteLookup } from "./Surface";
 import type { Block } from "./protocol";
 import { useSpeech } from "./useSpeech";
 import { beginVisit, daysSince, forgetVisitor, rememberName, type Visitor } from "./memory";
+import { buildGreeting } from "./greeting";
 import { icebreakerHint, pickIcebreakers } from "./icebreakers";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
@@ -358,23 +359,13 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
     // form of personalisation that reliably backfires.
     const speakNow = () => {
       setStatus("Speaking");
-      const back = greetedName ? "Welcome back. " : "";
-      // The spoken instructions must match the device — phones have no Space bar.
-      const how = touchRef.current
-        ? "Tap the orb when you want to talk."
-        : "Hold Space when you want to talk.";
-      // A conversational agent's opener, not an assistant's orientation. The
-      // old line led with the client project and then disclaimed it ("but I'm
-      // not only here for the portfolio") — an index read aloud, and backwards
-      // for the visitor who came to poke at the thing itself, which the gym
-      // transcripts say is nearly everyone. This one is identity, permission,
-      // mechanics, then a question — because an agent ends its turn with a
-      // move, and an open question is the move that fits a first meeting.
-      // The work stays one breath away ("down to the numbers"), not up front.
-      const greeting =
-        `${back}This is a conversation, not a search box. Dinesh's work, down ` +
-        `to the numbers, the unflattering parts included. Or something else ` +
-        `entirely. ${how} So, what brought you here?`;
+      // Text and variants live in greeting.ts, which is also what the
+      // prerender script walks. One source, so the audio cannot drift from the
+      // words.
+      const greeting = buildGreeting({
+        returning: Boolean(greetedName),
+        touch: touchRef.current,
+      });
       speechRef.current.say(greeting, () => setStatus(""));
     };
 

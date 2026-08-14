@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PRERENDERED } from "./prerendered.generated";
 
 export type MicState = "ok" | "denied" | "unsupported";
 export type ListenMode = "hold" | "tap";
@@ -469,12 +470,22 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
       ttsFetch.current = ctl;
       setTtsSpeaking(true);
       try {
-        const res = await fetch("/api/voice", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ text }),
-          signal: ctl.signal,
-        });
+        // Fixed lines were rendered once with Eleven v3 and are served as
+        // files. Playing one skips the synthesis round trip entirely, so the
+        // greeting starts the moment the orb lands instead of after a request,
+        // and it carries v3's audio tags, which are the only way this agent
+        // gets warmth into a line without claiming a feeling in the words.
+        // A miss is ordinary: the line goes to Flash live, same words.
+        const canned = PRERENDERED[text];
+
+        const res = canned
+          ? await fetch(canned, { signal: ctl.signal })
+          : await fetch("/api/voice", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ text }),
+              signal: ctl.signal,
+            });
         if (gen !== utterGen.current) return; // superseded while synthesising
         if (!res.ok) throw new Error(`voice ${res.status}`);
         const blob = await res.blob();

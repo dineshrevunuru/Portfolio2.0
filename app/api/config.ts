@@ -55,7 +55,28 @@ export const VOICE_PROVIDER: VoiceProvider =
 export const ELEVENLABS = {
   key: process.env.ELEVENLABS_API_KEY ?? "",
   voiceId: process.env.ELEVENLABS_VOICE_ID ?? "X03mvPuTfprif8QBAVeJ",
-  model: process.env.ELEVENLABS_MODEL ?? "eleven_turbo_v2_5",
+  /**
+   * Flash, for every LIVE turn. Was eleven_turbo_v2_5, which ElevenLabs now
+   * marks deprecated and describes as "outclassed by Flash models", pointing
+   * at this one. Flash is ~75ms and is what their docs call correct for
+   * real-time voice agents.
+   *
+   * NOT eleven_v3, even though v3 is the expressive one. The visitor is
+   * standing in silence waiting, so time-to-first-word beats the last points
+   * of delivery quality, and v3 is a larger model on a higher-fidelity codec
+   * that ElevenLabs pointedly leaves out of its own real-time recommendations.
+   * v3 earns its place on the FIXED lines instead — see PRERENDERED below,
+   * where the latency is paid once at build time and never by a visitor.
+   */
+  model: process.env.ELEVENLABS_MODEL ?? "eleven_flash_v2_5",
+  /**
+   * v3, for lines whose text is known ahead of time and can therefore be
+   * rendered once. Audio tags ([warm], [laughs], [sighs]) are v3-only, and
+   * they are the one way this agent can carry warmth without breaking the rule
+   * that it must never claim an inner state: a warm delivery is not a claimed
+   * feeling, it is how the line is said.
+   */
+  prerenderModel: process.env.ELEVENLABS_PRERENDER_MODEL ?? "eleven_v3",
   /**
    * Scribe, for voice IN. Verified against the account on 2026-07-25 — the API
    * accepts scribe_v1, scribe_v1_experimental and scribe_v2 on the file endpoint.
