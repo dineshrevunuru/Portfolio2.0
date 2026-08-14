@@ -652,8 +652,16 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   // mic is a dead end.
   // Rotated by visit count, so a return visit doesn't open on the same row.
   const openers = pickIcebreakers(visitor?.visits ?? 0);
-  const openerPool = openers.filter((o) => !askedBefore.current.has(norm(o)));
-  const chips = turn?.chips.length ? turn.chips : !turn ? openers : openerPool;
+  // `turn.chips` is `[]` in two situations the prompt now tells apart, and
+  // they need opposite treatment. Before any turn (`!turn`), empty means the
+  // model was never asked — show the icebreakers. After a turn, `[]` is a
+  // real answer: the model followed "chips obey the same direction rule as
+  // speech" and chose to offer nothing, live and verified against a visitor
+  // who opened with "hey there" and got chips:[] back from /api/lorem. Falling
+  // back to the icebreaker pool there was silently overriding that choice —
+  // the words stopped pitching and the row of buttons under them kept doing
+  // it, undetectable by reading the transcript alone.
+  const chips = !turn ? openers : turn.chips;
 
   // The spinning `rec` border is a strong attention magnet, so it has to earn
   // its place: it points at the first suggestion the visitor has NOT already
