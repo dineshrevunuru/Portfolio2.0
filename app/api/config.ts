@@ -56,19 +56,37 @@ export const ELEVENLABS = {
   key: process.env.ELEVENLABS_API_KEY ?? "",
   voiceId: process.env.ELEVENLABS_VOICE_ID ?? "X03mvPuTfprif8QBAVeJ",
   /**
-   * Flash, for every LIVE turn. Was eleven_turbo_v2_5, which ElevenLabs now
-   * marks deprecated and describes as "outclassed by Flash models", pointing
-   * at this one. Flash is ~75ms and is what their docs call correct for
-   * real-time voice agents.
+   * v3 everywhere, live turns included. Dinesh's call, and it is only
+   * affordable because the audio path streams.
    *
-   * NOT eleven_v3, even though v3 is the expressive one. The visitor is
-   * standing in silence waiting, so time-to-first-word beats the last points
-   * of delivery quality, and v3 is a larger model on a higher-fidelity codec
-   * that ElevenLabs pointedly leaves out of its own real-time recommendations.
-   * v3 earns its place on the FIXED lines instead — see PRERENDERED below,
-   * where the latency is paid once at build time and never by a visitor.
+   * Measured on this account, 44-word answer, median of three:
+   *
+   *                    first audio    complete
+   *   flash, buffered      497ms        513ms
+   *   v3,    buffered    5,983ms      6,060ms   ← what this used to be
+   *   flash, streaming     135ms        513ms
+   *   v3,    streaming     585ms      6,335ms   ← what it is now
+   *
+   * Buffered, v3 costs five and a half extra seconds of silence per turn on
+   * top of the model call, which is not a trade, it is a wall. Streaming, it
+   * costs about 450ms more to first word than Flash, which sits inside a
+   * normal conversational gap. Generation finishes in 6.3s while the same
+   * words take roughly fifteen seconds to speak, so playback never catches up
+   * with it.
+   *
+   * WHAT THIS BUYS: audio tags, which are v3-only, on every line rather than
+   * only the pre-rendered ones. That is the one mechanism that gets warmth
+   * into this agent without breaking the rule against claiming an inner state.
+   *
+   * ⚠ The gain is entirely dependent on streaming, in BOTH places: the route
+   * must call the /stream endpoint, and useSpeech must feed MediaSource rather
+   * than await res.blob(). Undo either and this silently becomes a six-second
+   * wait. Safari has no MediaSource for audio/mpeg and takes the buffered
+   * path, so it pays the full generation time.
+   *
+   * Set ELEVENLABS_MODEL=eleven_flash_v2_5 to trade the tags back for ~450ms.
    */
-  model: process.env.ELEVENLABS_MODEL ?? "eleven_flash_v2_5",
+  model: process.env.ELEVENLABS_MODEL ?? "eleven_v3",
   /**
    * v3, for lines whose text is known ahead of time and can therefore be
    * rendered once. Audio tags ([warm], [laughs], [sighs]) are v3-only, and

@@ -68,7 +68,13 @@ export async function POST(req: Request) {
     upstream =
       provider === "elevenlabs"
         ? await fetch(
-            `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(ELEVENLABS.voiceId)}`,
+            // The /stream endpoint, not the plain one. Measured against this account:
+            // the plain endpoint generates the whole file before sending a byte,
+            // so v3 took 5,983ms to first audio on a 44-word answer. Streaming,
+            // the same text starts in 585ms. The route already forwards
+            // upstream.body untouched, so the only thing that was buffering was
+            // the endpoint choice and the client's await res.blob().
+            `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(ELEVENLABS.voiceId)}/stream`,
             {
               method: "POST",
               headers: {

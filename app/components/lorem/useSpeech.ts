@@ -470,31 +470,6 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
       ttsFetch.current = ctl;
       setTtsSpeaking(true);
       try {
-        // Fixed lines were rendered once with Eleven v3 and are served as
-        // files. Playing one skips the synthesis round trip entirely, so the
-        // greeting starts the moment the orb lands instead of after a request,
-        // and it carries v3's audio tags, which are the only way this agent
-        // gets warmth into a line without claiming a feeling in the words.
-        // A miss is ordinary: the line goes to Flash live, same words.
-        const canned = PRERENDERED[text];
-
-        const res = canned
-          ? await fetch(canned, { signal: ctl.signal })
-          : await fetch("/api/voice", {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({ text }),
-              signal: ctl.signal,
-            });
-        if (gen !== utterGen.current) return; // superseded while synthesising
-        if (!res.ok) throw new Error(`voice ${res.status}`);
-        const blob = await res.blob();
-        if (gen !== utterGen.current) return;
-
-        releaseUrl();
-        const url = URL.createObjectURL(blob);
-        objectUrl.current = url;
-
         let done = false;
         const finish = () => {
           if (done) return;
@@ -506,6 +481,90 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
         };
         el.onended = finish;
         el.onerror = finish;
+
+        // Fixed lines were rendered once with Eleven v3 and are served as
+        // files. Pointing the element straight at the file skips the synthesis
+        // round trip AND lets the browser stream it natively, so the greeting
+        // starts the moment the orb lands. A miss is ordinary: the line is
+        // synthesised live below.
+        const canned = PRERENDERED[text];
+        if (canned) {
+          releaseUrl();
+          el.src = canned;
+          await el.play();
+          return;
+        }
+
+        const res = await fetch("/api/voice", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text }),
+          signal: ctl.signal,
+        });
+        if (gen !== utterGen.current) return; // superseded while synthesising
+        if (!res.ok) throw new Error(`voice ${res.status}`);
+
+        // Play the audio as it arrives instead of waiting for the file.
+        //
+        // This is what makes v3 usable on a live turn. Measured on a 44-word
+        // answer: v3 needs 6.0s to produce the complete file but only 585ms to
+        // produce the first audio, and speaking those words takes about fifteen
+        // seconds, so generation stays comfortably ahead of playback. The old
+        // `await res.blob()` threw that away and waited for the last byte,
+        // which is the whole reason v3 looked impossible.
+        //
+        // MediaSource is the only way to feed a growing stream to an <audio>
+        // element. Safari does not support it for audio/mpeg, so it takes the
+        // buffered path below: same words, later start.
+        const MS = typeof window !== "undefined" ? window.MediaSource : undefined;
+        if (MS?.isTypeSupported?.("audio/mpeg") && res.body) {
+          const ms = new MS();
+          releaseUrl();
+          const url = URL.createObjectURL(ms);
+          objectUrl.current = url;
+          el.src = url;
+
+          await new Promise<void>((r) =>
+            ms.addEventListener("sourceopen", () => r(), { once: true }),
+          );
+          if (gen !== utterGen.current) return;
+
+          const sb = ms.addSourceBuffer("audio/mpeg");
+          const reader = res.body.getReader();
+          // appendBuffer is asynchronous and throws if called while updating,
+          // so each chunk waits for the previous one to settle.
+          const append = (chunk: BufferSource) =>
+            new Promise<void>((resolve, reject) => {
+              sb.addEventListener("updateend", () => resolve(), { once: true });
+              sb.addEventListener("error", () => reject(new Error("sourcebuffer")), { once: true });
+              sb.appendBuffer(chunk);
+            });
+
+          let playing = false;
+          for (;;) {
+            const { done: streamDone, value } = await reader.read();
+            if (gen !== utterGen.current) {
+              await reader.cancel().catch(() => {});
+              return;
+            }
+            if (streamDone) break;
+            await append(value);
+            // Start on the first chunk. Everything after this arrives faster
+            // than it is consumed, so the element never starves.
+            if (!playing) {
+              playing = true;
+              void el.play();
+            }
+          }
+          if (ms.readyState === "open") ms.endOfStream();
+          return;
+        }
+
+        const blob = await res.blob();
+        if (gen !== utterGen.current) return;
+        releaseUrl();
+        const url = URL.createObjectURL(blob);
+        objectUrl.current = url;
         el.src = url;
         await el.play();
       } catch (e) {
