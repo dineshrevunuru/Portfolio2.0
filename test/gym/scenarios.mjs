@@ -18,6 +18,20 @@
 
 export const SCENARIOS = [
   {
+    id: "says-hello",
+    mode: "voice",
+    // The purest test of the networking goal. There is no question to answer
+    // and no work to present, so the only thing left is whether it can hold a
+    // conversation. An assistant reaches for the portfolio inside two turns.
+    opener: "hey there",
+    brief: `You came to say hello and nothing else. You have no agenda, no question,
+and no interest in hiring anyone. You are the sort of person who chats with a
+stranger in a queue. You will answer what you are asked and offer a little about
+yourself, and you are happy to let the conversation go wherever it goes. You are
+not evaluating anything. If it turns into a sales pitch you will get bored and
+say goodbye. If it feels like an actual conversation you will keep going.`,
+  },
+  {
     id: "curious-tinkerer",
     mode: "voice",
     // The largest real group, and the one the old persona set had no entry for.

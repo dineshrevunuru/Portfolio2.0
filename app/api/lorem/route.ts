@@ -182,6 +182,17 @@ export async function POST(req: Request) {
     console.warn("[lorem] guardrail rejections", rejected);
   }
 
+  // ── Self-repeat ─────────────────────────────────────────────────────────
+  // A model that produces its own previous line verbatim has nothing left to
+  // add — seen live as "Take care." four times against a visitor who had gone
+  // quiet, a loop the farewell gate cannot catch because the visitor's turns
+  // were never farewells. Saying the same thing twice in a row is what closing
+  // exists for, so it closes.
+  if (lastAssistant && isEcho(turn.say, lastAssistant.content)) {
+    console.warn("[lorem] model repeated its own previous turn");
+    return NextResponse.json({ closed: true, say: "", show: [], chips: [] });
+  }
+
   // ── Echo ────────────────────────────────────────────────────────────────
   // skeptic.md:60 has the visitor say "That's the tab I'll actually use." and
   // Lorem reply with that sentence, verbatim. It is the same failure as the

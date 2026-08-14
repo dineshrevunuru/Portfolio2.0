@@ -99,7 +99,12 @@ async function converse(scenario) {
 
   for (let i = 0; i < limit; i++) {
     const said = i === 0 ? scenario.opener : await visitorSays(scenario, render(turns));
-    if (!said) break;
+    // A visitor with nothing to say has left. The model is told not to write
+    // stage directions, but under "I already said goodbye" pressure it emits
+    // "*(no reply)*" or "(leaves)" anyway — and a stage direction fed to Lorem
+    // produced four identical "Take care."s in a live run, a loop no farewell
+    // gate can catch because the input was never a farewell.
+    if (!said || /^\W*[(*[]/.test(said.trim())) break;
     turns.push({ who: "visitor", text: said });
 
     const out = await loremSays(history, said, scenario.mode);
