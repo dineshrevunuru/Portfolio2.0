@@ -92,7 +92,6 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
     dx: number;
     dy: number;
     scale: number;
-    go: boolean;
   } | null>(null);
 
   const kinRef = useRef<HTMLInputElement | null>(null);
@@ -112,6 +111,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
    *  settles into. Wrappers, because MicOrb owns its own ref internally. */
   const gateOrbRef = useRef<HTMLSpanElement | null>(null);
   const dockOrbRef = useRef<HTMLDivElement | null>(null);
+  const flyElRef = useRef<HTMLDivElement | null>(null);
 
   // modK is only meaningful where a keyboard exists; on coarse pointers every
   // "press ⌘K" string becomes "tap" (navigator.platform reports iPhone/iPad as
@@ -342,12 +342,8 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
       dx: to.left - from.left,
       dy: to.top - from.top,
       scale: from.width / to.width,
-      go: false,
     });
-    // Two frames: one to mount the clone at rest, one to arm the transition.
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => setFly((f) => (f ? { ...f, go: true } : f))),
-    );
+    // The flight itself is started by the effect that watches `fly`.
     window.setTimeout(() => {
       setFly(null);
       setGate(false);
@@ -357,6 +353,33 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
   const startRef = useRef(start);
   startRef.current = start;
+
+  /**
+   * Run the gate orb's flight exactly once per `fly`.
+   *
+   * An effect rather than an inline ref callback, which is where this landed
+   * first and broke in a way worth recording: an inline arrow is a new function
+   * every render, so React detaches and reattaches the ref each time and calls
+   * it again. LoremHome re-renders freely while the orb is in the air (status,
+   * voice state), so `animate()` fired three times on one element, each restart
+   * yanking the transform back to the first keyframe. The clone sat at the gate
+   * looking exactly as broken as the CSS-transition version it replaced.
+   *
+   * `fly` is set once and never mutated, so this runs once; the cleanup cancels
+   * if the flight is torn down early.
+   */
+  useEffect(() => {
+    const el = flyElRef.current;
+    if (!fly || !el) return;
+    const anim = el.animate(
+      [
+        { transform: `translate(0px, 0px) scale(${fly.scale})` },
+        { transform: `translate(${fly.dx}px, ${fly.dy}px) scale(1)` },
+      ],
+      { duration: 680 / (pace || 1), easing: "cubic-bezier(.22,.85,.25,1)", fill: "forwards" },
+    );
+    return () => anim.cancel();
+  }, [fly, pace]);
 
   /* ── Keyboard ─────────────────────────────────────────────────────────── */
 
@@ -909,21 +932,28 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
           The clone is laid out at the DESTINATION size and scaled up to the
           gate's, so the flight shrinks it into its seat as it goes. Both
-          transforms keep the same function list — translate then scale — so
-          the browser interpolates component-wise instead of falling back to
-          matrix decomposition, which visibly wobbles on a large scale delta. */}
+          keyframes keep the same transform function list — translate then
+          scale — so the browser interpolates component-wise instead of falling
+          back to matrix decomposition, which visibly wobbles on a scale delta.
+
+          Driven by the Web Animations API in an effect below rather than by a
+          CSS transition armed from a second state flip. Both work in a real
+          browser; WAAPI wins on having one animation object with an explicit
+          cancel, and on not needing a second render or a requestAnimationFrame
+          pair to get moving. The rAF version also stalls wherever rAF is
+          throttled, which is a real condition (background tab, some embedded
+          webviews) even though a visitor tapping the gate is by definition
+          looking at the page. */}
       {fly && (
         <div
+          ref={flyElRef}
           className="lorem-orbfly"
           style={{
             left: fly.x,
             top: fly.y,
             width: fly.w,
             height: fly.h,
-            transform: fly.go
-              ? `translate(${fly.dx}px, ${fly.dy}px) scale(1)`
-              : `translate(0px, 0px) scale(${fly.scale})`,
-            transitionDuration: `${(0.68 / (pace || 1)).toFixed(2)}s`,
+            transform: `translate(0px, 0px) scale(${fly.scale})`,
           }}
         >
           <MicOrb state="speaking" decorative />

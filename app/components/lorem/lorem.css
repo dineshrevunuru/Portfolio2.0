@@ -58,15 +58,20 @@
 .lorem-startgate.gone{opacity:0;pointer-events:none}
 /* The gate orb's flight to the dock. Fixed so the rects measured from both
    ends line up regardless of scroll; eased to decelerate into the seat. */
-.lorem-orbfly{position:fixed;z-index:11;pointer-events:none;will-change:transform;transform-origin:top left;transition-property:transform;transition-timing-function:cubic-bezier(.22,.85,.25,1)}
+/* Duration and easing live with the element.animate() call in LoremHome, not
+   here, so the flight is one object that can be cancelled. Origin stays
+   top-left so the measured position and the scale resolve against the same
+   corner. */
+.lorem-orbfly{position:fixed;z-index:11;pointer-events:none;will-change:transform;transform-origin:top left}
 .lorem-startgate .t{font-size:19px;color:var(--ink);font-weight:500}
-/* The gate orb at 2x. The bar heights are set inline by MicOrb's rAF loop, so
-   a bigger box would leave 62px bars rattling inside it — scaling the whole
-   orb is the only thing that keeps the proportions the component was drawn at.
-   The wrapper carries the real 124px so the flex column still reserves the
-   space; only the orb inside is transformed. */
-.lorem-gateorb{width:124px;height:124px;display:grid;place-items:center}
-.lorem-gateorb .lorem-micorb{transform:scale(2)}
+/* The gate orb at 1.5x (62 → 93). The bar heights are set inline by MicOrb's
+   rAF loop, so a bigger box would leave 62px bars rattling inside it — scaling
+   the whole orb is the only thing that keeps the proportions the component was
+   drawn at. The wrapper carries the real 93px so the flex column still reserves
+   the space; only the orb inside is transformed. The settle flight reads its
+   scale from these measured rects, so it follows this number automatically. */
+.lorem-gateorb{width:93px;height:93px;display:grid;place-items:center}
+.lorem-gateorb .lorem-micorb{transform:scale(1.5)}
 .lorem-startgate .copylink{margin-top:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;padding:9px 20px;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s}
 .lorem-startgate .copylink:hover{background:#F7FAFF;border-color:#C9D4E4}
 
