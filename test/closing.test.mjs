@@ -76,3 +76,33 @@ assert.ok(!isEcho("", "bye"), "empty say was treated as an echo rather than a sc
 console.log(
   `PASS — ${farewells.length} farewells close, ${mustPass.length} real messages pass through, echo caught both ways`,
 );
+
+/* 6 ─ the chip gate: work chips only after the visitor steered there.
+      In code because it lost as a prompt rule three evaluated runs straight. */
+import { gateChips, visitorSteeredToWork } from "../.test-build/components/lorem/closing.js";
+
+// not steered: pure small talk
+assert.equal(visitorSteeredToWork(["hey there", "not much, just wandering around"]), false);
+// steered: any mention of the work, in any earlier turn or the current one
+assert.equal(visitorSteeredToWork(["hey", "who's dinesh, what does he actually do"]), true);
+assert.equal(visitorSteeredToWork(["walk me through the most complex thing he shipped"]), true);
+assert.equal(visitorSteeredToWork(["i'm redoing my whole portfolio"]), true);
+
+// unsteered visitor: work chips drop, conversational chips survive
+assert.deepEqual(
+  gateChips(["what's dinesh's take on food", "pho or ramen?", "show me the work anyway"], false),
+  ["pho or ramen?"],
+  "work chips reached an unsteered visitor",
+);
+// steered visitor: everything passes untouched
+assert.deepEqual(
+  gateChips(["what did he actually ship?", "show me the numbers"], true),
+  ["what did he actually ship?", "show me the numbers"],
+  "chips were wrongly gated after the visitor asked about the work",
+);
+// the exact chips from the mechanics-rules run that should have been caught
+for (const bad of ["what's dinesh's take on food", "what's his HCI focus?", "what's dinesh actually built"]) {
+  assert.deepEqual(gateChips([bad], false), [], `leaked to an unsteered visitor: ${bad}`);
+}
+
+console.log("PASS — chip gate: work chips gated until the visitor steers, then untouched");

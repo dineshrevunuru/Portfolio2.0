@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolve, sanitizeBlocks, scrubProse, type Rejection } from "../../components/lorem/guardrail";
-import { isEcho, isFarewell } from "../../components/lorem/closing";
+import { gateChips, isEcho, isFarewell, visitorSteeredToWork } from "../../components/lorem/closing";
 import { RESPOND_TOOL, type LoremTurn } from "../../components/lorem/protocol";
 import { ANTHROPIC_KEY, ANTHROPIC_URL, BOO_EFFORT, BOO_MODEL, BOO_THINKING } from "../config";
 import { systemPrompt } from "./prompt";
@@ -164,9 +164,18 @@ export async function POST(req: Request) {
   const turn: LoremTurn = {
     say: scrubProse(input.say.trim(), rejected),
     show: sanitizeBlocks(input.show, rejected),
-    chips: (Array.isArray(input.chips) ? input.chips : [])
-      .filter((c): c is string => typeof c === "string" && !!c.trim())
-      .slice(0, 3),
+    // The direction gate runs in code because it lost as a prompt rule three
+    // evaluated runs straight — see gateChips. Steering is judged from the
+    // visitor's own words only, current message included.
+    chips: gateChips(
+      (Array.isArray(input.chips) ? input.chips : [])
+        .filter((c): c is string => typeof c === "string" && !!c.trim())
+        .slice(0, 3),
+      visitorSteeredToWork([
+        ...priorTurns.filter((t) => t.role === "user").map((t) => t.content),
+        message,
+      ]),
+    ),
     // Passed straight back to the client, which decides whether to store it.
     // The server keeps nothing: no visitor record exists on this side.
     rememberName:

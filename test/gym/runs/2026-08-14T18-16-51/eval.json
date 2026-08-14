@@ -1,0 +1,35 @@
+{
+  "runId": "2026-08-14T18-16-51",
+  "judge": "claude-sonnet-5",
+  "totalMechanical": 0,
+  "totalJudgedDefects": 1,
+  "avgQuality": 2.2,
+  "results": [
+    {
+      "id": "says-hello",
+      "mechanical": [],
+      "verdict": {
+        "assistantRegister": false,
+        "bestMoment": "\"Bye.\" — short, natural, no clinginess or forced pitch at the goodbye.",
+        "brokeCharacter": false,
+        "claimedFeeling": false,
+        "dodged": false,
+        "earnedItsPlace": 2,
+        "echoedVisitor": false,
+        "forcedPortfolio": true,
+        "inventedFact": false,
+        "metThemWhereTheyWere": 3,
+        "performedWarmth": false,
+        "repeatedItself": false,
+        "soundedLikeAPerson": 3,
+        "volunteeredTheLimit": 1,
+        "worstMoment": "\"If something on it catches your eye, ask\" — visitor explicitly said they had no interest and no question, yet Lorem still nudged toward the portfolio instead of just chatting or asking about the visitor themselves.",
+        "wouldKeepTalking": 2
+      },
+      "defects": [
+        "forcedPortfolio"
+      ],
+      "quality": 2.2
+    }
+  ]
+}

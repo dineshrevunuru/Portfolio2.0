@@ -215,3 +215,16 @@ for (const [input, mustKeep] of [
 // thousands separators must still survive as one numeral
 assert.ok(kept("Surface reached 10,000+ users.").includes("10,000"), "thousands separator broken");
 console.log("   · punctuation guard: years with trailing , and . survive; 10,000 intact");
+
+/* 10 ─ em dashes never survive into speech. The voice spec's ban was
+       instructed-only and violated 228 times across the simulations, then once
+       more live. Now enforced like numerals. */
+const r10 = [];
+const d1 = scrubProse("I don't have a \"day\" — I only exist in the span of a conversation.", r10);
+assert.ok(!d1.includes("—"), `em dash survived: ${d1}`);
+assert.ok(d1.includes("day\", I only exist"), `dash rewrite mangled the sentence: ${d1}`);
+const d2 = scrubProse("Retention went from forty percent to seventy-two percent — the client's number.", r10);
+assert.ok(!d2.includes("—"), `em dash survived beside verified numerals: ${d2}`);
+assert.ok(d2.includes("seventy-two percent"), `dash strip damaged a verified numeral: ${d2}`);
+assert.ok(!scrubProse("An en dash – also banned.", r10).includes("–"), "en dash survived");
+console.log("   · em/en dash strip: rewrites to a comma, verified numerals intact");

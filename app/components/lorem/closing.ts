@@ -57,3 +57,33 @@ export function isEcho(say: string, message: string): boolean {
   const a = norm(say);
   return a.length > 0 && a === norm(message);
 }
+
+/**
+ * The chip gate: work chips only after the visitor has steered toward the
+ * work.
+ *
+ * This went into code after losing to the model three times as a prompt rule.
+ * The instruction "a visitor who has not asked about Dinesh's work gets NO
+ * work chips" was added, the model's spoken words obeyed it, and across three
+ * separate evaluated runs the chips kept pitching anyway — "show me the work
+ * anyway" at a visitor who had just declined, "what's dinesh's take on food"
+ * in the middle of a food riff that was working on its own. Six of seven
+ * mechanical defects in the mechanics-rules run were exactly this. The same
+ * codebase evidence as ever: its instructed em-dash rule was violated 228
+ * times, its enforced numeral rule zero.
+ *
+ * Direction is decided from what the VISITOR has said, current message
+ * included. The word list mirrors the eval's workChipUninvited check, so the
+ * gate and the metric agree about what "work" means.
+ */
+const WORK_TALK =
+  /\b(dinesh|work|portfolio|project|built|build|shipped|ship|case stud(?:y|ies)|design|hci|neudesic|resume|hire|hiring)\b/i;
+
+export function visitorSteeredToWork(visitorMessages: string[]): boolean {
+  return visitorMessages.some((m) => WORK_TALK.test(m));
+}
+
+export function gateChips(chips: string[], steered: boolean): string[] {
+  if (steered) return chips;
+  return chips.filter((c) => !WORK_TALK.test(c));
+}

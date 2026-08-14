@@ -1,0 +1,9 @@
+{
+  "runId": "2026-08-14T18-16-51",
+  "app": "http://localhost:3000",
+  "visitorModel": "claude-sonnet-5",
+  "scenarios": [
+    "says-hello"
+  ],
+  "at": "2026-08-14T18:17:07.171Z"
+}

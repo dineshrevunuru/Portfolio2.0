@@ -369,6 +369,17 @@ function dropHoledSentences(text: string, rejected: Rejection[]): string {
   return out;
 }
 
+/**
+ * The em dash, enforced at last. The voice spec calls the ban absolute, the
+ * prompt repeats it, and the model produced 228 of them across eleven
+ * simulated conversations and then another one live ("I don't really have a
+ * "day" — I only exist in the span of a conversation"). Instructed rules
+ * drift; this one now gets the same treatment as numerals. A comma is the
+ * safe universal rewrite: every em-dash aside reads correctly as a clause,
+ * and a TTS voice treats them nearly identically.
+ */
+const stripDashes = (s: string) => s.replace(/\s*[—–]\s*/g, ", ").replace(/,\s*([.!?])/g, "$1");
+
 export function scrubProse(say: string, rejected: Rejection[]): string {
   const allowed = allowedNumerals();
   const digitsScrubbed = say.replace(NUMERAL_RE, (m) => {
@@ -376,7 +387,9 @@ export function scrubProse(say: string, rejected: Rejection[]): string {
     rejected.push({ block: "say", reason: `unbacked numeral "${m}"` });
     return HOLE;
   });
-  return dropHoledSentences(scrubWordNumbers(digitsScrubbed, allowed, rejected), rejected);
+  return stripDashes(
+    dropHoledSentences(scrubWordNumbers(digitsScrubbed, allowed, rejected), rejected),
+  );
 }
 
 /** Resolve the ids that survived into the display values the client renders. */
