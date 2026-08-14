@@ -59,7 +59,7 @@ export default function LoremBanner() {
     <Link
       className="loremv"
       href="/lorem"
-      aria-label="Ask Lorem — a voice-first way to explore Dinesh's work"
+      aria-label="Ask Lorem, a voice-first way to explore Dinesh's work"
     >
       <span className="loremv-wave">
         <Aurora energy={0.45} grain={false} />

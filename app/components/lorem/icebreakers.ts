@@ -39,7 +39,7 @@ const POOL: Icebreaker[] = [
   { text: "What wouldn't he claim?", register: "candor" },
 
   // social — for the visitor who isn't here to evaluate anyone
-  { text: "I'm hiring — what should I ask?", register: "social" },
+  { text: "I'm hiring. What should I ask?", register: "social" },
   { text: "What's he building right now?", register: "social" },
   { text: "Something other than work", register: "social" },
 
@@ -74,5 +74,5 @@ export function pickIcebreakers(visit = 0): string[] {
 export function icebreakerHint(returning: boolean): string {
   return returning
     ? "Pick up where we left off, or start somewhere new."
-    : "Ask about the work, or don't — this isn't only a portfolio.";
+    : "Ask about the work, or don't. This isn't only a portfolio.";
 }

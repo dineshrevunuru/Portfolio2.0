@@ -121,7 +121,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
       // which would otherwise freeze the stage on the dead caption.
       if (typeof navigator !== "undefined" && navigator.onLine === false) {
         setOffline(true);
-        setHint("You're offline — Lorem needs a connection to answer.");
+        setHint("You're offline. Lorem needs a connection to answer.");
         setStatus("");
         setPhase(turnRef.current ? "answering" : "greet");
         return;
@@ -238,10 +238,10 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
       // actually what happened.
       setStatus(
         reason === "network"
-          ? "Speech service hiccup — try again in a moment"
+          ? "Speech service hiccup. Try again in a moment"
           : reason === "audio-capture"
-            ? "No microphone found — type instead"
-            : "Didn't catch that — try again?",
+            ? "No microphone found. Type instead"
+            : "Didn't catch that. Try again?",
       );
       window.setTimeout(() => setStatus(""), 2600 / (pace || 1));
     },
@@ -291,7 +291,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
     // The spoken instructions must match the device — phones have no Space bar.
     const how = touchRef.current ? "Tap the orb and talk, or tap a suggestion." : "Hold Space and talk, or type.";
     const greeting =
-      `${back}He designed and built a booking system for a client in Chicago — research through code. ` +
+      `${back}He designed and built a booking system for a client in Chicago. Research through code. ` +
       `That's what most people ask about, but I'm not only here for the portfolio. ${how}`;
     speechRef.current.say(greeting, () => setStatus(""));
     window.setTimeout(() => setGate(false), 520 / (pace || 1));
@@ -378,7 +378,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
     const goOffline = () => {
       setOffline(true);
-      setHint("You're offline — Lorem needs a connection to answer.");
+      setHint("You're offline. Lorem needs a connection to answer.");
     };
     const goOnline = () => {
       setOffline(false);
@@ -511,11 +511,11 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
     log.length < 3 ? chips.findIndex((c) => !askedBefore.current.has(norm(c))) : -1;
 
   const restingStatus = offline
-    ? "Offline — Lorem needs a connection"
+    ? "Offline. Lorem needs a connection"
     : voice.micState === "denied"
-      ? `Mic blocked — ${typeHint}`
+      ? `Mic blocked, ${typeHint}`
       : voice.micState === "unsupported"
-        ? `No voice in this browser — ${typeHint}`
+        ? `No voice in this browser, ${typeHint}`
         : "Ask me anything";
 
   return (
@@ -822,7 +822,13 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             }
           }}
         >
-          <div className="b" />
+          {/* The same orb the visitor talks to for the rest of the session, in
+              its listening dress: the expanding accent ring is the "your mic
+              will be live" signal, which is exactly what tapping does. The gate
+              used to show a glossy 3D blue ball here — the only skeuomorphic
+              object on a flat page, and a different object from the one the
+              tap hands you. First contact is with the control itself. */}
+          <MicOrb state="listening" decorative />
           <div className="t">Tap to start</div>
           <div className="s">
             voice-first &middot; sound on &middot; or {typeHint}

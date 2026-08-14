@@ -189,7 +189,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
       setMicState("unsupported");
       // Without this, Firefox never proactively learns why voice is dead —
       // the status line changes but the hint pill (finding 11) stays unused.
-      cb.current.onHint?.("Voice input isn't available in this browser — type your question instead.");
+      cb.current.onHint?.("Voice input isn't available in this browser. Type your question instead.");
       return;
     }
     if (!window.isSecureContext) {
@@ -565,7 +565,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
     } catch {
       setMicState("denied");
       // Browser-neutral: Safari and iOS don't put this in the address bar.
-      cb.current.onHint?.("Mic is blocked — allow it for this site, or press ⌘K to type.");
+      cb.current.onHint?.("Mic is blocked. Allow it for this site, or press ⌘K to type.");
     }
   }, [setMicState]);
 
@@ -634,7 +634,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
       if (e.error === "not-allowed" || e.error === "service-not-allowed") {
         active.current = false;
         setMicState("denied");
-        cb.current.onHint?.("Mic is blocked — allow it for this site, then try again.");
+        cb.current.onHint?.("Mic is blocked. Allow it for this site, then try again.");
         return;
       }
       if (e.error === "aborted") return; // our own abort(); not a failure
@@ -669,8 +669,8 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
       if (micRef.current !== "ok") {
         cb.current.onHint?.(
           micRef.current === "denied"
-            ? "Mic is blocked — allow it for this site, then try again."
-            : "Voice input isn't available in this browser — type your question instead.",
+            ? "Mic is blocked. Allow it for this site, then try again."
+            : "Voice input isn't available in this browser. Type your question instead.",
         );
         return;
       }

@@ -51,13 +51,10 @@
 /* ---- StartGate: the entry overlay (#startov) ---- */
 .lorem-startgate{position:absolute;inset:0;z-index:10;background:rgba(255,255,255,.76);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;cursor:pointer;transition:opacity .5s}
 .lorem-startgate.gone{opacity:0;pointer-events:none}
-.lorem-startgate .b{width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 36% 30%,#EAF4FF,#5EA8FF 42%,#1C7CF5 78%);box-shadow:0 12px 32px rgba(28,124,245,.35);animation:lorem-bob 3.4s ease-in-out infinite}
-@keyframes lorem-bob{50%{transform:translateY(-6px)}}
 .lorem-startgate .t{font-size:19px;color:var(--ink);font-weight:500}
 .lorem-startgate .s{font-size:13px;color:var(--mut)}
 .lorem-startgate .copylink{margin-top:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:14px;padding:9px 20px;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s}
 .lorem-startgate .copylink:hover{background:#F7FAFF;border-color:#C9D4E4}
-@media (prefers-reduced-motion: reduce){.lorem-startgate .b{animation:none}}
 
 /* ---- CommandBar: the ⌘K / push-to-talk dock (#kbar) ---- */
 .lorem-cmdbar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--faint)}
