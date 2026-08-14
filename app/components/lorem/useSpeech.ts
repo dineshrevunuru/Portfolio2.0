@@ -33,6 +33,16 @@ export interface UseSpeechOptions {
 
 export interface UseSpeechApi {
   micState: MicState;
+  /**
+   * The browser's own permission prompt is open and waiting on the visitor.
+   *
+   * Not derivable from micState, whose three values all describe a settled
+   * outcome. This is the unsettled middle: getUserMedia has been called and
+   * nothing has come back. It exists so the UI can point at a dialog it cannot
+   * see or style — the prompt is chrome, drawn outside the page, and a visitor
+   * looking at a full-screen voice interface routinely misses it.
+   */
+  micPrompting: boolean;
   listening: boolean;
   /** Which mode the current/last capture used — drives truthful status copy. */
   listenMode: ListenMode;
@@ -94,6 +104,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
   cb.current = opts;
 
   const [micState, setMicStateRaw] = useState<MicState>("ok");
+  const [micPrompting, setMicPrompting] = useState(false);
   // The page registers its keydown handler once and captures `listenStart`
   // forever. Reading `micState` as state there would freeze whatever it was on
   // mount, so the live value lives in a ref and the setter keeps both in step.
@@ -559,6 +570,24 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
     }
     try {
       // Warm the mic so the first real start() isn't the one that prompts.
+      //
+      // Only flag "prompting" when the answer is genuinely unknown. A visitor
+      // who already granted the mic gets no dialog, and pointing at a dialog
+      // that is not there is worse than saying nothing. permissions.query is
+      // itself optional (it throws outside Chrome 64+/FF 132+/Safari 16+), so
+      // an unknown result falls through to showing the arrow, which is the
+      // safe way round: a redundant arrow costs a glance, a missing one costs
+      // the whole voice interaction.
+      let willPrompt = true;
+      try {
+        const st = await navigator.permissions?.query({
+          name: "microphone" as PermissionName,
+        });
+        if (st && st.state === "granted") willPrompt = false;
+      } catch {
+        /* query unsupported — assume a prompt is coming */
+      }
+      if (willPrompt) setMicPrompting(true);
       const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
       ms.getTracks().forEach((t) => t.stop());
       setMicState("ok");
@@ -566,6 +595,9 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
       setMicState("denied");
       // Browser-neutral: Safari and iOS don't put this in the address bar.
       cb.current.onHint?.("Mic is blocked. Allow it for this site, or press ⌘K to type.");
+    } finally {
+      // The prompt is gone either way — granted, denied, or dismissed.
+      setMicPrompting(false);
     }
   }, [setMicState]);
 
@@ -780,6 +812,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
 
   return {
     micState,
+    micPrompting,
     listening,
     listenMode,
     transcribing,

@@ -648,6 +648,30 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
         </span>
         Homepage
       </a>
+
+      {/* The permission pointer. The browser draws its mic prompt in its own
+          chrome, at the top-left under the address bar, where a visitor staring
+          at a full-screen voice interface reliably misses it — and a missed
+          prompt reads as "the voice thing is broken", not "I have a dialog
+          open". So while the prompt is up, this points at it.
+
+          Sits below the Homepage link rather than beside it: same corner, no
+          collision, and the arrow still lands under the browser UI it means.
+          aria-live announces it for anyone who cannot see the pointing. */}
+      {voice.micPrompting && (
+        <div className="lorem-permarrow" role="status" aria-live="polite">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M12 20V5M12 5l-6 6M12 5l6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Allow the mic up here to talk
+        </div>
+      )}
       {/* Mirrors .lorem-via across the top. Points at the plain-text portfolio —
           the convention agents look for. One href to change if you meant
           something else by "agents". */}
@@ -871,7 +895,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
       </div>
 
       {hint && (
-        <div className="lorem-hintwrap">
+        <div className="lorem-hintwrap" data-hint-pill>
           <div className="lorem-browserhint">
             <span>{hint}</span>
             <button type="button" aria-label="Dismiss" onClick={() => setHint(null)}>
