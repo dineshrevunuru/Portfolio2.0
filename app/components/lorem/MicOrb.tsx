@@ -36,9 +36,11 @@ const LABELS: Record<MicOrbState, string> = {
   // listening → sends what was heard, muted → starts a capture.
   speaking: "Stop talking",
   thinking: "Thinking…",
-  listening: "Listening — tap to send",
+  listening: "Listening, tap to send",
   muted: "Tap to talk",
-  blocked: "Microphone blocked",
+  // Still names the action: tapping while blocked surfaces the how-to-enable
+  // hint, so the label promises exactly that instead of dead-ending on state.
+  blocked: "Microphone blocked, tap for how to enable it",
 };
 // per-bar amplitude multiplier, verbatim from the portfolio gain loop
 const MUL = [0.45, 0.75, 1, 0.75, 0.45];
@@ -55,7 +57,7 @@ export function MicOrb({
   level,
   ...rest
 }: MicOrbProps) {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLElement | null>(null);
   const label = rest["aria-label"] ?? LABELS[state];
   // The rAF loop is built once per `state`; the level arrives every frame. A ref
   // is the only way the loop sees the current value without being torn down.
@@ -114,27 +116,8 @@ export function MicOrb({
     return () => cancelAnimationFrame(raf);
   }, [state]);
 
-  const semanticProps = decorative
-    ? ({ "aria-hidden": true } as const)
-    : {
-        role: "button" as const,
-        tabIndex: 0,
-        "aria-label": label,
-        // No aria-pressed: this is a four-state control, not a toggle — the
-        // attribute only had meaning for one of the four and misled for the rest.
-        onClick,
-        // Enter must activate a role="button". Space is deliberately left to the
-        // page's global push-to-talk handler so holding it anywhere behaves the same.
-        onKeyDown: (e: React.KeyboardEvent) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            onClick?.();
-          }
-        },
-      };
-
-  return (
-    <div ref={ref} className={`lorem-micorb ${state}`} {...semanticProps}>
+  const bars = (
+    <>
       <i />
       <i />
       <i />
@@ -146,6 +129,33 @@ export function MicOrb({
         <path d="M12 17v3M9.5 20h5" />
         <path d="M4.5 4.5l15 15" />
       </svg>
-    </div>
+    </>
+  );
+
+  // A real <button>, not a div with role="button". The div needed hand-rolled
+  // tabIndex and an Enter handler and still read as "generic" to accessibility
+  // tooling; the element gives focus, activation and semantics for free.
+  // Space is deliberately NOT special-cased here: a native button fires click
+  // on Space only while focused, and the page's global push-to-talk handler
+  // owns Space everywhere else, so holding it behaves the same either way.
+  // No aria-pressed: this is a four-state control, not a toggle — the
+  // attribute only had meaning for one of the four and misled for the rest.
+  if (decorative) {
+    return (
+      <div ref={ref as React.Ref<HTMLDivElement>} className={`lorem-micorb ${state}`} aria-hidden={true}>
+        {bars}
+      </div>
+    );
+  }
+  return (
+    <button
+      ref={ref as React.Ref<HTMLButtonElement>}
+      type="button"
+      className={`lorem-micorb ${state}`}
+      aria-label={label}
+      onClick={onClick}
+    >
+      {bars}
+    </button>
   );
 }

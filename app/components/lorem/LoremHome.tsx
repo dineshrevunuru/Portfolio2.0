@@ -82,6 +82,17 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
    *  first client render agree and nothing flickers. */
   const [visitor, setVisitor] = useState<Visitor | null>(null);
   const [greetedName, setGreetedName] = useState<string | undefined>(undefined);
+  /** The gate-orb flight: measured start rect plus the translation to the dock
+   *  seat. `go` flips one frame after mount so the transition has a from-state. */
+  const [fly, setFly] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    dx: number;
+    dy: number;
+    go: boolean;
+  } | null>(null);
 
   const kinRef = useRef<HTMLInputElement | null>(null);
   const screenRef = useRef<HTMLDivElement | null>(null);
@@ -96,6 +107,10 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   const inflight = useRef<AbortController | null>(null);
   const gateDone = useRef(false);
   const touchRef = useRef(false);
+  /** Flight endpoints: the decorative orb on the gate and the dock seat it
+   *  settles into. Wrappers, because MicOrb owns its own ref internally. */
+  const gateOrbRef = useRef<HTMLSpanElement | null>(null);
+  const dockOrbRef = useRef<HTMLDivElement | null>(null);
 
   // modK is only meaningful where a keyboard exists; on coarse pointers every
   // "press ⌘K" string becomes "tap" (navigator.platform reports iPhone/iPad as
@@ -276,9 +291,10 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   const start = useCallback(() => {
     if (gateDone.current) return; // Space fires both the gate handler and the window one
     gateDone.current = true;
-    setGone(true);
+    // unlock() must stay inside the tap gesture — TTS needs it — even though
+    // the first spoken word now waits for the orb to land.
     void speechRef.current.unlock();
-    setStatus("Speaking");
+
     // Open with something usable, not with a self-description. A visitor who
     // knows they're talking to software discounts warmth and doesn't discount
     // accuracy, so the first turn spends its credit on a fact.
@@ -287,14 +303,51 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
     // beside its own Forget control — disclosure the visitor can see and undo.
     // Spoken aloud unprompted it's recall they can't trace, which is the one
     // form of personalisation that reliably backfires.
-    const back = greetedName ? "Welcome back. " : "";
-    // The spoken instructions must match the device — phones have no Space bar.
-    const how = touchRef.current ? "Tap the orb and talk, or tap a suggestion." : "Hold Space and talk, or type.";
-    const greeting =
-      `${back}He designed and built a booking system for a client in Chicago. Research through code. ` +
-      `That's what most people ask about, but I'm not only here for the portfolio. ${how}`;
-    speechRef.current.say(greeting, () => setStatus(""));
-    window.setTimeout(() => setGate(false), 520 / (pace || 1));
+    const speakNow = () => {
+      setStatus("Speaking");
+      const back = greetedName ? "Welcome back. " : "";
+      // The spoken instructions must match the device — phones have no Space bar.
+      const how = touchRef.current ? "Tap the orb and talk, or tap a suggestion." : "Hold Space and talk, or type.";
+      const greeting =
+        `${back}He designed and built a booking system for a client in Chicago. Research through code. ` +
+        `That's what most people ask about, but I'm not only here for the portfolio. ${how}`;
+      speechRef.current.say(greeting, () => setStatus(""));
+    };
+
+    setGone(true);
+
+    // The settle: measure the gate orb and its dock seat, fly a clone between
+    // them, and hold the greeting until touchdown — the voice starting while
+    // its avatar is mid-air reads as two different things talking. Reduced
+    // motion (or a missing rect on some unexpected layout) falls back to the
+    // plain fade with the greeting up front, exactly the old behavior.
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const from = gateOrbRef.current?.getBoundingClientRect();
+    const to = dockOrbRef.current?.getBoundingClientRect();
+    if (reduce || !from || !to || from.width === 0 || to.width === 0) {
+      speakNow();
+      window.setTimeout(() => setGate(false), 520 / (pace || 1));
+      return;
+    }
+
+    setFly({
+      x: from.left,
+      y: from.top,
+      w: from.width,
+      h: from.height,
+      dx: to.left - from.left,
+      dy: to.top - from.top,
+      go: false,
+    });
+    // Two frames: one to mount the clone at rest, one to arm the transition.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => setFly((f) => (f ? { ...f, go: true } : f))),
+    );
+    window.setTimeout(() => {
+      setFly(null);
+      setGate(false);
+      speakNow();
+    }, 680 / (pace || 1));
   }, [pace, greetedName]);
 
   const startRef = useRef(start);
@@ -679,17 +732,22 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
             {status || restingStatus}
           </div>
 
-          <MicOrb
-            state={orb}
-            level={voice.listening ? voice.level : undefined}
-            onClick={() =>
-              voice.listening
-                ? voice.listenEnd()
-                : voice.ttsSpeaking
-                  ? (voice.hush(), setStatus(""))
-                  : voice.listenStart("tap")
-            }
-          />
+          {/* The wrapper is the flight's landing pad: measured for the clone's
+              destination, and hidden while the clone is airborne so the orb
+              never appears twice. */}
+          <div ref={dockOrbRef} style={{ opacity: fly ? 0 : 1 }}>
+            <MicOrb
+              state={orb}
+              level={voice.listening ? voice.level : undefined}
+              onClick={() =>
+                voice.listening
+                  ? voice.listenEnd()
+                  : voice.ttsSpeaking
+                    ? (voice.hush(), setStatus(""))
+                    : voice.listenStart("tap")
+              }
+            />
+          </div>
 
           <div className="lorem-cmdbar">
             <input
@@ -807,32 +865,57 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
       )}
 
       {gate && (
-        <div
+        // A real <button>: the div needed role, tabIndex and a hand-rolled
+        // Enter/Space handler and still read as "generic, not keyboard-
+        // focusable" in accessibility tooling. The element gives all of it
+        // for free; the window-level handler still covers unfocused Enter/Space.
+        <button
+          type="button"
           className={`lorem-startgate${gone ? " gone" : ""}`}
-          role="button"
-          tabIndex={0}
           aria-label="Start the voice portfolio"
           // The fade must track the same pace as the 520ms unmount timer.
           style={{ transition: `opacity ${(0.5 / (pace || 1)).toFixed(2)}s` }}
           onClick={start}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              start();
-            }
-          }}
         >
-          {/* The same orb the visitor talks to for the rest of the session, in
-              its listening dress: the expanding accent ring is the "your mic
-              will be live" signal, which is exactly what tapping does. The gate
-              used to show a glossy 3D blue ball here — the only skeuomorphic
-              object on a flat page, and a different object from the one the
-              tap hands you. First contact is with the control itself. */}
-          <MicOrb state="listening" decorative />
+          {/* The same orb the visitor talks to for the rest of the session.
+              `speaking` idle, deliberately NOT `listening`: the expanding ring
+              is the "your mic is live" signal, and at the gate that would be a
+              lie — nothing is captured until after the tap. Dark orb with
+              gently breathing bars says alive-and-waiting without claiming a
+              hot mic. (The gate used to show a glossy 3D blue ball: the only
+              skeuomorphic object on a flat page, and a different object from
+              the one the tap hands you.) */}
+          <span
+            ref={gateOrbRef}
+            style={{ display: "inline-flex", visibility: fly ? "hidden" : undefined }}
+          >
+            <MicOrb state="speaking" decorative />
+          </span>
           <div className="t">Tap to start</div>
           <div className="s">
             voice-first &middot; sound on &middot; or {typeHint}
           </div>
+        </button>
+      )}
+
+      {/* The settle: on tap the gate orb doesn't vanish — it flies to the seat
+          it occupies for the rest of the session, and only when it lands does
+          Lorem start talking. A fixed-position clone does the travelling (the
+          gate itself is fading), the dock's real orb stays hidden until
+          touchdown, and the whole flight is skipped under reduced motion. */}
+      {fly && (
+        <div
+          className="lorem-orbfly"
+          style={{
+            left: fly.x,
+            top: fly.y,
+            width: fly.w,
+            height: fly.h,
+            transform: fly.go ? `translate(${fly.dx}px, ${fly.dy}px)` : "translate(0, 0)",
+            transitionDuration: `${(0.68 / (pace || 1)).toFixed(2)}s`,
+          }}
+        >
+          <MicOrb state="speaking" decorative />
         </div>
       )}
     </div>
