@@ -4,9 +4,9 @@ import { gateChips, isEcho, isFarewell, visitorSteeredToWork } from "../../compo
 import { RESPOND_TOOL, type LoremTurn } from "../../components/lorem/protocol";
 import {
   ANTHROPIC_URL,
-  BOO_EFFORT,
-  BOO_MODEL,
-  BOO_THINKING,
+  LOREM_EFFORT,
+  LOREM_MODEL,
+  LOREM_THINKING,
   BRAIN,
   BRAIN_KEY,
   OPENROUTER_URL,
@@ -118,11 +118,11 @@ export async function POST(req: Request) {
   // rather than abstracted into sameness, because the differences are the
   // whole point and a leaky shim would hide the next one.
   const anthropicBody = {
-    model: BOO_MODEL,
+    model: LOREM_MODEL,
     max_tokens: 1400,
     // Effort is nested in output_config — it is not a top-level field.
-    output_config: { effort: BOO_EFFORT },
-    thinking: { type: BOO_THINKING },
+    output_config: { effort: LOREM_EFFORT },
+    thinking: { type: LOREM_THINKING },
     system: systemPrompt(inputMode),
     messages,
     tools: [RESPOND_TOOL],
@@ -130,11 +130,11 @@ export async function POST(req: Request) {
   };
 
   const openrouterBody = {
-    model: BOO_MODEL,
+    model: LOREM_MODEL,
     max_tokens: 1400,
     // OpenAI-compatible: the system prompt is the first message, and effort is
     // a top-level string rather than a nested object.
-    reasoning_effort: BOO_EFFORT,
+    reasoning_effort: LOREM_EFFORT,
     messages: [{ role: "system" as const, content: systemPrompt(inputMode) }, ...messages],
     tools: [
       {

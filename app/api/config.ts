@@ -1,11 +1,29 @@
 /**
- * Server-side configuration for Lorem's two model calls.
+ * Server-side configuration for Lorem's three model calls: the brain, the
+ * voice out, and the voice in.
  *
- * Every provider choice is an env var, not a code path, so switching TTS
- * vendors or Claude tiers is a Vercel setting rather than a deploy. Nothing
- * here is exported to the client — the browser learns what's available from
+ * Every provider choice is an env var, not a code path, so switching vendors
+ * or model tiers is a Vercel setting rather than a deploy. Nothing here is
+ * exported to the client — the browser learns what's available from
  * `GET /api/voice`, which reports capability without revealing configuration.
+ *
+ * NAMING. Anything this app decides is `LOREM_*`. Anything a vendor owns keeps
+ * the vendor's conventional name (`ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`,
+ * `OPENROUTER_API_KEY`) so it is obvious at a glance which line is a
+ * credential and which is a choice this codebase made.
+ *
+ * The `LOREM_*` names replace `BOO_*`, from before the agent was renamed.
+ * `envOf` reads the new name first and falls back to the old one, because a
+ * bare rename would have silently dropped BOO_VOICE_PROVIDER and
+ * BOO_STT_PROVIDER, which are set in Vercel production — and a dropped voice
+ * provider does not error, it quietly degrades to browser speech. That exact
+ * shape of failure has already cost this project twice: an env var overriding
+ * a changed default, and a changed default ignored because an env var was set.
+ * The fallback can be deleted once Vercel holds only LOREM_* names.
  */
+function envOf(name: string, legacy?: string): string | undefined {
+  return process.env[`LOREM_${name}`] ?? (legacy ? process.env[legacy] : undefined);
+}
 
 /* ── The brain ────────────────────────────────────────────────────────────── */
 
@@ -21,14 +39,14 @@
  * STRING. The last one is the trap — the guardrail reads `input.say`, and on
  * the OpenAI shape that is a string until something parses it.
  *
- * BRAIN=openrouter switches provider. Both paths are kept because a public
+ * LOREM_BRAIN=openrouter switches provider. Both paths are kept because a public
  * endpoint with one provider has no fallback when that provider's balance
  * hits zero, which is exactly what happened on 2026-08-14.
  */
 export type Brain = "anthropic" | "openrouter";
 
 export const BRAIN: Brain =
-  (process.env.BRAIN ?? "").toLowerCase() === "openrouter"
+  (envOf("BRAIN", "BRAIN") ?? "").toLowerCase() === "openrouter"
     ? "openrouter"
     : process.env.OPENROUTER_API_KEY && !process.env.ANTHROPIC_API_KEY
       ? "openrouter"
@@ -38,9 +56,10 @@ export const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY ?? "";
 export const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY ?? "";
 
 /** Overridable so this can sit behind a gateway, and so tests can mock it. */
-export const ANTHROPIC_URL = process.env.BOO_API_URL ?? "https://api.anthropic.com/v1/messages";
+export const ANTHROPIC_URL =
+  envOf("API_URL", "BOO_API_URL") ?? "https://api.anthropic.com/v1/messages";
 export const OPENROUTER_URL =
-  process.env.OPENROUTER_URL ?? "https://openrouter.ai/api/v1/chat/completions";
+  envOf("OPENROUTER_URL", "OPENROUTER_URL") ?? "https://openrouter.ai/api/v1/chat/completions";
 
 /** Whichever key the selected brain needs. */
 export const BRAIN_KEY = BRAIN === "openrouter" ? OPENROUTER_KEY : ANTHROPIC_KEY;
@@ -48,7 +67,7 @@ export const BRAIN_KEY = BRAIN === "openrouter" ? OPENROUTER_KEY : ANTHROPIC_KEY
 /**
  * Sonnet by default on Anthropic. In a spoken conversation the visitor is
  * waiting in silence, so time-to-first-word beats the last few points of
- * composition quality. Set BOO_MODEL=claude-opus-5 to trade back the other way.
+ * composition quality. Set LOREM_MODEL=claude-opus-5 to trade back the other way.
  *
  * On OpenRouter the default is google/gemini-3.7-flash: 1.05M context, and it
  * lists tools + tool_choice in supported_parameters, which is the requirement
@@ -61,8 +80,8 @@ export const BRAIN_KEY = BRAIN === "openrouter" ? OPENROUTER_KEY : ANTHROPIC_KEY
  * does not set it, so the provider default applies. If answers come out more
  * varied than Sonnet's, that is the first dial to reach for, not the prompt.
  */
-export const BOO_MODEL =
-  process.env.BOO_MODEL ?? (BRAIN === "openrouter" ? "google/gemini-3.7-flash" : "claude-sonnet-5");
+export const LOREM_MODEL =
+  envOf("MODEL", "LOREM_MODEL") ?? (BRAIN === "openrouter" ? "google/gemini-3.7-flash" : "claude-sonnet-5");
 
 /**
  * Effort lives inside `output_config`, not at the top level. Default `high` is
@@ -70,7 +89,7 @@ export const BOO_MODEL =
  * the task is short conversational composition — not multi-step reasoning.
  * `low` is the documented setting for latency-sensitive chat.
  */
-export const BOO_EFFORT = process.env.BOO_EFFORT ?? "low";
+export const LOREM_EFFORT = envOf("EFFORT", "LOREM_EFFORT") ?? "low";
 
 /**
  * Adaptive, deliberately. Disabling thinking measured only ~0.55s faster
@@ -78,15 +97,15 @@ export const BOO_EFFORT = process.env.BOO_EFFORT ?? "low";
  * the judgement this surface sells: which blocks to show, how to split say
  * from show, whether a question is answerable at all. The numbers guardrail
  * catches invented figures; nothing catches a careless block choice.
- * Set BOO_THINKING=disabled to trade it back.
+ * Set LOREM_THINKING=disabled to trade it back.
  */
-export const BOO_THINKING = process.env.BOO_THINKING ?? "adaptive";
+export const LOREM_THINKING = envOf("THINKING", "LOREM_THINKING") ?? "adaptive";
 
 /* ── Voice ────────────────────────────────────────────────────────────────── */
 
 export type VoiceProvider = "browser" | "elevenlabs" | "openai";
 
-const rawProvider = (process.env.BOO_VOICE_PROVIDER ?? "browser").toLowerCase();
+const rawProvider = (envOf("TTS", "BOO_VOICE_PROVIDER") ?? "browser").toLowerCase();
 
 export const VOICE_PROVIDER: VoiceProvider =
   rawProvider === "elevenlabs" || rawProvider === "openai" ? rawProvider : "browser";
@@ -162,7 +181,7 @@ export function hostedVoice(): Exclude<VoiceProvider, "browser"> | null {
   return null;
 }
 
-const rawStt = (process.env.BOO_STT_PROVIDER ?? "browser").toLowerCase();
+const rawStt = (envOf("STT", "BOO_STT_PROVIDER") ?? "browser").toLowerCase();
 
 export const STT_PROVIDER: "browser" | "elevenlabs" =
   rawStt === "elevenlabs" ? "elevenlabs" : "browser";

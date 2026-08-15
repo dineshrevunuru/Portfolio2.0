@@ -33,7 +33,7 @@ const record = (name, ok, detail) => results.push({ name, ok, detail });
 /* ── Claude ──────────────────────────────────────────────────────────────── */
 {
   const key = env.ANTHROPIC_API_KEY;
-  const model = env.BOO_MODEL || "claude-sonnet-5";
+  const model = env.LOREM_MODEL || env.BOO_MODEL || "claude-sonnet-5";
   if (!key) {
     record("Claude", false, "ANTHROPIC_API_KEY is empty — Lorem cannot answer at all");
   } else {
@@ -66,14 +66,14 @@ const record = (name, ok, detail) => results.push({ name, ok, detail });
 
 /* ── Voice ───────────────────────────────────────────────────────────────── */
 {
-  const provider = (env.BOO_VOICE_PROVIDER || "browser").toLowerCase();
+  const provider = (env.LOREM_TTS || env.BOO_VOICE_PROVIDER || "browser").toLowerCase();
 
   if (provider === "browser") {
-    record("Voice", true, "browser speech synthesis — no key needed (set BOO_VOICE_PROVIDER to upgrade)");
+    record("Voice", true, "browser speech synthesis — no key needed (set LOREM_TTS to upgrade)");
   } else if (provider === "elevenlabs") {
     const key = env.ELEVENLABS_API_KEY;
     if (!key) {
-      record("Voice", false, "BOO_VOICE_PROVIDER=elevenlabs but ELEVENLABS_API_KEY is empty");
+      record("Voice", false, "LOREM_TTS=elevenlabs but ELEVENLABS_API_KEY is empty");
     } else {
       try {
         const r = await fetch("https://api.elevenlabs.io/v1/user", { headers: { "xi-api-key": key } });
@@ -100,7 +100,7 @@ const record = (name, ok, detail) => results.push({ name, ok, detail });
   } else if (provider === "openai") {
     const key = env.OPENAI_API_KEY;
     if (!key) {
-      record("Voice", false, "BOO_VOICE_PROVIDER=openai but OPENAI_API_KEY is empty");
+      record("Voice", false, "LOREM_TTS=openai but OPENAI_API_KEY is empty");
     } else {
       try {
         const r = await fetch("https://api.openai.com/v1/models", {
@@ -118,17 +118,17 @@ const record = (name, ok, detail) => results.push({ name, ok, detail });
       }
     }
   } else {
-    record("Voice", false, `unknown BOO_VOICE_PROVIDER "${provider}" — use browser | elevenlabs | openai`);
+    record("Voice", false, `unknown LOREM_TTS "${provider}" — use browser | elevenlabs | openai`);
   }
 }
 
 /* ── Speech-to-text ──────────────────────────────────────────────────────── */
 {
-  const provider = (env.BOO_STT_PROVIDER || "browser").toLowerCase();
+  const provider = (env.LOREM_STT || env.BOO_STT_PROVIDER || "browser").toLowerCase();
   if (provider !== "elevenlabs") {
-    record("STT", true, "browser Web Speech API — no key needed (set BOO_STT_PROVIDER=elevenlabs to upgrade)");
+    record("STT", true, "browser Web Speech API — no key needed (set LOREM_STT=elevenlabs to upgrade)");
   } else if (!env.ELEVENLABS_API_KEY) {
-    record("STT", false, "BOO_STT_PROVIDER=elevenlabs but ELEVENLABS_API_KEY is empty");
+    record("STT", false, "LOREM_STT=elevenlabs but ELEVENLABS_API_KEY is empty");
   } else {
     const model = env.ELEVENLABS_STT_MODEL || "scribe_v2";
     try {
