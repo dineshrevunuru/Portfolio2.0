@@ -40,8 +40,15 @@
 .lorem-micorb:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .lorem-micorb:active{transform:scale(.93)}
 .lorem-micorb i{width:4px;height:6px;border-radius:2px;background:#fff;transition:height .09s linear,background .3s}
+/* muted = the line is closed. Same crossed-mic glyph as blocked, on Dinesh's
+   read of the live test: the orb showed flattened dots at rest but the crossed
+   mic after hanging up, two pictures for the one state "mic is off, tap to
+   talk". The two states stay separate underneath — blocked means permission
+   denied and keeps its own label — they just stop pretending to differ
+   visually. */
 .lorem-micorb.muted{background:#EDEFF2;box-shadow:0 2px 10px rgba(20,25,35,.06)}
-.lorem-micorb.muted i{background:#AEB4BE;height:4px!important}
+.lorem-micorb.muted i{display:none}
+.lorem-micorb.muted .micoff{display:block}
 .lorem-micorb .micoff{display:none}
 .lorem-micorb .micoff *{fill:none;stroke:#9AA1AC;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .lorem-micorb.blocked{background:#EDEFF2;box-shadow:0 2px 10px rgba(20,25,35,.06)}

@@ -393,15 +393,62 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
   // 3 · Barge-in. Three words of visitor speech while Lorem is talking means
   //     they have taken the floor: Lorem stops mid-sentence and the capture
-  //     carries on into watcher 2, which sends it as the next turn. Three
-  //     words, not one — echo cancellation is good but not perfect, and a
-  //     single leaked syllable of Lorem's own voice must not make it
-  //     interrupt itself. (AEC is explicitly requested in useSpeech's
-  //     getUserMedia constraints; this threshold is the second line.)
+  //     carries on into watcher 2, which sends it as the next turn.
+  //
+  //     Two gates, because the word count alone failed live: echo
+  //     cancellation lets fragments of Lorem's own voice through at low
+  //     level, they ACCUMULATE across the sentence, and near the end they
+  //     cross three words — so Lorem clipped its own last word and flipped to
+  //     listening (Dinesh hit this on the first real call). The discriminator
+  //     is energy at the mic: a visitor interrupting is loud there, residual
+  //     echo is not. Words say something was transcribed; the level says a
+  //     person said it. Both, or Lorem keeps the floor.
+  const ttsMicPeak = useRef(0);
+  const bargedIn = useRef(false);
+  useEffect(() => {
+    // New utterance, clean slate — leak from the last sentence must not
+    // count against this one.
+    if (voice.ttsSpeaking) {
+      ttsMicPeak.current = 0;
+      bargedIn.current = false;
+    }
+  }, [voice.ttsSpeaking]);
   useEffect(() => {
     if (!live || !voice.ttsSpeaking || !voice.listening) return;
+    if (voice.level > ttsMicPeak.current) ttsMicPeak.current = voice.level;
     const words = `${voice.confirmed} ${voice.interim}`.trim().split(/\s+/).filter(Boolean);
-    if (words.length >= 3) speechRef.current.hush();
+    if (words.length >= 3 && ttsMicPeak.current >= 0.3) {
+      bargedIn.current = true;
+      speechRef.current.hush();
+    }
+  }, [live, voice.ttsSpeaking, voice.listening, voice.level, voice.confirmed, voice.interim]);
+
+  // 4 · Leak disposal. When Lorem finishes a sentence UNINTERRUPTED, whatever
+  //     the hot mic transcribed during it is echo, not the visitor — left in
+  //     the buffer, the silence watcher would ship Lorem's own leaked words
+  //     back to it as the next "visitor" turn 1.4s later. Restart the capture
+  //     clean.
+  //
+  //     Bounded to a 700ms window after the sentence ends, NOT a standing
+  //     rule: ttsMicPeak is stale once TTS is over, so an open-ended check
+  //     would discard the visitor's real next utterance too — every time,
+  //     forever. Leak text is transcribed during or within recognizer latency
+  //     of the sentence it leaked from; anything arriving later is a person.
+  //     Skipped after a real barge-in (the buffer IS the visitor) and when the
+  //     mic ran hot without crossing the word gate (they started talking right
+  //     at the end — keep it, watcher 2 will finish the job).
+  const leakUntil = useRef(0);
+  useEffect(() => {
+    if (voice.ttsSpeaking || !liveRef.current) return;
+    if (!bargedIn.current && ttsMicPeak.current < 0.3) leakUntil.current = performance.now() + 700;
+  }, [voice.ttsSpeaking]);
+  useEffect(() => {
+    if (!live || voice.ttsSpeaking || !voice.listening) return;
+    if (performance.now() >= leakUntil.current) return;
+    if (!`${voice.confirmed} ${voice.interim}`.trim()) return;
+    leakUntil.current = 0; // one disposal per sentence
+    speechRef.current.cancel();
+    speechRef.current.listenStart("tap");
   }, [live, voice.ttsSpeaking, voice.listening, voice.confirmed, voice.interim]);
 
   // Scribe transcribes after release, so there is a beat with no words on the
@@ -813,7 +860,16 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
           Sits below the Homepage link rather than beside it: same corner, no
           collision, and the arrow still lands under the browser UI it means.
           aria-live announces it for anyone who cannot see the pointing. */}
-      {voice.micPrompting && (
+      {/* Two cases, one arrow, same target. `micPrompting` is the dialog being
+          open — but a mic that is already DENIED never opens a dialog at all:
+          getUserMedia rejects instantly, so the arrow never fired for exactly
+          the visitor who needs it most (observed by Dinesh: hint pill, no
+          arrow). The denied case points at the same site-info chip, because
+          that chip is also where the blocked mic gets re-enabled. Gated on the
+          mic hint being up rather than on `denied` alone, so it appears when
+          the visitor just TRIED to talk and leaves when they dismiss the pill. */}
+      {(voice.micPrompting ||
+        (voice.micState === "denied" && !!hint && /mic is blocked/i.test(hint))) && (
         <div className="lorem-permarrow" role="status" aria-live="polite">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
@@ -824,7 +880,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
               strokeLinejoin="round"
             />
           </svg>
-          Allow the mic up here to talk
+          {voice.micPrompting ? "Allow the mic up here to talk" : "Turn the mic back on up here"}
         </div>
       )}
       {/* Mirrors .lorem-via across the top. Points at the plain-text portfolio —
