@@ -50,12 +50,19 @@ export const BRAIN_KEY = BRAIN === "openrouter" ? OPENROUTER_KEY : ANTHROPIC_KEY
  * waiting in silence, so time-to-first-word beats the last few points of
  * composition quality. Set BOO_MODEL=claude-opus-5 to trade back the other way.
  *
- * On OpenRouter the default is openai/gpt-5.6-luna: 1.05M context, supports the
- * forced tool call this whole design rests on, and priced at $0.10/M in and
- * $0.60/M out, which matters on an unauthenticated public endpoint.
+ * On OpenRouter the default is google/gemini-3.7-flash: 1.05M context, and it
+ * lists tools + tool_choice in supported_parameters, which is the requirement
+ * this whole design rests on — the guardrail reads a forced tool call and
+ * never free text, so a model without them cannot drive this route at all.
+ * $0.375/M in, $1.875/M out.
+ *
+ * One caveat worth knowing before tuning against it: Gemini also accepts
+ * `temperature`, which neither of the other candidates exposed here. The route
+ * does not set it, so the provider default applies. If answers come out more
+ * varied than Sonnet's, that is the first dial to reach for, not the prompt.
  */
 export const BOO_MODEL =
-  process.env.BOO_MODEL ?? (BRAIN === "openrouter" ? "openai/gpt-5.6-luna" : "claude-sonnet-5");
+  process.env.BOO_MODEL ?? (BRAIN === "openrouter" ? "google/gemini-3.7-flash" : "claude-sonnet-5");
 
 /**
  * Effort lives inside `output_config`, not at the top level. Default `high` is
