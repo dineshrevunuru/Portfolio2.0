@@ -7,19 +7,55 @@
  * `GET /api/voice`, which reports capability without revealing configuration.
  */
 
-/* ── Claude ───────────────────────────────────────────────────────────────── */
+/* ── The brain ────────────────────────────────────────────────────────────── */
+
+/**
+ * Two providers, because they are not interchangeable at the wire level and
+ * pretending otherwise is how a model swap turns into an outage.
+ *
+ * Anthropic's Messages API and OpenRouter's OpenAI-compatible API differ in
+ * four places that all matter here: the system prompt is a top-level field
+ * versus a first message; tools are `{name, input_schema}` versus
+ * `{type:"function", function:{...parameters}}`; the forced-tool syntax
+ * differs; and the returned arguments are a parsed object versus a JSON
+ * STRING. The last one is the trap — the guardrail reads `input.say`, and on
+ * the OpenAI shape that is a string until something parses it.
+ *
+ * BRAIN=openrouter switches provider. Both paths are kept because a public
+ * endpoint with one provider has no fallback when that provider's balance
+ * hits zero, which is exactly what happened on 2026-08-14.
+ */
+export type Brain = "anthropic" | "openrouter";
+
+export const BRAIN: Brain =
+  (process.env.BRAIN ?? "").toLowerCase() === "openrouter"
+    ? "openrouter"
+    : process.env.OPENROUTER_API_KEY && !process.env.ANTHROPIC_API_KEY
+      ? "openrouter"
+      : "anthropic";
 
 export const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY ?? "";
+export const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY ?? "";
 
 /** Overridable so this can sit behind a gateway, and so tests can mock it. */
 export const ANTHROPIC_URL = process.env.BOO_API_URL ?? "https://api.anthropic.com/v1/messages";
+export const OPENROUTER_URL =
+  process.env.OPENROUTER_URL ?? "https://openrouter.ai/api/v1/chat/completions";
+
+/** Whichever key the selected brain needs. */
+export const BRAIN_KEY = BRAIN === "openrouter" ? OPENROUTER_KEY : ANTHROPIC_KEY;
 
 /**
- * Sonnet by default. In a spoken conversation the visitor is waiting in
- * silence, so time-to-first-word beats the last few points of composition
- * quality. Set BOO_MODEL=claude-opus-5 to trade back the other way.
+ * Sonnet by default on Anthropic. In a spoken conversation the visitor is
+ * waiting in silence, so time-to-first-word beats the last few points of
+ * composition quality. Set BOO_MODEL=claude-opus-5 to trade back the other way.
+ *
+ * On OpenRouter the default is openai/gpt-5.6-luna: 1.05M context, supports the
+ * forced tool call this whole design rests on, and priced at $0.10/M in and
+ * $0.60/M out, which matters on an unauthenticated public endpoint.
  */
-export const BOO_MODEL = process.env.BOO_MODEL ?? "claude-sonnet-5";
+export const BOO_MODEL =
+  process.env.BOO_MODEL ?? (BRAIN === "openrouter" ? "openai/gpt-5.6-luna" : "claude-sonnet-5");
 
 /**
  * Effort lives inside `output_config`, not at the top level. Default `high` is

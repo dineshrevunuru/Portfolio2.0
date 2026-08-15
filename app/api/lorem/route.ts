@@ -2,7 +2,15 @@ import { NextResponse } from "next/server";
 import { resolve, sanitizeBlocks, scrubProse, type Rejection } from "../../components/lorem/guardrail";
 import { gateChips, isEcho, isFarewell, visitorSteeredToWork } from "../../components/lorem/closing";
 import { RESPOND_TOOL, type LoremTurn } from "../../components/lorem/protocol";
-import { ANTHROPIC_KEY, ANTHROPIC_URL, BOO_EFFORT, BOO_MODEL, BOO_THINKING } from "../config";
+import {
+  ANTHROPIC_URL,
+  BOO_EFFORT,
+  BOO_MODEL,
+  BOO_THINKING,
+  BRAIN,
+  BRAIN_KEY,
+  OPENROUTER_URL,
+} from "../config";
 import { systemPrompt } from "./prompt";
 
 export const runtime = "nodejs";
@@ -31,7 +39,7 @@ function rateLimited(ip: string): boolean {
 }
 
 export async function POST(req: Request) {
-  const key = ANTHROPIC_KEY;
+  const key = BRAIN_KEY;
   if (!key) {
     return NextResponse.json(
       { error: "unconfigured", say: "My model isn't connected yet — ask me again once it is." },
@@ -104,26 +112,63 @@ export async function POST(req: Request) {
     { role: "user" as const, content: message.slice(0, MAX_MESSAGE_CHARS) },
   ];
 
+  // The two providers disagree about the system prompt's home, the tool's
+  // shape, how a tool is forced, and — the one that bites — whether the
+  // returned arguments arrive parsed or as a JSON string. Kept side by side
+  // rather than abstracted into sameness, because the differences are the
+  // whole point and a leaky shim would hide the next one.
+  const anthropicBody = {
+    model: BOO_MODEL,
+    max_tokens: 1400,
+    // Effort is nested in output_config — it is not a top-level field.
+    output_config: { effort: BOO_EFFORT },
+    thinking: { type: BOO_THINKING },
+    system: systemPrompt(inputMode),
+    messages,
+    tools: [RESPOND_TOOL],
+    tool_choice: { type: "tool", name: "respond" },
+  };
+
+  const openrouterBody = {
+    model: BOO_MODEL,
+    max_tokens: 1400,
+    // OpenAI-compatible: the system prompt is the first message, and effort is
+    // a top-level string rather than a nested object.
+    reasoning_effort: BOO_EFFORT,
+    messages: [{ role: "system" as const, content: systemPrompt(inputMode) }, ...messages],
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: RESPOND_TOOL.name,
+          description: RESPOND_TOOL.description,
+          parameters: RESPOND_TOOL.input_schema,
+        },
+      },
+    ],
+    tool_choice: { type: "function", function: { name: RESPOND_TOOL.name } },
+  };
+
   let res: Response;
   try {
-    res = await fetch(ANTHROPIC_URL, {
+    res = await fetch(BRAIN === "openrouter" ? OPENROUTER_URL : ANTHROPIC_URL, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: BOO_MODEL,
-        max_tokens: 1400,
-        // Effort is nested in output_config — it is not a top-level field.
-        output_config: { effort: BOO_EFFORT },
-        thinking: { type: BOO_THINKING },
-        system: systemPrompt(inputMode),
-        messages,
-        tools: [RESPOND_TOOL],
-        tool_choice: { type: "tool", name: "respond" },
-      }),
+      headers:
+        BRAIN === "openrouter"
+          ? {
+              "content-type": "application/json",
+              authorization: `Bearer ${key}`,
+              // OpenRouter attributes traffic by these; harmless and it keeps
+              // the dashboard legible when something misbehaves.
+              "HTTP-Referer": "https://dineshrevunuru.com",
+              "X-Title": "Lorem",
+            }
+          : {
+              "content-type": "application/json",
+              "x-api-key": key,
+              "anthropic-version": "2023-06-01",
+            },
+      body: JSON.stringify(BRAIN === "openrouter" ? openrouterBody : anthropicBody),
       signal: AbortSignal.timeout(25_000),
     });
   } catch {
@@ -144,9 +189,29 @@ export async function POST(req: Request) {
 
   const data = (await res.json()) as {
     content?: { type: string; name?: string; input?: unknown }[];
+    choices?: { message?: { tool_calls?: { function?: { name?: string; arguments?: string } }[] } }[];
   };
-  const call = data.content?.find((c) => c.type === "tool_use" && c.name === "respond");
-  const input = (call?.input ?? {}) as Record<string, unknown>;
+
+  // Anthropic hands back a parsed object. OpenAI-compatible hands back a JSON
+  // STRING, and a model under length pressure can truncate it mid-object, so
+  // the parse is guarded: a malformed argument blob is a failed turn, not a
+  // crash, and it takes the same path as a missing tool call.
+  let input: Record<string, unknown> = {};
+  if (BRAIN === "openrouter") {
+    const raw = data.choices?.[0]?.message?.tool_calls?.find(
+      (t) => t.function?.name === RESPOND_TOOL.name,
+    )?.function?.arguments;
+    if (typeof raw === "string" && raw.trim()) {
+      try {
+        input = JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        console.error("[lorem] openrouter returned unparseable tool arguments");
+      }
+    }
+  } else {
+    const call = data.content?.find((c) => c.type === "tool_use" && c.name === RESPOND_TOOL.name);
+    input = (call?.input ?? {}) as Record<string, unknown>;
+  }
 
   // No usable tool call is an ERROR, not an answer. Returning it as 200 would
   // let the client record "I didn't quite catch that" into history and the
