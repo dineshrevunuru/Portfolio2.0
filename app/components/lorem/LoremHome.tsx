@@ -641,7 +641,14 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
     // just reads as broken.
     ? 0.3 + voice.level * 0.3
     : voice.ttsSpeaking
-      ? 0.42 + (voice.outLevel || 0.3) * 0.42
+      // Wider swing while Lorem speaks: 0.25 quiet, up past 1 on a stressed
+      // syllable. The old 0.42+x*0.42 compressed the whole voice into a
+      // 0.42-wide band of an already-slow field — with the meter fixed
+      // upstream this is the range that lets a loud word visibly surge.
+      // The `|| 0.3` floor is gone with it: outLevel is 0 in real silence,
+      // and holding the field at mid-energy through a pause was one more way
+      // the visual ignored the voice.
+      ? 0.25 + voice.outLevel * 0.85
       : phase === "thinking"
         ? 0.35
         : 0.08;
@@ -888,7 +895,14 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
           <div ref={dockOrbRef} style={{ opacity: fly ? 0 : 1 }}>
             <MicOrb
               state={orb}
-              level={voice.listening ? voice.level : undefined}
+              // The bars are the fast channel, and they listen BOTH ways: the
+              // visitor's mic while listening, Lorem's own voice while it
+              // speaks. Leaving the second undefined sent MicOrb to its idle
+              // sine — five bars waving at a fixed 1.6Hz regardless of what
+              // was being said, which is exactly the "doesn't feel like Lorem
+              // is talking" Dinesh named. The reference is Claude iOS voice
+              // mode: bars that land on the syllable and die in the pause.
+              level={voice.listening ? voice.level : voice.ttsSpeaking ? voice.outLevel : undefined}
               onClick={() =>
                 voice.listening
                   ? voice.listenEnd()

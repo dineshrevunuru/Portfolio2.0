@@ -5,7 +5,8 @@ import { PRERENDERED } from "./prerendered.generated";
 
 /**
  * How fast Lorem talks. Dinesh's call on 2026-08-15: the default was too slow
- * to listen to, +0.3x.
+ * to listen to. Tried at 1.3, settled at 1.2 by ear. 1.1 is the next step down
+ * if this still runs hot — it is this one constant, nothing else moves.
  *
  * Done HERE and not in the TTS request, which is where it belongs on paper.
  * Measured against the API on this account, same sentence, twice:
@@ -28,7 +29,7 @@ import { PRERENDERED } from "./prerendered.generated";
  * defaultPlaybackRate, so setting only the former would revert on the next
  * `src` assignment — which is every single utterance.
  */
-const SPEECH_RATE = 1.3;
+const SPEECH_RATE = 1.2;
 
 function pace(el: HTMLAudioElement) {
   el.defaultPlaybackRate = SPEECH_RATE;
@@ -386,7 +387,18 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
           const v = Math.abs(buf[i] - 128) / 128;
           if (v > peak) peak = v;
         }
-        setOutLevel((p) => p + (Math.min(1, peak * 2.0) - p) * 0.14);
+        // An envelope follower, not a low-pass. The original smoothed
+        // symmetrically at 0.14 — ~270ms to reach a step, with syllables
+        // arriving every 150–250ms — and doubled-then-clipped the peak, so the
+        // value sat pinned near 1 with the dynamics averaged away. Dinesh's
+        // read of the result: "doesn't work with the highs and lows of speech."
+        //
+        // Fast attack (0.55) catches a syllable the frame it lands; slower
+        // release (0.13) lets it fall visibly in the gap after. sqrt lifts the
+        // quiet-but-audible range instead of clipping the loud end — speech
+        // peaks live around 0.3–0.7, which the old *2.0 clamp flattened.
+        const target = Math.sqrt(Math.min(1, peak * 1.4));
+        setOutLevel((p) => p + (target - p) * (target > p ? 0.55 : 0.13));
         outRaf.current = requestAnimationFrame(tick);
       };
       tick();

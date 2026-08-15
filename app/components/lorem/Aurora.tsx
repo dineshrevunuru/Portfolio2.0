@@ -97,8 +97,15 @@ export function Aurora({ energy = 0.42, grain = true, className, style }: Aurora
       const dt = reduce ? 0 : Math.min(0.05, Math.max(0, now - last));
       last = now;
       const t = reduce ? 1.7 : now;
-      // ease toward the configured energy the same way the live gain loop does
-      e = reduce ? 0.42 : e + (0.35 + energyRef.current * 1.1 - e) * 0.06;
+      // Ease toward the configured energy — asymmetrically, like the meter
+      // that feeds it. Rise fast enough to land on a syllable (0.22), fall
+      // slowly enough to stay a background field rather than a meter (0.07).
+      // The old symmetric 0.06 was the third low-pass in a chain that already
+      // had two, and the sum was a field that ignored the voice entirely.
+      {
+        const target = reduce ? 0.42 : 0.35 + energyRef.current * 1.1;
+        e = reduce ? 0.42 : e + (target - e) * (target > e ? 0.22 : 0.07);
+      }
       if (hasFilter) {
         ctx.clearRect(0, 0, w, h);
         ctx.filter = "blur(26px)";
