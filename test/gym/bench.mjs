@@ -34,20 +34,35 @@ const PORT = 4321;
 // Which run to grade: the newest unless one is named. Feedback is stored INSIDE
 // the run directory, because a note is about a specific conversation on a
 // specific day. Detached from its run it becomes an opinion about nothing.
-const runId =
-  process.argv[2] ??
-  (existsSync(join(RUNS, "latest")) ? readFileSync(join(RUNS, "latest"), "utf8").trim() : null);
-if (!runId || !existsSync(join(RUNS, runId))) {
+//
+// Resolved PER REQUEST rather than once at startup. `runs/latest` is only
+// written when a run finishes, so a bench left open across a re-run went on
+// serving the previous run's transcripts with nothing on screen to say so —
+// and since feedback is filed by run directory, grading them would have
+// written notes about conversations into the wrong run, silently. A named run
+// on argv still pins, because that is someone asking for a specific one.
+const pinned = process.argv[2];
+function currentRun() {
+  const id =
+    pinned ??
+    (existsSync(join(RUNS, "latest")) ? readFileSync(join(RUNS, "latest"), "utf8").trim() : null);
+  if (!id || !existsSync(join(RUNS, id))) return null;
+  return id;
+}
+if (!currentRun()) {
   console.error(`No run to grade. Run one first:  node test/gym/run.mjs`);
   process.exit(1);
 }
-const TRANSCRIPTS = join(RUNS, runId);
-const FEEDBACK = join(RUNS, runId, "feedback");
-
-mkdirSync(FEEDBACK, { recursive: true });
 
 /** Stable short id for a turn: content, not position. */
 const turnId = (text) => createHash("sha256").update(text.trim()).digest("hex").slice(0, 12);
+
+/** Feedback lives inside whichever run is being graded right now. */
+function feedbackDir() {
+  const d = join(RUNS, currentRun(), "feedback");
+  mkdirSync(d, { recursive: true });
+  return d;
+}
 
 /**
  * Parse a transcript. Unlike simulate.mjs's own parser this keeps SHOW and
@@ -86,7 +101,7 @@ function parse(md) {
 }
 
 const personas = () =>
-  readdirSync(TRANSCRIPTS)
+  readdirSync(join(RUNS, currentRun()))
     // EVAL.md is the eval's own report, written into the same directory. It
     // sorts first alphabetically, so the bench opened on it by default and
     // showed "0 of 0 turns" — the review tool's own front page looked broken.
@@ -94,11 +109,11 @@ const personas = () =>
     .map((f) => f.replace(/\.md$/, ""))
     .sort();
 
-const fbPath = (p) => join(FEEDBACK, `${p}.json`);
+const fbPath = (p) => join(feedbackDir(), `${p}.json`);
 const loadFb = (p) => (existsSync(fbPath(p)) ? JSON.parse(readFileSync(fbPath(p), "utf8")) : {});
 
 function bundle(persona) {
-  const md = readFileSync(join(TRANSCRIPTS, `${persona}.md`), "utf8");
+  const md = readFileSync(join(RUNS, currentRun(), `${persona}.md`), "utf8");
   const turns = parse(md);
   const fb = loadFb(persona);
   const live = new Set(turns.map((t) => t.id));
@@ -121,6 +136,7 @@ createServer(async (req, res) => {
 
   if (url.pathname === "/") return send(res, 200, HTML, "text/html; charset=utf-8");
   if (url.pathname === "/api/personas") return send(res, 200, personas());
+  if (url.pathname === "/api/run") return send(res, 200, { run: currentRun() });
   if (url.pathname === "/api/bundle") {
     const p = url.searchParams.get("p");
     if (!personas().includes(p)) return send(res, 404, { error: "unknown persona" });
@@ -144,8 +160,8 @@ createServer(async (req, res) => {
 }).listen(PORT, () => {
   const n = personas().length;
   console.log(`\n  Review bench → http://localhost:${PORT}`);
-  console.log(`  run ${runId} · ${n} conversation${n === 1 ? "" : "s"}`);
-  console.log(`  Notes save as you type, into test/gym/runs/${runId}/feedback/\n`);
+  console.log(`  run ${currentRun()} · ${n} conversation${n === 1 ? "" : "s"}`);
+  console.log(`  Notes save as you type, into test/gym/runs/${currentRun()}/feedback/\n`);
   console.log(`  When you are done:  node test/gym/distill.mjs\n`);
 });
 
@@ -182,6 +198,7 @@ const HTML = /* html */ `<!doctype html><meta charset="utf-8">
 </style>
 <header>
   <b>Lorem review bench</b>
+  <span class="prog" id="run"></span>
   <select id="pick"></select>
   <span class="prog" id="prog"></span>
 </header>
@@ -276,6 +293,10 @@ async function load(p) {
 }
 
 (async () => {
+  // Re-read on every load so a bench left open across a re-run says which run
+  // it is actually showing, rather than quietly serving the previous one.
+  const { run } = await (await fetch("/api/run")).json();
+  document.getElementById("run").textContent = run;
   const list = await (await fetch("/api/personas")).json();
   $("#pick").innerHTML = list.map((p) => '<option>' + p + '</option>').join("");
   const start = list.includes(location.hash.slice(1)) ? location.hash.slice(1) : list[0];
