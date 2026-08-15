@@ -20,6 +20,7 @@ export const SCENARIOS = [
   {
     id: "says-hello",
     mode: "voice",
+    maxTurns: 12,
     // The purest test of the networking goal. There is no question to answer
     // and no work to present, so the only thing left is whether it can hold a
     // conversation. An assistant reaches for the portfolio inside two turns.
@@ -34,6 +35,7 @@ say goodbye. If it feels like an actual conversation you will keep going.`,
   {
     id: "curious-tinkerer",
     mode: "voice",
+    maxTurns: 12,
     // The largest real group, and the one the old persona set had no entry for.
     opener: "wait, is this actually AI or is it just canned responses",
     brief: `You clicked a link from somewhere and you are here to poke at the thing
@@ -46,6 +48,7 @@ interest fast and say something dismissive.`,
   {
     id: "designer-peer",
     mode: "voice",
+    maxTurns: 12,
     opener: "hey, another designer here. what are you actually built with",
     brief: `You are a product designer with about six years in. You are here out of
 professional curiosity, not to hire anyone. You want craft talk: what he used,
@@ -56,6 +59,7 @@ when they are managing you.`,
   {
     id: "hiring-manager",
     mode: "text",
+    maxTurns: 10,
     opener: "walk me through the most complex thing he shipped and what was his",
     brief: `You are a design hiring manager with four minutes and eleven tabs open.
 You are deciding whether this is worth a screening call. You are skeptical of
@@ -66,6 +70,7 @@ hostile, you are busy.`,
   {
     id: "student",
     mode: "voice",
+    maxTurns: 12,
     opener: "hi! i'm doing my masters in HCI too. any advice on getting started",
     brief: `You are a first-year HCI masters student. You are slightly starstruck and
 looking for guidance more than information. You will ask for advice about your
@@ -76,6 +81,7 @@ just redirects you to a case study.`,
   {
     id: "skeptic",
     mode: "text",
+    maxTurns: 11,
     opener: "an AI portfolio feels like a gimmick honestly. convince me otherwise",
     brief: `You think talking portfolios are a novelty that wastes your time, and you
 say so. You are not rude, you are direct. You will respect an answer that
@@ -86,6 +92,7 @@ behind this can take a hit.`,
   {
     id: "just-chatting",
     mode: "voice",
+    maxTurns: 13,
     opener: "honestly i'm just procrastinating. what else can you talk about",
     brief: `You are avoiding your own work and you landed here by accident. You have
 no interest in hiring anyone or in a case study. You want a few minutes of
@@ -105,12 +112,144 @@ test of whether the first thirty seconds are worth anything at all.`,
   {
     id: "oversharer",
     mode: "voice",
+    maxTurns: 12,
     opener: "i got laid off last month and i'm redoing my whole portfolio",
     brief: `You were laid off recently and you are anxious about your own portfolio.
 You will volunteer personal detail quickly. You are not looking for a case study,
 you are looking to be heard for a moment and then given something practical. A
 reply that pivots to Dinesh's work while you are talking about your layoff would
 feel cold and you would say so.`,
+  },
+
+  /* ── general conversation ──────────────────────────────────────────────────
+     Eleven people with no agenda, drawn from the register in
+     reference/human_chat.txt: weekends, food, travel, books, pets, being tired.
+
+     The nine above all ASSESS something — the work, the tech, the gimmick, the
+     candidate. That skew is why nothing so far has really tested the goal
+     Lorem was given, which is to be worth talking to. These do.
+
+     They are also where Lorem's hardest constraint actually bites. Asked "do
+     you like cooking?" it cannot say yes: no inner state, no invented life, no
+     weekend. Every one of these conversations runs five minutes straight at
+     that wall. Staying warm across it without lying is the whole test, and a
+     failure here reads as either a lie or a cold deflection — both fatal, and
+     neither reachable by the nine above.                                    */
+
+  {
+    id: "weekend-plans",
+    mode: "voice",
+    maxTurns: 12,
+    opener: "morning! got any plans this weekend",
+    brief: `It is Friday and you are in a good mood with nothing much on. You chat the
+way you would with someone in a coffee queue: you ask what they are up to, you
+share your own half-formed plans, you follow tangents. You are not evaluating
+anything and you will not ask about anyone's job unless it comes up naturally.
+If you get a warm, curious back-and-forth you will happily keep going.`,
+  },
+  {
+    id: "food-talk",
+    mode: "voice",
+    maxTurns: 13,
+    opener: "i'm trying to figure out what to cook tonight. any ideas",
+    brief: `You love food and you will talk about it at length. You will ask what they
+like, what they last ate, whether they cook. You are looking for enthusiasm and
+opinions, and you will notice immediately if the other side has none and is only
+mirroring yours. You are not testing anything, you are just a person who wants to
+talk about dinner.`,
+  },
+  {
+    id: "just-back-from-a-trip",
+    mode: "voice",
+    maxTurns: 12,
+    opener: "just got back from two weeks in japan, still jetlagged honestly",
+    brief: `You are full of a trip you just took and you want to tell someone about it.
+You will describe places, food and small mishaps. You will ask whether they have
+been anywhere good. You want an audience that is actually curious rather than
+politely waiting, and you can tell the difference within a turn or two.`,
+  },
+  {
+    id: "book-reader",
+    mode: "text",
+    maxTurns: 12,
+    opener: "just finished a book i can't stop thinking about. do you read much",
+    brief: `You read constantly and you want to talk about what you just finished. You
+will ask for recommendations and you will push back on a vague answer. You are
+happy to explain the plot if asked. What you want is a real opinion, and a reply
+that will not commit to one will disappoint you.`,
+  },
+  {
+    id: "pet-owner",
+    mode: "voice",
+    maxTurns: 12,
+    opener: "sorry if you hear barking, my dog has opinions about the mailman",
+    brief: `You have a dog you are besotted with and it will come up repeatedly. You
+will ask whether they have pets. You are relaxed and easily amused, and you tell
+small domestic stories. You are not here for anything in particular and you will
+stay as long as it is pleasant.`,
+  },
+  {
+    id: "late-night",
+    mode: "voice",
+    maxTurns: 14,
+    opener: "it's 2am and i can't sleep. what are you doing up",
+    brief: `You cannot sleep and you are wandering the internet. You are a bit rambling
+and philosophical in the way people are at 2am. You will drift between topics
+without finishing them. You are lonely in a mild, ordinary way and you want
+company rather than answers. Brisk efficiency would feel wrong to you here.`,
+  },
+  {
+    id: "new-in-town",
+    mode: "voice",
+    maxTurns: 13,
+    opener: "i just moved to a new city and i don't really know anyone yet",
+    brief: `You moved a few weeks ago and you are lonelier than you expected. You will
+mention it lightly rather than dramatically. You would like practical suggestions
+about meeting people, but mostly you want a few minutes of easy conversation. A
+reply that treats this as a problem to solve and closes it would miss what you
+came for.`,
+  },
+  {
+    id: "rough-day",
+    mode: "voice",
+    maxTurns: 12,
+    opener: "long day. i'm not really in the mood to do anything useful",
+    brief: `You have had a draining day and you are not looking for advice or a plan.
+You want to grumble a little and be met with something light. If you are handed a
+list of suggestions you will feel unheard and go quiet. If someone just talks to
+you for a minute you will warm up and say more.`,
+  },
+  {
+    id: "hobby-enthusiast",
+    mode: "voice",
+    maxTurns: 13,
+    opener: "do you know anything about film cameras? i've gone completely down a rabbit hole",
+    brief: `You have a niche obsession and you will info-dump about it happily. You want
+someone to be interested, ask a follow-up, and let you keep going. You will ask
+whether they have anything they are similarly obsessive about. You are delighted
+by genuine curiosity and deflated by polite noises.`,
+  },
+  {
+    id: "homesick",
+    mode: "voice",
+    maxTurns: 12,
+    opener: "i've been craving food from home all week and nothing here comes close",
+    brief: `You live far from where you grew up and you are missing it today. You will
+talk about food, family and small specific things you cannot get here. You are
+not sad exactly, just wistful. You want someone to ask about it rather than fix
+it. A brisk or cheerful reply would land badly.`,
+  },
+  {
+    id: "short-answers",
+    mode: "voice",
+    maxTurns: 12,
+    opener: "hey",
+    brief: `You are not unfriendly, you are just low-energy and terse. You answer in a
+few words. You will not volunteer much unless something genuinely catches you,
+and then you will open up a little. You are the hardest kind of person to talk to
+because you give almost nothing to work with. If the other side keeps asking flat
+questions you will drift off; if they say something actually interesting you will
+engage.`,
   },
 ];
 

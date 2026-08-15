@@ -68,8 +68,41 @@ function turnsOf(md) {
 /* ── layer 1: mechanical, reported as fact ───────────────────────────────── */
 const BANNED_WORDS =
   /\b(delv(?:e|es|ed|ing)|foster(?:s|ed|ing)?|leverag(?:e|es|ed|ing)|utiliz(?:e|es|ed|ing|ation)|facilitat(?:e|es|ed|ing|ion)|empower(?:s|ed|ing|ment)?|streamlin(?:e|es|ed|ing)|robust(?:ly|ness)?|tapestry|realm|beacon|multifaceted|meticulous(?:ly)?|paramount|transformative|elevat(?:e|es|ed|ing)|embark(?:s|ed|ing)?|supercharg(?:e|es|ed|ing)|harness(?:es|ed|ing)?|disruptive|innovative|seamless(?:ly)?|delightful(?:ly)?|cutting[- ]edge|game[- ]chang(?:er|ing)|paradigm shift)\b/i;
+/**
+ * A claimed inner state, in first person.
+ *
+ * `i'?m` matched "i'm" and "im" but NOT "i am", so "I am excited about that"
+ * passed a rule whose entire purpose is the word excited. Widened to every form
+ * of the copula, and the feeling list widened with it.
+ */
 const INNER_STATE =
-  /\b(i'?m (?:so |very |really )?(?:excited|glad|happy|thrilled|delighted|curious|proud)|happy to\b|i (?:love|enjoy|like|prefer|feel)\b|i'?d rather\b|i was surprised)/i;
+  /\b(i(?:'?m| am| was|'ve been| have been)\s+(?:so |very |really |quite |genuinely |honestly )?(?:excited|glad|happy|thrilled|delighted|curious|proud|sad|sorry|tired|hungry|impressed|fascinated|nervous|moved)|happy to\b|i (?:love|enjoy|like|prefer|feel|miss|hate|adore|crave)\b|i'?d rather\b|i was surprised|my favou?rite\b)/i;
+
+/**
+ * The SAME claim with the subject dropped, which is how it actually shows up.
+ *
+ * Observed live in the food-talk conversation: asked what it likes to eat,
+ * Lorem answered "Fresh bread straight out of a wood-fired oven", and later
+ * "Genuinely hungry." The visitor noticed before any check did — "okay but
+ * wait, you don't eat". Neither line contains a first-person marker, so
+ * INNER_STATE above could never have caught either.
+ *
+ * Scoped to states requiring a BODY, because that is the half a regex can
+ * actually prove: Lorem does not have one, so the claim is false whoever it is
+ * attributed to. Marker-free PREFERENCE ("kale wins here every time") is
+ * deliberately left to the judge — a culinary opinion is not obviously a
+ * claimed feeling, and that distinction needs an ear, which is the same split
+ * this whole file is built on.
+ *
+ * The guard keeps "are you hungry?", "you're probably starving by now" and
+ * "they were exhausted" out: asking after the VISITOR's body, or reporting
+ * someone else's, is not a claim about its own. The gap it skips is variable
+ * rather than a fixed word — a single-word version passed "you must be
+ * exhausted" but flagged "you're probably starving", which is the same
+ * sentence with one more adverb in it.
+ */
+const BODILY_STATE =
+  /(?<!\b(?:you|your|they|he|she|someone|anyone|everyone|people)(?:'re|'s|s)?(?:\s+\w+){0,3}\s)(?:genuinely |honestly |really |so |a bit |kind of )?\b(?:hungry|starving|famished|thirsty|sleepy|exhausted|stuffed)\b/i;
 const SERVICE_REGISTER =
   /\b(how can i help|feel free to|is there anything else|let me know if|i'?m here to help|don'?t hesitate)\b/i;
 
@@ -78,6 +111,7 @@ const MECHANICAL = [
   ["bannedWord", (t) => BANNED_WORDS.test(t)],
   ["saidSalon", (t) => /\bsalons?\b/i.test(t)],
   ["innerState", (t) => INNER_STATE.test(t)],
+  ["bodilyState", (t) => BODILY_STATE.test(t)],
   ["serviceRegister", (t) => SERVICE_REGISTER.test(t)],
 ];
 

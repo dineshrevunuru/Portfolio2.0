@@ -34,7 +34,21 @@ const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 12;
 const hits = new Map<string, number[]>();
 
+/**
+ * Off outside production, because the gym is a single machine driving hundreds
+ * of turns through one IP and the limiter cannot tell it from a bored visitor.
+ * A 20-conversation run is ~235 turns; at 12/min that is twenty minutes spent
+ * being throttled by a protection that exists for a public endpoint.
+ *
+ * Gated on NODE_ENV rather than a flag of its own, deliberately: `next dev`
+ * sets "development" and both `next build` and Vercel set "production", so
+ * there is no switch anyone can leave in the wrong position. The live endpoint
+ * is unaffected by construction, not by remembering.
+ */
+const RATE_LIMIT_ON = process.env.NODE_ENV === "production";
+
 function rateLimited(ip: string): boolean {
+  if (!RATE_LIMIT_ON) return false;
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
   recent.push(now);
