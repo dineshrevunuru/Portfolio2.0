@@ -5,8 +5,8 @@ import { PRERENDERED } from "./prerendered.generated";
 
 /**
  * How fast Lorem talks. Dinesh's call on 2026-08-15: the default was too slow
- * to listen to. Tried at 1.3, settled at 1.2 by ear. 1.1 is the next step down
- * if this still runs hot — it is this one constant, nothing else moves.
+ * to listen to. Tried 1.3, then 1.2, settled at 1.1 by ear — his listening
+ * test, one constant, nothing else moves.
  *
  * Done HERE and not in the TTS request, which is where it belongs on paper.
  * Measured against the API on this account, same sentence, twice:
@@ -29,7 +29,7 @@ import { PRERENDERED } from "./prerendered.generated";
  * defaultPlaybackRate, so setting only the former would revert on the next
  * `src` assignment — which is every single utterance.
  */
-const SPEECH_RATE = 1.2;
+const SPEECH_RATE = 1.1;
 
 function pace(el: HTMLAudioElement) {
   el.defaultPlaybackRate = SPEECH_RATE;
@@ -94,7 +94,7 @@ export interface UseSpeechApi {
   ttsSpeaking: boolean;
   /** Call from the StartGate click. Unlocks TTS + warms the mic. */
   unlock: () => Promise<void>;
-  listenStart: (mode: ListenMode) => void;
+  listenStart: (mode: ListenMode, opts?: { keepSpeaking?: boolean }) => void;
   listenEnd: () => void;
   cancel: () => void;
   say: (text: string, onDone?: () => void) => void;
@@ -329,7 +329,13 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
 
   const startMeter = useCallback(async () => {
     try {
-      const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Echo cancellation EXPLICIT, not defaulted: the live call mode keeps
+      // the mic open while Lorem plays through the speakers, and AEC is the
+      // only thing standing between that and Lorem transcribing itself,
+      // interrupting itself, and answering itself.
+      const ms = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
       stream.current = ms;
       startRecorder(ms);
       ac.current ??= new AudioContext();
@@ -706,7 +712,13 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
         /* query unsupported — assume a prompt is coming */
       }
       if (willPrompt) setMicPrompting(true);
-      const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Echo cancellation EXPLICIT, not defaulted: the live call mode keeps
+      // the mic open while Lorem plays through the speakers, and AEC is the
+      // only thing standing between that and Lorem transcribing itself,
+      // interrupting itself, and answering itself.
+      const ms = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
       ms.getTracks().forEach((t) => t.stop());
       setMicState("ok");
     } catch {
@@ -810,11 +822,17 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
   }, [lang, settle]);
 
   const listenStart = useCallback(
-    (m: ListenMode) => {
+    (m: ListenMode, opts?: { keepSpeaking?: boolean }) => {
       // Barge-in FIRST, above every guard. The orb is the only shut-up
       // affordance on the page; with the mic blocked, an early return before
       // hush() left Lorem talking through the visitor's interruption.
-      hush();
+      //
+      // `keepSpeaking` is the live-call exception: there the mic opens WHILE
+      // Lorem is talking, precisely so the visitor can talk over it — cutting
+      // the voice the moment the mic opened would make interruption
+      // impossible rather than possible. The caller owns hushing on actual
+      // visitor speech.
+      if (!opts?.keepSpeaking) hush();
       if (active.current) return;
       if (micRef.current !== "ok") {
         cb.current.onHint?.(

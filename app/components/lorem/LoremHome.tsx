@@ -296,12 +296,33 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
   /* ── Voice ────────────────────────────────────────────────────────────── */
 
+  /* Live call mode — Dinesh's spec, verbatim: "It will just be two people
+     talking on a phone." Orb click starts the call; the mic then stays part of
+     the conversation — open while the visitor talks, open WHILE LOREM TALKS so
+     the visitor can interrupt, reopened after every answer — until the orb is
+     clicked again, which hangs up.
+
+     State lives here rather than in useSpeech because a call is a POLICY about
+     turn-taking, and useSpeech deliberately only owns mechanics. A ref
+     shadows it for the callbacks below, which are captured once. */
+  const [live, setLive] = useState(false);
+  const liveRef = useRef(false);
+  liveRef.current = live;
+
   const voice = useSpeech({
     speak: speak && !skipGate,
     onFinal: (text) => {
       void askRef.current(text, "voice");
     },
     onEmpty: (reason) => {
+      // On a call, a stretch of silence is not a failure — it is a phone call
+      // where nobody is talking. Reopen the mic and keep the line up; the
+      // "didn't catch that" pill is for push-to-talk, where the visitor
+      // explicitly tried to say something.
+      if (liveRef.current && reason === "no-speech") {
+        speechRef.current?.listenStart("tap");
+        return;
+      }
       setPhase(turnRef.current ? "answering" : "greet");
       // "Didn't catch that" blames the visitor — only say it when that is
       // actually what happened.
@@ -322,6 +343,67 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   const turnRef = useRef(turn);
   turnRef.current = turn;
 
+  /* ── The call loop, as three watchers ────────────────────────────────────
+     Watchers on speech state rather than callbacks threaded through ask(),
+     because Lorem speaks from FOUR places (answers, error lines, the greeting,
+     replays) and the call must survive all of them. ttsSpeaking is the one
+     signal every path already emits. */
+
+  // 1 · Keep the mic part of the conversation. The moment Lorem starts
+  //     talking, the mic opens WITH it (keepSpeaking, so listenStart's
+  //     barge-in hush doesn't cut Lorem off at its own first word) — that hot
+  //     mic is what makes interruption possible. And when Lorem finishes with
+  //     the mic somehow closed, reopen it: a phone call where you must be
+  //     invited to speak again after each sentence is not a phone call.
+  useEffect(() => {
+    if (!live) return;
+    const v = speechRef.current;
+    if (voice.ttsSpeaking && !voice.listening) v.listenStart("tap", { keepSpeaking: true });
+    // Reopen only from a RESTING phase. "capturing" is excluded on purpose:
+    // right after listenEnd() there is a window where listening is already
+    // false but the utterance is still settling (Scribe upload, the 900ms
+    // Safari fallback) — reopening there resets the capture buffers and the
+    // visitor's words are silently lost. "thinking"/transcribing are the same
+    // window with different names.
+    else if (
+      !voice.ttsSpeaking &&
+      !voice.listening &&
+      !voice.transcribing &&
+      phase !== "thinking" &&
+      phase !== "capturing"
+    )
+      v.listenStart("tap");
+  }, [live, voice.ttsSpeaking, voice.listening, voice.transcribing, phase]);
+
+  // 2 · End-of-utterance by silence, which is what makes this a call rather
+  //     than tap-to-send: the visitor stops talking, and 1.4 seconds later
+  //     their words are on their way. Every transcript change resets the
+  //     timer, so it only ever fires on an actual pause. Nothing fires while
+  //     the transcript is empty — an open line with nobody talking stays open.
+  useEffect(() => {
+    if (!live || !voice.listening) return;
+    // While Lorem still has the floor, the fragment is the barge-in watcher's
+    // business (below), not a finished utterance.
+    if (voice.ttsSpeaking) return;
+    const text = `${voice.confirmed} ${voice.interim}`.trim();
+    if (!text) return;
+    const t = window.setTimeout(() => speechRef.current.listenEnd(), 1400);
+    return () => window.clearTimeout(t);
+  }, [live, voice.listening, voice.ttsSpeaking, voice.confirmed, voice.interim]);
+
+  // 3 · Barge-in. Three words of visitor speech while Lorem is talking means
+  //     they have taken the floor: Lorem stops mid-sentence and the capture
+  //     carries on into watcher 2, which sends it as the next turn. Three
+  //     words, not one — echo cancellation is good but not perfect, and a
+  //     single leaked syllable of Lorem's own voice must not make it
+  //     interrupt itself. (AEC is explicitly requested in useSpeech's
+  //     getUserMedia constraints; this threshold is the second line.)
+  useEffect(() => {
+    if (!live || !voice.ttsSpeaking || !voice.listening) return;
+    const words = `${voice.confirmed} ${voice.interim}`.trim().split(/\s+/).filter(Boolean);
+    if (words.length >= 3) speechRef.current.hush();
+  }, [live, voice.ttsSpeaking, voice.listening, voice.confirmed, voice.interim]);
+
   // Scribe transcribes after release, so there is a beat with no words on the
   // stage. Name it rather than letting the caption sit frozen.
   useEffect(() => {
@@ -330,15 +412,23 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
   useEffect(() => {
     if (voice.listening) {
+      // On a call, the hot mic under Lorem's own speech is plumbing, not a
+      // capture the visitor started — relabeling the screen "capturing" while
+      // Lorem is mid-answer would be a lie.
+      if (voice.ttsSpeaking) return;
       setPhase("capturing");
-      // Truthful per mode: "release to send" is a lie when they tapped the orb.
+      // Truthful per mode: "release to send" is a lie when they tapped the
+      // orb, and "tap to send" is a lie on a live call, where a pause sends
+      // and a tap hangs up.
       setStatus(
         voice.listenMode === "hold"
           ? "Listening… release to send"
-          : "Listening… tap the orb to send",
+          : liveRef.current
+            ? "Listening… pause when you're done"
+            : "Listening… tap the orb to send",
       );
     }
-  }, [voice.listening, voice.listenMode]);
+  }, [voice.listening, voice.listenMode, voice.ttsSpeaking]);
 
   /* ── Start ────────────────────────────────────────────────────────────── */
 
@@ -620,12 +710,15 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   // Ranked above speaking (as it was) it meant a visitor who denied the mic
   // watched a dead grey orb through every answer Lorem gave. Transcribing counts
   // as thinking: from the visitor's side it is the same wait.
-  const orb: MicOrbState = voice.listening
-    ? "listening"
-    : phase === "thinking" || voice.transcribing
-      ? "thinking"
-      : voice.ttsSpeaking
-        ? "speaking"
+  // ttsSpeaking above listening: on a live call both are true while Lorem
+  // talks (the mic stays hot for barge-in), and the orb should say who has
+  // the floor. Off a call the two never co-occur, so the flip changes nothing.
+  const orb: MicOrbState = voice.ttsSpeaking
+    ? "speaking"
+    : voice.listening
+      ? "listening"
+      : phase === "thinking" || voice.transcribing
+        ? "thinking"
         : voice.micState === "denied"
           ? "blocked"
           : "muted";
@@ -902,14 +995,36 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
               // was being said, which is exactly the "doesn't feel like Lorem
               // is talking" Dinesh named. The reference is Claude iOS voice
               // mode: bars that land on the syllable and die in the pause.
-              level={voice.listening ? voice.level : voice.ttsSpeaking ? voice.outLevel : undefined}
-              onClick={() =>
-                voice.listening
-                  ? voice.listenEnd()
-                  : voice.ttsSpeaking
-                    ? (voice.hush(), setStatus(""))
-                    : voice.listenStart("tap")
-              }
+              //
+              // ttsSpeaking FIRST: on a live call both can be true at once,
+              // and while Lorem has the floor the bars are Lorem's voice —
+              // the hot mic underneath is mostly AEC-cancelled silence.
+              level={voice.ttsSpeaking ? voice.outLevel : voice.listening ? voice.level : undefined}
+              aria-label={live ? "End the live conversation" : undefined}
+              // The orb is the call switch — Dinesh's spec: click starts a
+              // live two-way conversation, click again hangs up. Push-to-talk
+              // (hold Space) and typing (⌘K) still exist for discrete turns;
+              // the orb is no longer tap-to-send.
+              onClick={() => {
+                if (live) {
+                  setLive(false);
+                  voice.cancel(); // discard any half-captured utterance
+                  voice.hush();
+                  setStatus("");
+                  return;
+                }
+                if (voice.micState !== "ok") {
+                  // No call without a mic. listenStart is still the right
+                  // entry: it hushes Lorem (the orb stays the one reliable
+                  // shut-up control) and raises the how-to-enable hint.
+                  voice.listenStart("tap");
+                  return;
+                }
+                setLive(true);
+                voice.listenStart("tap");
+                setStatus("Live. Just talk — tap the orb to hang up");
+                window.setTimeout(() => setStatus(""), 3400);
+              }}
             />
           </div>
 
