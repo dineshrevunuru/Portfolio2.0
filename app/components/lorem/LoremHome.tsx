@@ -117,8 +117,21 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   /** Normalised questions already asked — stops the `rec` chip re-recommending
    *  something the visitor has already heard. */
   const askedBefore = useRef<Set<string>>(new Set());
-  /** Lorem's memory. Sent whole each turn; the server is stateless by design. */
+  /** Lorem's memory. Sent whole each turn; the server holds no conversation
+   *  state between requests. */
   const history = useRef<{ role: "user" | "assistant"; content: string }[]>([]);
+  /** Conversation key for the turn log — minted per page load, random, and
+   *  never stored client-side, so it groups a conversation's turns without
+   *  identifying who had it. crypto.randomUUID needs a secure context, which
+   *  /lorem always has; the fallback is for odd embeds and costs nothing. */
+  const sessionId = useRef<string>("");
+  if (!sessionId.current) {
+    try {
+      sessionId.current = crypto.randomUUID();
+    } catch {
+      sessionId.current = `s-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`;
+    }
+  }
   const inflight = useRef<AbortController | null>(null);
   const gateDone = useRef(false);
   const touchRef = useRef(false);
@@ -197,7 +210,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
         res = await fetch("/api/lorem", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ message: q, history: history.current, mode }),
+          body: JSON.stringify({ message: q, history: history.current, mode, sessionId: sessionId.current }),
           signal: ctl.signal,
         });
       } catch (e) {
@@ -1244,7 +1257,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
               included, so the claim would have nothing behind it there. */}
           {notChrome && (
             <div className="gnote" style={entryBeat(0.9)} role="note">
-              Voice works here. Chrome adds live captions.
+              Works best on Chrome.
             </div>
           )}
         </button>

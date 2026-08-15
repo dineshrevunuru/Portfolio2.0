@@ -17,7 +17,8 @@
     "gym": "node test/gym/run.mjs",
     "gym:review": "node test/gym/bench.mjs",
     "gym:distill": "node test/gym/distill.mjs",
-    "gym:eval": "node test/gym/eval.mjs"
+    "gym:eval": "node test/gym/eval.mjs",
+    "pull:conversations": "node scripts/pull-conversations.mjs"
   },
   "dependencies": {
     "next": "16.2.4",

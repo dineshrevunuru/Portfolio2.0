@@ -18,6 +18,7 @@ import {
   OPENROUTER_URL,
 } from "../config";
 import { systemPrompt } from "./prompt";
+import { logTurn } from "./logTurn";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,6 +60,7 @@ function rateLimited(ip: string): boolean {
 }
 
 export async function POST(req: Request) {
+  const started = Date.now();
   const key = BRAIN_KEY;
   if (!key) {
     return NextResponse.json(
@@ -85,11 +87,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
 
-  const { message, history, mode } = (body ?? {}) as {
+  const { message, history, mode, sessionId } = (body ?? {}) as {
     message?: unknown;
     history?: unknown;
     mode?: unknown;
+    sessionId?: unknown;
   };
+  // A conversation key, minted client-side per page load so it links turns to
+  // each other and never to a person. Validated to a UUID shape because it is
+  // written to a datastore: a client can send anything, and "anything" must
+  // not include a 2MB string or someone's email address in a query param.
+  const session =
+    typeof sessionId === "string" && /^[a-z0-9-]{8,40}$/i.test(sessionId) ? sessionId : "untagged";
   if (typeof message !== "string" || !message.trim()) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
@@ -275,7 +284,9 @@ export async function POST(req: Request) {
       steered,
     ),
     // Passed straight back to the client, which decides whether to store it.
-    // The server keeps nothing: no visitor record exists on this side.
+    // No PERSON record exists on this side. Turns are logged for the
+    // training loop (see logTurn.ts) keyed by an anonymous per-pageload id —
+    // the name memory itself still lives only in the visitor's browser.
     rememberName:
       typeof input.rememberName === "string" && input.rememberName.trim()
         ? input.rememberName.trim().slice(0, 24)
@@ -332,6 +343,20 @@ export async function POST(req: Request) {
       { status: 502 },
     );
   }
+
+  // The one place a real visitor's turn becomes trainable data. After the
+  // response is fully assembled, fire-and-forget — see logTurn.ts for the
+  // design (and for the reversal of the old "server keeps nothing" promise).
+  logTurn({
+    sessionId: session,
+    mode: inputMode,
+    message: message.slice(0, MAX_MESSAGE_CHARS),
+    say: turn.say,
+    show: turn.show,
+    chips: turn.chips,
+    model: LOREM_MODEL,
+    ms: Date.now() - started,
+  });
 
   return NextResponse.json({ ...turn, ...resolve(turn.show) });
 }
