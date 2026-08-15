@@ -1,0 +1,28 @@
+{
+  "runId": "2026-08-15T17-40-23",
+  "app": "http://localhost:3000",
+  "visitorModel": "claude-sonnet-5",
+  "scenarios": [
+    "says-hello",
+    "curious-tinkerer",
+    "designer-peer",
+    "hiring-manager",
+    "student",
+    "skeptic",
+    "just-chatting",
+    "quick-bounce",
+    "oversharer",
+    "weekend-plans",
+    "food-talk",
+    "just-back-from-a-trip",
+    "book-reader",
+    "pet-owner",
+    "late-night",
+    "new-in-town",
+    "rough-day",
+    "hobby-enthusiast",
+    "homesick",
+    "short-answers"
+  ],
+  "at": "2026-08-15T17:54:51.121Z"
+}

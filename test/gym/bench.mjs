@@ -87,7 +87,10 @@ function parse(md) {
 
 const personas = () =>
   readdirSync(TRANSCRIPTS)
-    .filter((f) => f.endsWith(".md"))
+    // EVAL.md is the eval's own report, written into the same directory. It
+    // sorts first alphabetically, so the bench opened on it by default and
+    // showed "0 of 0 turns" — the review tool's own front page looked broken.
+    .filter((f) => f.endsWith(".md") && f !== "EVAL.md")
     .map((f) => f.replace(/\.md$/, ""))
     .sort();
 
