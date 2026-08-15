@@ -28,7 +28,21 @@ for (const line of readFileSync(".env.local", "utf8").split("\n")) {
 const KEY = process.env.ANTHROPIC_API_KEY;
 if (!KEY) throw new Error("ANTHROPIC_API_KEY missing from .env.local");
 
-const MODEL = process.env.BOO_MODEL || "claude-sonnet-5";
+/* This harness posts to api.anthropic.com directly, so it can only ever
+   exercise the ANTHROPIC path — which is now Lorem's fallback, not its brain.
+   Reading LOREM_MODEL keeps it honest: if the configured model is a Gemini id
+   it stops rather than quietly reporting on a configuration that no longer
+   ships. `npm run gym` drives the real route and therefore the real provider. */
+const MODEL = process.env.LOREM_MODEL || process.env.BOO_MODEL || "claude-sonnet-5";
+if (!MODEL.startsWith("claude-")) {
+  console.error(
+    `This harness calls Anthropic directly and cannot run "${MODEL}".\n` +
+      `Lorem's brain is on OpenRouter now — use \`npm run gym\`, which drives the\n` +
+      `real /api/lorem route. To exercise the Anthropic fallback instead:\n` +
+      `    LOREM_MODEL=claude-sonnet-5 node test/convo.mjs`,
+  );
+  process.exit(1);
+}
 
 /* ── scenarios ────────────────────────────────────────────────────────────
    Each is a thread. Multi-turn threads carry history the way the route does,

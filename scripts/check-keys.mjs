@@ -30,36 +30,67 @@ for (const line of readFileSync(ENV, "utf8").split("\n")) {
 const results = [];
 const record = (name, ok, detail) => results.push({ name, ok, detail });
 
-/* ── Claude ──────────────────────────────────────────────────────────────── */
+/* ── Brain ───────────────────────────────────────────────────────────────────
+   Resolved exactly as app/api/config.ts resolves it. If this check picks the
+   provider a different way, it stops being a check: it once probed Anthropic
+   while the app was calling OpenRouter, and reported the OpenRouter model
+   "not available to this key" — a red cross on a working setup. Mirroring the
+   real resolution is the whole value of this script.                       */
 {
-  const key = env.ANTHROPIC_API_KEY;
-  const model = env.LOREM_MODEL || env.BOO_MODEL || "claude-sonnet-5";
+  const brain =
+    (env.LOREM_BRAIN || env.BRAIN || "").toLowerCase() === "openrouter"
+      ? "openrouter"
+      : env.OPENROUTER_API_KEY && !env.ANTHROPIC_API_KEY
+        ? "openrouter"
+        : "anthropic";
+
+  const model =
+    env.LOREM_MODEL ||
+    env.BOO_MODEL ||
+    (brain === "openrouter" ? "google/gemini-3.7-flash" : "claude-sonnet-5");
+
+  const key = brain === "openrouter" ? env.OPENROUTER_API_KEY : env.ANTHROPIC_API_KEY;
+  const keyName = brain === "openrouter" ? "OPENROUTER_API_KEY" : "ANTHROPIC_API_KEY";
+  const label = `Brain (${brain})`;
+
   if (!key) {
-    record("Claude", false, "ANTHROPIC_API_KEY is empty — Lorem cannot answer at all");
+    record(label, false, `${keyName} is empty — Lorem cannot answer at all`);
   } else {
+    const [url, headers] =
+      brain === "openrouter"
+        ? [
+            "https://openrouter.ai/api/v1/chat/completions",
+            { "content-type": "application/json", authorization: `Bearer ${key}` },
+          ]
+        : [
+            "https://api.anthropic.com/v1/messages",
+            {
+              "content-type": "application/json",
+              "x-api-key": key,
+              "anthropic-version": "2023-06-01",
+            },
+          ];
     try {
-      const r = await fetch("https://api.anthropic.com/v1/messages", {
+      const r = await fetch(url, {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": key,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model,
-          max_tokens: 1,
-          messages: [{ role: "user", content: "hi" }],
-        }),
+        headers,
+        body: JSON.stringify({ model, max_tokens: 1, messages: [{ role: "user", content: "hi" }] }),
       });
-      if (r.ok) record("Claude", true, `authenticated · model ${model}`);
-      else if (r.status === 401) record("Claude", false, "key rejected (401)");
-      else if (r.status === 404) record("Claude", false, `model "${model}" not available to this key`);
+      if (r.ok) record(label, true, `authenticated · model ${model}`);
+      else if (r.status === 401) record(label, false, `${keyName} rejected (401)`);
+      else if (r.status === 402) record(label, false, "authenticated, but the account is out of credit");
+      else if (r.status === 404) record(label, false, `model "${model}" not available to this key`);
       else if (r.status === 400) {
-        // A 400 still proves auth; usually a max_tokens quibble.
-        record("Claude", true, `authenticated · model ${model} (probe returned 400)`);
-      } else record("Claude", false, `HTTP ${r.status}`);
+        // A 400 still proves auth; usually a max_tokens quibble. OpenRouter,
+        // though, also returns 400 for an unknown model id — which is a real
+        // misconfiguration and must not be reported as a pass.
+        const body = await r.text();
+        /not a valid model|no (?:endpoints|allowed providers) found|is not a valid/i.test(body)
+          ? record(label, false, `model "${model}" was rejected by ${brain}`)
+          : record(label, true, `authenticated · model ${model} (probe returned 400)`);
+      } else record(label, false, `HTTP ${r.status}`);
     } catch (e) {
-      record("Claude", false, `unreachable: ${e.message}`);
+      record(label, false, `unreachable: ${e.message}`);
     }
   }
 }

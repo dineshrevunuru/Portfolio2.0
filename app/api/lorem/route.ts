@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { resolve, sanitizeBlocks, scrubProse, type Rejection } from "../../components/lorem/guardrail";
 import { gateChips, isEcho, isFarewell, visitorSteeredToWork } from "../../components/lorem/closing";
-import { RESPOND_TOOL, type LoremTurn } from "../../components/lorem/protocol";
+import {
+  RESPOND_TOOL,
+  RESPOND_TOOL_FLAT,
+  unflattenBlocks,
+  type LoremTurn,
+} from "../../components/lorem/protocol";
 import {
   ANTHROPIC_URL,
   LOREM_EFFORT,
@@ -136,13 +141,17 @@ export async function POST(req: Request) {
     // a top-level string rather than a nested object.
     reasoning_effort: LOREM_EFFORT,
     messages: [{ role: "system" as const, content: systemPrompt(inputMode) }, ...messages],
+    // The FLAT schema, not the strict one. Google accepts `oneOf` and then
+    // ignores it, leaving the model to answer `show: [{}]` — see the comment
+    // above RESPOND_TOOL_FLAT. This is the fifth wire-level difference between
+    // the two providers, and the only one that fails silently.
     tools: [
       {
         type: "function",
         function: {
-          name: RESPOND_TOOL.name,
-          description: RESPOND_TOOL.description,
-          parameters: RESPOND_TOOL.input_schema,
+          name: RESPOND_TOOL_FLAT.name,
+          description: RESPOND_TOOL_FLAT.description,
+          parameters: RESPOND_TOOL_FLAT.input_schema,
         },
       },
     ],
@@ -204,6 +213,9 @@ export async function POST(req: Request) {
     if (typeof raw === "string" && raw.trim()) {
       try {
         input = JSON.parse(raw) as Record<string, unknown>;
+        // Convert the flat schema's {label} step elements back to the bare
+        // strings every renderer expects, before the guardrail sees them.
+        if (input.show !== undefined) input.show = unflattenBlocks(input.show);
       } catch {
         console.error("[lorem] openrouter returned unparseable tool arguments");
       }

@@ -81,7 +81,7 @@ export const BRAIN_KEY = BRAIN === "openrouter" ? OPENROUTER_KEY : ANTHROPIC_KEY
  * varied than Sonnet's, that is the first dial to reach for, not the prompt.
  */
 export const LOREM_MODEL =
-  envOf("MODEL", "LOREM_MODEL") ?? (BRAIN === "openrouter" ? "google/gemini-3.7-flash" : "claude-sonnet-5");
+  envOf("MODEL", "BOO_MODEL") ?? (BRAIN === "openrouter" ? "google/gemini-3.7-flash" : "claude-sonnet-5");
 
 /**
  * Effort lives inside `output_config`, not at the top level. Default `high` is
@@ -89,7 +89,7 @@ export const LOREM_MODEL =
  * the task is short conversational composition — not multi-step reasoning.
  * `low` is the documented setting for latency-sensitive chat.
  */
-export const LOREM_EFFORT = envOf("EFFORT", "LOREM_EFFORT") ?? "low";
+export const LOREM_EFFORT = envOf("EFFORT", "BOO_EFFORT") ?? "low";
 
 /**
  * Adaptive, deliberately. Disabling thinking measured only ~0.55s faster
@@ -99,7 +99,7 @@ export const LOREM_EFFORT = envOf("EFFORT", "LOREM_EFFORT") ?? "low";
  * catches invented figures; nothing catches a careless block choice.
  * Set LOREM_THINKING=disabled to trade it back.
  */
-export const LOREM_THINKING = envOf("THINKING", "LOREM_THINKING") ?? "adaptive";
+export const LOREM_THINKING = envOf("THINKING", "BOO_THINKING") ?? "adaptive";
 
 /* ── Voice ────────────────────────────────────────────────────────────────── */
 

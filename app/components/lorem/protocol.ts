@@ -111,9 +111,20 @@ export type LoremRequest = {
 
 /* ── Tool schema handed to the model ──────────────────────────────────── */
 
+/**
+ * A discriminated union on `type`. Each branch carries its own
+ * `required: ["type", …]`, so there is deliberately NO `required` at this
+ * level — a top-level `required` naming a property that only exists inside the
+ * branches is invalid JSON Schema. Anthropic accepted it anyway; Google
+ * rejects the whole request:
+ *
+ *   properties[show].items.required[0]: property is not defined
+ *
+ * which arrives as an opaque `[lorem] upstream 400` and takes Lorem's every
+ * turn down. Redundant here, load-bearing there — so it stays out.
+ */
 const blockSchema = {
   type: "object",
-  required: ["type"],
   oneOf: [
     {
       properties: { type: { const: "heading" }, text: { type: "string", maxLength: 90 } },
@@ -279,6 +290,103 @@ const blockSchema = {
   ],
 } as const;
 
+/* ── The same tool, in Google's schema subset ──────────────────────────────
+   Google's function-declaration schema accepts `oneOf` and then ignores it:
+   the request succeeds, and the model — which can no longer see any branch —
+   answers with `show: [{}]`. Empty objects, every turn. `sanitizeBlocks` drops
+   them correctly, so nothing breaks loudly; the visual track simply goes dark
+   while speech carries on sounding fine. That is the worst shape of failure
+   this project keeps meeting, and it is why this is derived rather than
+   written: a hand-maintained second schema drifts from the first, silently,
+   in exactly the same way.
+
+   So the union is FLATTENED for that path — `type` becomes an enum and every
+   branch field is merged in as optional — and the per-branch shapes move into
+   the description, where the model can still read them. The strictness is not
+   lost, only relocated: `sanitizeBlocks` was always the real gate, and it runs
+   on both paths regardless of which schema produced the block.            */
+
+type JsonSchema = Record<string, unknown>;
+
+/** Merge two same-named string fields by keeping the LOOSER limit — the
+ *  schema is a hint on this path, and `sanitizeBlocks` enforces the real one. */
+function looser(a: JsonSchema, b: JsonSchema): JsonSchema {
+  const max = (s: JsonSchema) => (typeof s.maxLength === "number" ? s.maxLength : Infinity);
+  return max(b) > max(a) ? b : a;
+}
+
+function flattenBlockSchema(): { schema: JsonSchema; shapes: string[] } {
+  const props: Record<string, JsonSchema> = {};
+  const itemProps: Record<string, JsonSchema> = {};
+  const kinds: string[] = [];
+  const shapes: string[] = [];
+
+  for (const branch of blockSchema.oneOf as unknown as {
+    properties: Record<string, JsonSchema>;
+    required: string[];
+  }[]) {
+    const kind = (branch.properties.type as { const: string }).const;
+    kinds.push(kind);
+    const fields: string[] = [];
+
+    for (const [name, spec] of Object.entries(branch.properties)) {
+      if (name === "type") continue;
+
+      // `items` is the one genuinely polymorphic field: metrics, personas,
+      // steps and arc each mean something different by it. Their element
+      // shapes are merged into one optional bag; `steps`, whose elements are
+      // bare strings, rides along as {label} and is converted back by
+      // `unflattenBlocks` below.
+      if (name === "items") {
+        const el = (spec as { items: JsonSchema }).items;
+        if (el.type === "string") {
+          itemProps.label ??= { type: "string" };
+          fields.push("items[].label");
+        } else {
+          for (const [k, v] of Object.entries((el.properties ?? {}) as Record<string, JsonSchema>))
+            itemProps[k] = itemProps[k] ? looser(itemProps[k], v) : v;
+          fields.push(`items[].{${Object.keys(el.properties ?? {}).join(",")}}`);
+        }
+        continue;
+      }
+
+      props[name] = props[name] ? looser(props[name], spec) : spec;
+      fields.push(branch.required.includes(name) ? name : `${name}?`);
+    }
+    shapes.push(`${kind}: ${fields.join(" ") || "(no fields)"}`);
+  }
+
+  props.items = {
+    type: "array",
+    items: { type: "object", properties: itemProps },
+    description:
+      "For metrics, personas, steps and arc only. metrics → {factId}; " +
+      "personas → {name, detail, need}; steps → {label}; arc → {label, active}.",
+  };
+  props.type = { type: "string", enum: kinds };
+
+  return { schema: { type: "object", properties: props, required: ["type"] }, shapes };
+}
+
+/** Undo the `steps` accommodation above: {label} elements back to bare
+ *  strings, which is what `LoremBlock` and every renderer expect. */
+export function unflattenBlocks(show: unknown): unknown {
+  if (!Array.isArray(show)) return show;
+  return show.map((b) => {
+    if (!b || typeof b !== "object") return b;
+    const block = b as { type?: unknown; items?: unknown };
+    if (block.type !== "steps" || !Array.isArray(block.items)) return b;
+    return {
+      ...block,
+      items: block.items.map((i) =>
+        i && typeof i === "object" && typeof (i as { label?: unknown }).label === "string"
+          ? (i as { label: string }).label
+          : i,
+      ),
+    };
+  });
+}
+
 export const RESPOND_TOOL = {
   name: "respond",
   description:
@@ -337,5 +445,32 @@ export const RESPOND_TOOL = {
     },
     required: ["say"],
     additionalProperties: false,
+  },
+};
+
+/**
+ * `RESPOND_TOOL` with only the `show` items reshaped — same name, same
+ * description, same every other field, so the two paths ask for the same thing
+ * and differ only where Google forces them to. Built at module load from the
+ * strict schema above, so adding a block type updates both.
+ */
+const flattened = flattenBlockSchema();
+
+export const RESPOND_TOOL_FLAT = {
+  ...RESPOND_TOOL,
+  input_schema: {
+    ...RESPOND_TOOL.input_schema,
+    properties: {
+      ...RESPOND_TOOL.input_schema.properties,
+      show: {
+        ...RESPOND_TOOL.input_schema.properties.show,
+        description:
+          RESPOND_TOOL.input_schema.properties.show.description +
+          " Each block's fields, by type — " +
+          flattened.shapes.join(" · ") +
+          ". Fields not listed for a type do not belong on it.",
+        items: flattened.schema,
+      },
+    },
   },
 };

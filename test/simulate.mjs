@@ -57,8 +57,23 @@ const flag = (name, fallback) => {
 };
 
 const VISITOR_MODEL = flag("visitor", HAIKU);
-const BOO_MODEL = flag("lorem", process.env.BOO_MODEL || "claude-sonnet-5");
+/* Like convo.mjs, this posts to api.anthropic.com directly and so can only
+   drive the ANTHROPIC fallback path, not the OpenRouter brain Lorem now runs
+   on. The visitor and judge stay on Claude deliberately — a judge sharing the
+   brain's model grades its own output, and every baseline so far was judged
+   here. The instrument does not move when the thing being measured does. */
+const BOO_MODEL = flag("lorem", process.env.LOREM_MODEL || process.env.BOO_MODEL || "claude-sonnet-5");
 const JUDGE_MODEL = flag("judge", "claude-sonnet-5");
+
+if (!BOO_MODEL.startsWith("claude-")) {
+  console.error(
+    `This harness calls Anthropic directly and cannot run "${BOO_MODEL}".\n` +
+      `Lorem's brain is on OpenRouter now — use \`npm run gym\`, which drives the\n` +
+      `real /api/lorem route. To exercise the Anthropic fallback instead:\n` +
+      `    node test/simulate.mjs --lorem claude-sonnet-5`,
+  );
+  process.exit(1);
+}
 
 /** Claude 5 takes output_config/thinking; Haiku 4.5 rejects them. */
 const tuning = (model, effort, thinking) =>
