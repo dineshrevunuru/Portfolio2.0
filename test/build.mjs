@@ -24,6 +24,7 @@ export function build() {
       "app/components/lorem/prerendered.generated.ts",
       "app/components/lorem/protocol.ts",
       "app/api/lorem/prompt.ts",
+      "app/site.ts",
       "--outDir", OUT,
       "--rootDir", "app",
       "--module", "esnext",

@@ -29,8 +29,14 @@
  * of this file runs server-side: robots, sitemap, layout metadata, and the
  * Clarity server component.
  */
+/* `||`, NOT `??`. .env.local carries a literal `NEXT_PUBLIC_SITE_URL=` line —
+   blank on purpose, because only production should claim the real domain — and
+   a blank line is an empty STRING, not undefined. `??` passed it straight
+   through, so SITE_URL became "" and `new URL("")` threw in layout.tsx's
+   metadataBase: every page 500ed, locally, on every route. The fallback chain
+   below is written for exactly this case; `??` just never let it run. */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_ENV === "production"
     ? "https://dineshrevunuru.com"
     : process.env.VERCEL_URL

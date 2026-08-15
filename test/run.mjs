@@ -14,3 +14,4 @@ execFileSync("node", ["test/guardrail.test.mjs"], { stdio: "inherit" });
 execFileSync("node", ["test/closing.test.mjs"], { stdio: "inherit" });
 execFileSync("node", ["test/prerender.test.mjs"], { stdio: "inherit" });
 execFileSync("node", ["test/flat-schema.test.mjs"], { stdio: "inherit" });
+execFileSync("node", ["test/site-url.test.mjs"], { stdio: "inherit" });
