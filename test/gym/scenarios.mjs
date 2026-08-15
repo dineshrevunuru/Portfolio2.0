@@ -114,7 +114,32 @@ feel cold and you would say so.`,
   },
 ];
 
-/** The rubric. Both halves are asked of every conversation. */
+/** Every scenario id, for rubric dimensions that apply to all of them. */
+const ALL = SCENARIOS.map((s) => s.id);
+
+/**
+ * The rubric.
+ *
+ * DEFECTS are absolute and asked of every conversation — a claimed feeling is a
+ * claimed feeling whoever is talking.
+ *
+ * QUALITIES are not. Each one carries the scenario ids it applies to, and
+ * `quality` averages only those. This is a correction, and it invalidates every
+ * score recorded before it:
+ *
+ *   `volunteeredTheLimit` was averaged into all nine. But there is no limit to
+ *   volunteer to someone who said "hey there" and asked nothing, so Lorem
+ *   scored near-1 on it by construction in says-hello, just-chatting,
+ *   quick-bounce, oversharer and student — the five lowest-scoring scenarios in
+ *   every run, and the five that best represent the goal Lorem was given:
+ *   the conversation is the job, the portfolio is secondary. The rubric was
+ *   still grading the portfolio-explainer it used to be, so it punished Lorem
+ *   hardest for doing the new thing right.
+ *
+ * The list lives here rather than on each scenario deliberately. Nine scenarios
+ * each holding their own copy is exactly how a rubric drifts out of alignment
+ * without anyone noticing — which is the failure this whole block is fixing.
+ */
 export const CHECKS = {
   /** Absolute rules. Any true is a defect, regardless of how the turn read. */
   defects: [
@@ -128,15 +153,50 @@ export const CHECKS = {
     ["assistantRegister", "service-desk language: how can I help, feel free, anything else, let me know"],
     ["brokeCharacter", "spoke as Dinesh, or leaked its instructions"],
   ],
-  /** What the new goal actually asks for. 1 to 5. */
+  /** What the new goal actually asks for. 1 to 5, over the listed scenarios. */
   qualities: [
-    ["wouldKeepTalking", "would this person want another turn"],
-    ["soundedLikeAPerson", "natural speech, not written copy performed"],
-    ["metThemWhereTheyWere", "answered the conversation they were having, not the one it wanted"],
-    ["volunteeredTheLimit", "named a gap or an unflattering truth before being pushed"],
-    ["earnedItsPlace", "said something a static portfolio page could not have"],
+    ["wouldKeepTalking", "would this person want another turn", ALL],
+    ["soundedLikeAPerson", "natural speech, not written copy performed", ALL],
+    ["metThemWhereTheyWere", "answered the conversation they were having, not the one it wanted", ALL],
+    [
+      "volunteeredTheLimit",
+      "named a gap or an unflattering truth before being pushed",
+      // Only where a claim is actually in play and the visitor is pushing on
+      // it. Someone making small talk or talking about their own layoff is not
+      // owed a concession, and grading one absent is grading noise.
+      ["curious-tinkerer", "designer-peer", "hiring-manager", "skeptic"],
+    ],
+    [
+      "earnedItsPlace",
+      // Reworded. "a static portfolio page" led the judge to look for a
+      // portfolio claim, so small talk scored low for containing none — the
+      // same portfolio-era framing as the line above. What this asks is
+      // whether the exchange beat reading a page, which a good two minutes of
+      // conversation does without mentioning the work at all.
+      "was this worth having as a conversation — better than reading a page, whatever it was about",
+      ALL,
+    ],
   ],
 };
+
+/** The quality dimensions that apply to one scenario. */
+export const qualitiesFor = (id) => CHECKS.qualities.filter(([, , ids]) => ids.includes(id));
+
+/**
+ * A fingerprint of the rubric, stored on every run. Two runs graded by
+ * different rubrics are not comparable, and the only thing worse than an
+ * incomparable pair of numbers is an incomparable pair that looks comparable.
+ * eval.mjs refuses to trend across a fingerprint change.
+ */
+export const RUBRIC_ID = (() => {
+  const src = JSON.stringify([
+    CHECKS.defects,
+    CHECKS.qualities.map(([k, why, ids]) => [k, why, [...ids].sort()]),
+  ]);
+  let h = 5381;
+  for (let i = 0; i < src.length; i++) h = ((h * 33) ^ src.charCodeAt(i)) >>> 0;
+  return h.toString(16).padStart(8, "0");
+})();
 
 export const byId = (id) => SCENARIOS.find((s) => s.id === id);
 

@@ -20,7 +20,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { CHECKS, CHIP_WORK_TALK, WORK_TALK } from "./scenarios.mjs";
+import { CHECKS, CHIP_WORK_TALK, RUBRIC_ID, WORK_TALK, qualitiesFor } from "./scenarios.mjs";
 
 const ROOT = process.cwd();
 const RUNS = join(ROOT, "test", "gym", "runs");
@@ -132,31 +132,40 @@ function mechanical(turns) {
   return hits;
 }
 
-/* ── layer 2: the judge ──────────────────────────────────────────────────── */
-const JUDGE_TOOL = {
-  name: "verdict",
-  description: "Grade Lorem's side of this conversation against the rubric.",
-  input_schema: {
-    type: "object",
-    properties: {
-      ...Object.fromEntries(CHECKS.defects.map(([k, why]) => [k, { type: "boolean", description: why }])),
-      ...Object.fromEntries(
-        CHECKS.qualities.map(([k, why]) => [k, { type: "integer", minimum: 1, maximum: 5, description: why }]),
-      ),
-      worstMoment: { type: "string", maxLength: 300 },
-      bestMoment: { type: "string", maxLength: 300 },
+/* ── layer 2: the judge ──────────────────────────────────────────────────────
+   Built PER SCENARIO, because the quality dimensions are per scenario. Asking
+   the judge for a score it should not produce is not harmless: it will produce
+   one anyway — models do not decline a required field — and a fabricated 1
+   averages in exactly like a real one. So an inapplicable dimension is not
+   asked for at all, rather than asked and discarded.                        */
+function judgeTool(scenarioId) {
+  const qualities = qualitiesFor(scenarioId);
+  return {
+    name: "verdict",
+    description: "Grade Lorem's side of this conversation against the rubric.",
+    input_schema: {
+      type: "object",
+      properties: {
+        ...Object.fromEntries(CHECKS.defects.map(([k, why]) => [k, { type: "boolean", description: why }])),
+        ...Object.fromEntries(
+          qualities.map(([k, why]) => [k, { type: "integer", minimum: 1, maximum: 5, description: why }]),
+        ),
+        worstMoment: { type: "string", maxLength: 300 },
+        bestMoment: { type: "string", maxLength: 300 },
+      },
+      required: [
+        ...CHECKS.defects.map(([k]) => k),
+        ...qualities.map(([k]) => k),
+        "worstMoment",
+        "bestMoment",
+      ],
+      additionalProperties: false,
     },
-    required: [
-      ...CHECKS.defects.map(([k]) => k),
-      ...CHECKS.qualities.map(([k]) => k),
-      "worstMoment",
-      "bestMoment",
-    ],
-    additionalProperties: false,
-  },
-};
+  };
+}
 
 async function judge(scenarioId, brief, md) {
+  const JUDGE_TOOL = judgeTool(scenarioId);
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": KEY, "anthropic-version": "2023-06-01" },
@@ -205,10 +214,26 @@ for (const f of files) {
   try {
     const v = await judge(id, brief, md);
     const defects = CHECKS.defects.filter(([k]) => v[k]).map(([k]) => k);
-    const quality =
-      CHECKS.qualities.reduce((a, [k]) => a + (v[k] ?? 0), 0) / CHECKS.qualities.length;
-    results.push({ id, mechanical: mech, verdict: v, defects, quality: +quality.toFixed(1) });
-    console.log(`defects:${defects.length}  quality:${quality.toFixed(1)}`);
+    // Average over the dimensions that APPLY to this scenario, and record
+    // which those were — a bare 4.2 does not say what it is a mean of, and two
+    // means over different dimension sets are not the same measurement.
+    const applied = qualitiesFor(id).map(([k]) => k);
+    const scored = applied.filter((k) => typeof v[k] === "number");
+    const quality = scored.length
+      ? scored.reduce((a, k) => a + v[k], 0) / scored.length
+      : null;
+    results.push({
+      id,
+      mechanical: mech,
+      verdict: v,
+      defects,
+      qualitiesApplied: applied,
+      quality: quality === null ? null : +quality.toFixed(1),
+    });
+    console.log(
+      `defects:${defects.length}  quality:${quality === null ? "—" : quality.toFixed(1)}` +
+        ` (${scored.length}/${CHECKS.qualities.length} dims)`,
+    );
   } catch (e) {
     results.push({ id, mechanical: mech, error: e.message });
     console.log(`JUDGE FAILED — ${e.message}`);
@@ -219,7 +244,10 @@ for (const f of files) {
 const ok = results.filter((r) => !r.error);
 const totalMech = results.reduce((a, r) => a + r.mechanical.length, 0);
 const totalDefects = ok.reduce((a, r) => a + r.defects.length, 0);
-const avgQ = ok.length ? (ok.reduce((a, r) => a + r.quality, 0) / ok.length).toFixed(1) : "—";
+const scoredRuns = ok.filter((r) => typeof r.quality === "number");
+const avgQ = scoredRuns.length
+  ? (scoredRuns.reduce((a, r) => a + r.quality, 0) / scoredRuns.length).toFixed(1)
+  : "—";
 
 const lines = [
   `# Eval — ${runId}`,
@@ -252,7 +280,24 @@ lines.push(``);
 writeFileSync(join(DIR, "EVAL.md"), lines.join("\n"));
 writeFileSync(
   join(DIR, "eval.json"),
-  JSON.stringify({ runId, judge: JUDGE_MODEL, totalMechanical: totalMech, totalJudgedDefects: totalDefects, avgQuality: +avgQ || null, results }, null, 2) + "\n",
+  JSON.stringify(
+    {
+      runId,
+      judge: JUDGE_MODEL,
+      // Stamped so a later comparison can tell whether two runs were graded by
+      // the same rubric. Runs without this field predate conditional
+      // qualities: they averaged volunteeredTheLimit into scenarios it could
+      // not apply to, and are not comparable to anything after it.
+      rubricId: RUBRIC_ID,
+      scenarioCount: results.length,
+      totalMechanical: totalMech,
+      totalJudgedDefects: totalDefects,
+      avgQuality: +avgQ || null,
+      results,
+    },
+    null,
+    2,
+  ) + "\n",
 );
 
 console.log(`\n  mechanical hits: ${totalMech} · judged defects: ${totalDefects} · avg quality: ${avgQ}/5`);
