@@ -166,6 +166,32 @@ function mechanical(turns) {
   return hits;
 }
 
+/**
+ * The two numbers Dinesh's own grading turned out to be about.
+ *
+ * Measured against his rewrites over the 2026-08-15T17-40-23 run: Lorem's
+ * median turn was 40 words where his replacements were 9, and Lorem handed the
+ * turn back on 39% of turns where he did on 78%. His note — "Can keep it
+ * short. So user can process and think of one thing at a time and one
+ * question" — is the whole of it.
+ *
+ * Reported rather than judged, because both are countable and this file's rule
+ * is that anything countable is counted. A judge asked "was that too long?"
+ * would give an opinion where there is a fact.
+ */
+function shapeOf(turns) {
+  const said = turns
+    .filter((t) => t.who === "lorem" && t.text && !t.text.includes("error:"))
+    .map((t) => t.text.trim());
+  if (!said.length) return { turns: 0, medianWords: null, handedBackPct: null };
+  const w = said.map((t) => t.split(/\s+/).length).sort((a, b) => a - b);
+  return {
+    turns: said.length,
+    medianWords: w[Math.floor(w.length / 2)],
+    handedBackPct: Math.round((said.filter((t) => t.endsWith("?")).length / said.length) * 100),
+  };
+}
+
 /* ── layer 2: the judge ──────────────────────────────────────────────────────
    Built PER SCENARIO, because the quality dimensions are per scenario. Asking
    the judge for a score it should not produce is not harmless: it will produce
@@ -244,6 +270,7 @@ for (const f of files) {
   const brief = (/^> ([\s\S]*?)\n\n---/m.exec(md)?.[1] ?? "").replace(/^> ?/gm, "");
   const turns = turnsOf(md);
   const mech = mechanical(turns);
+  const shape = shapeOf(turns);
   process.stdout.write(`  ${id.padEnd(18)} mech:${String(mech.length).padStart(2)}  `);
   try {
     const v = await judge(id, brief, md);
@@ -262,6 +289,7 @@ for (const f of files) {
       verdict: v,
       defects,
       qualitiesApplied: applied,
+      shape,
       quality: quality === null ? null : +quality.toFixed(1),
     });
     console.log(
@@ -324,6 +352,16 @@ writeFileSync(
       // not apply to, and are not comparable to anything after it.
       rubricId: RUBRIC_ID,
       scenarioCount: results.length,
+      shape: (() => {
+        const all = results.flatMap((r) => r.shape ?? []);
+        const t = all.reduce((a, s) => a + s.turns, 0);
+        if (!t) return null;
+        return {
+          loremTurns: t,
+          medianWords: Math.round(all.reduce((a, s) => a + s.medianWords * s.turns, 0) / t),
+          handedBackPct: Math.round(all.reduce((a, s) => a + s.handedBackPct * s.turns, 0) / t),
+        };
+      })(),
       totalMechanical: totalMech,
       totalJudgedDefects: totalDefects,
       avgQuality: +avgQ || null,

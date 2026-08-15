@@ -1,0 +1,12 @@
+{
+  "daef88b3aac6": {
+    "verdict": "bad",
+    "note": "",
+    "at": "2026-08-15T19:14:46.339Z"
+  },
+  "d8217310ffcb": {
+    "verdict": "bad",
+    "note": "Don't have to use \"The deliberate part is the safety layer: I can't invent numbers or metrics, only reference verified fact IDs from a schema.\"",
+    "at": "2026-08-15T19:15:38.618Z"
+  }
+}

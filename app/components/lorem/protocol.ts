@@ -387,6 +387,30 @@ export function unflattenBlocks(show: unknown): unknown {
   });
 }
 
+/* ── How long `say` is allowed to be ───────────────────────────────────────
+   Measured against Dinesh's own rewrites, graded turn by turn over twenty
+   five-minute conversations:
+
+                        Lorem      Dinesh's rewrite
+     median turn        40 words   9 words
+     ends on a question 39%        78%
+
+   His note on it: "Can keep it short. So user can process and think of one
+   thing at a time and one question."
+
+   The prompt ALREADY said "two or three sentences" in four separate places,
+   and already carried a one-question-per-turn rule. Both produced 40 words and
+   39%. That is the same result this codebase keeps getting — its "absolute"
+   no-em-dash rule was broken 228 times while the code-enforced numeral rule
+   was broken zero — so the limit moves out of the prose and into the schema,
+   where it is a structural constraint rather than a request.
+
+   Two caps, not one, because a flat fifteen-word limit would wreck the
+   hiring-manager conversation: someone asking what he shipped is owed a real
+   answer. The route already computes whether the visitor has steered to the
+   work — the chip gate depends on it — so the cap rides the same signal.       */
+export const SAY_CAP = { small_talk: 150, steered: 420 } as const;
+
 export const RESPOND_TOOL = {
   name: "respond",
   description:
@@ -398,12 +422,14 @@ export const RESPOND_TOOL = {
     properties: {
       say: {
         type: "string",
-        maxLength: 480,
+        // Overridden per request by `withSayCap`. This value is the ceiling for
+        // a visitor who has actually asked about the work.
+        maxLength: SAY_CAP.steered,
         description:
-          "What Lorem says out loud. Conversational, first-name-basis, two or three " +
-          "sentences. Never read the visual blocks aloud — say the meaning, show the " +
-          "detail. Do not write bare numerals here; name the figure in words or let " +
-          "the metrics block carry it.",
+          "What Lorem says out loud. Conversational, first-name-basis. Never read " +
+          "the visual blocks aloud — say the meaning, show the detail. Do not write " +
+          "bare numerals here; name the figure in words or let the metrics block " +
+          "carry it.",
       },
       show: {
         type: "array",
@@ -454,6 +480,37 @@ export const RESPOND_TOOL = {
  * and differ only where Google forces them to. Built at module load from the
  * strict schema above, so adding a block type updates both.
  */
+/**
+ * The same tool with `say` capped for this turn. Applied to whichever variant
+ * the provider needs, so the two paths cannot disagree about how long an
+ * answer may be.
+ */
+export function withSayCap<T extends { input_schema: { properties: { say: unknown } } }>(
+  tool: T,
+  steered: boolean,
+): T {
+  const max = steered ? SAY_CAP.steered : SAY_CAP.small_talk;
+  const say = tool.input_schema.properties.say as Record<string, unknown>;
+  return {
+    ...tool,
+    input_schema: {
+      ...tool.input_schema,
+      properties: {
+        ...tool.input_schema.properties,
+        say: {
+          ...say,
+          maxLength: max,
+          description: steered
+            ? `${say.description as string} They have asked about the work, so answer it properly.`
+            : `${say.description as string} They are making conversation, not asking for a ` +
+              `briefing. One or two short sentences, usually under fifteen words. Answer, ` +
+              `then hand the turn back — ask them something built from what they just said.`,
+        },
+      },
+    },
+  };
+}
+
 const flattened = flattenBlockSchema();
 
 export const RESPOND_TOOL_FLAT = {

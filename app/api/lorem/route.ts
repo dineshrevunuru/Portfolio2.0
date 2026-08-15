@@ -5,6 +5,7 @@ import {
   RESPOND_TOOL,
   RESPOND_TOOL_FLAT,
   unflattenBlocks,
+  withSayCap,
   type LoremTurn,
 } from "../../components/lorem/protocol";
 import {
@@ -131,6 +132,15 @@ export async function POST(req: Request) {
     { role: "user" as const, content: message.slice(0, MAX_MESSAGE_CHARS) },
   ];
 
+  // Computed BEFORE the call now, not just after it. The chip gate has always
+  // used this signal; the length cap needs it too, and both must read the same
+  // one or a visitor could get small-talk-length answers with work chips.
+  const steered = visitorSteeredToWork([
+    ...priorTurns.filter((t) => t.role === "user").map((t) => t.content),
+    message,
+  ]);
+  const tool = withSayCap(BRAIN === "openrouter" ? RESPOND_TOOL_FLAT : RESPOND_TOOL, steered);
+
   // The two providers disagree about the system prompt's home, the tool's
   // shape, how a tool is forced, and — the one that bites — whether the
   // returned arguments arrive parsed or as a JSON string. Kept side by side
@@ -144,7 +154,7 @@ export async function POST(req: Request) {
     thinking: { type: LOREM_THINKING },
     system: systemPrompt(inputMode),
     messages,
-    tools: [RESPOND_TOOL],
+    tools: [tool],
     tool_choice: { type: "tool", name: "respond" },
   };
 
@@ -163,9 +173,9 @@ export async function POST(req: Request) {
       {
         type: "function",
         function: {
-          name: RESPOND_TOOL_FLAT.name,
-          description: RESPOND_TOOL_FLAT.description,
-          parameters: RESPOND_TOOL_FLAT.input_schema,
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.input_schema,
         },
       },
     ],
@@ -262,10 +272,7 @@ export async function POST(req: Request) {
       (Array.isArray(input.chips) ? input.chips : [])
         .filter((c): c is string => typeof c === "string" && !!c.trim())
         .slice(0, 3),
-      visitorSteeredToWork([
-        ...priorTurns.filter((t) => t.role === "user").map((t) => t.content),
-        message,
-      ]),
+      steered,
     ),
     // Passed straight back to the client, which decides whether to store it.
     // The server keeps nothing: no visitor record exists on this side.
