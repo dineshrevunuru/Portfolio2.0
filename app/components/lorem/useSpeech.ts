@@ -3,6 +3,39 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PRERENDERED } from "./prerendered.generated";
 
+/**
+ * How fast Lorem talks. Dinesh's call on 2026-08-15: the default was too slow
+ * to listen to, +0.3x.
+ *
+ * Done HERE and not in the TTS request, which is where it belongs on paper.
+ * Measured against the API on this account, same sentence, twice:
+ *
+ *   eleven_v3          speed 1.0 → 4.70s, speed 1.3 → 5.10s   IGNORED
+ *   eleven_flash_v2_5  speed 1.3 → 400 "expected ... less or equal to 1.2"
+ *
+ * v3 accepts `speed` in voice_settings and silently discards it, so a
+ * server-side change reads as done, deploys clean, and does nothing. Worse, it
+ * is a live grenade: switching ELEVENLABS_MODEL to Flash — which the config
+ * documents as the fast alternative — would start 400ing every line.
+ *
+ * playbackRate is exact, costs nothing, needs no re-render, and applies to the
+ * pre-rendered greeting and live streamed audio alike, so the first line a
+ * visitor hears runs at the same pace as every line after it. preservesPitch
+ * keeps the voice from going chipmunk; it defaults true but is set explicitly
+ * because the default has not always been.
+ *
+ * BOTH properties are set: per spec the load algorithm resets playbackRate to
+ * defaultPlaybackRate, so setting only the former would revert on the next
+ * `src` assignment — which is every single utterance.
+ */
+const SPEECH_RATE = 1.3;
+
+function pace(el: HTMLAudioElement) {
+  el.defaultPlaybackRate = SPEECH_RATE;
+  el.playbackRate = SPEECH_RATE;
+  (el as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = true;
+}
+
 export type MicState = "ok" | "denied" | "unsupported";
 export type ListenMode = "hold" | "tap";
 
@@ -491,6 +524,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
         if (canned) {
           releaseUrl();
           el.src = canned;
+          pace(el);
           await el.play();
           return;
         }
@@ -553,6 +587,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
             // than it is consumed, so the element never starves.
             if (!playing) {
               playing = true;
+              pace(el);
               void el.play();
             }
           }
@@ -566,6 +601,7 @@ export function useSpeech(opts: UseSpeechOptions): UseSpeechApi {
         const url = URL.createObjectURL(blob);
         objectUrl.current = url;
         el.src = url;
+        pace(el);
         await el.play();
       } catch (e) {
         if (ctl.signal.aborted || gen !== utterGen.current) return;
