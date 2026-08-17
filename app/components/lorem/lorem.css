@@ -411,3 +411,45 @@
 
 /* 22b · On the greet screen the forget line sits under the greeting itself. */
 .lorem-forget--greet{margin-top:14px;font-size:12.5px}
+
+/* ============================ SPACE THEME ============================
+   The through-the-black-hole variant (LoremHome theme="space"). Scoped
+   token overrides first — most surfaces read from the tokens and follow
+   for free — then the handful of rules above that hardcode a light color.
+   --ink-dark stays #16181D on purpose: the orb IS the black hole, and a
+   black hole does not get a night mode.
+   background:transparent is the single most load-bearing line here — the
+   fixed .bh-space starfield (z -1, from BlackHole.tsx) is the backdrop
+   for the whole session, which is what makes the consume animation and
+   the Lorem session one continuous place. */
+.lorem-home[data-theme="space"]{
+  --accent:#6FA5FF; --accent-soft:rgba(111,165,255,.14); --accent-ink:#A9C7FF;
+  --ink:#F2F5FA; --mut:#9BA6B5; --faint:#5E6875; --line:rgba(255,255,255,.10);
+  --surface-1:rgba(255,255,255,.055); --surface-2:rgba(255,255,255,.075); --surface-3:rgba(255,255,255,.05);
+  background:transparent;
+  color:var(--ink);
+}
+/* A black orb on black space needs a rim to stay an object. */
+.lorem-home[data-theme="space"] .lorem-micorb{
+  box-shadow:0 0 0 1px rgba(255,255,255,.16),0 8px 24px rgba(0,0,0,.55)}
+.lorem-home[data-theme="space"] .lorem-micorb.muted,
+.lorem-home[data-theme="space"] .lorem-micorb.blocked{background:#232833}
+.lorem-home[data-theme="space"] .lorem-chip{background:rgba(255,255,255,.06);border-color:var(--line)}
+.lorem-home[data-theme="space"] .lorem-chip.go:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22)}
+.lorem-home[data-theme="space"] .lorem-cmdbar .khint,
+.lorem-home[data-theme="space"] .lorem-cmdbar .ptthint{color:#8E99A9}
+.lorem-home[data-theme="space"] .lorem-cmdbar kbd{border-color:rgba(255,255,255,.2);color:var(--ink)}
+.lorem-home[data-theme="space"] .lorem-browserhint{background:#10151F;border-color:var(--line)}
+.lorem-home[data-theme="space"] .lorem-browserhint button{background:rgba(255,255,255,.08)}
+.lorem-home[data-theme="space"] .lorem-browserhint button:hover{background:rgba(255,255,255,.16);color:var(--ink)}
+.lorem-home[data-theme="space"] .lorem-bubble.them{background:rgba(255,255,255,.08);box-shadow:none}
+/* Patch 4 moved the user bubble to --accent-ink, which is a LIGHT blue here. */
+.lorem-home[data-theme="space"] .lorem-bubble.u{background:#1E4FA8;color:#fff}
+.lorem-home[data-theme="space"] .lorem-quote{background:rgba(255,255,255,.06);box-shadow:none}
+.lorem-home[data-theme="space"] .lorem-logov{background:rgba(6,10,18,.94)}
+.lorem-home[data-theme="space"] .lorem-asked-pin{background:rgba(6,10,18,.85)}
+/* Never seen under the blackhole entrance — but a white blur at the reveal
+   frame would be jarring, so the gate goes transparent in space. */
+.lorem-home[data-theme="space"] .lorem-startgate{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+/* The dark lane was dark-on-dark; a hairline keeps it a card. */
+.lorem-home[data-theme="space"] .lorem-lane.b{border:1px solid var(--line)}

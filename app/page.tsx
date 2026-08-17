@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import SiteNav from "./components/SiteNav";
 import SiteFooter from "./components/SiteFooter";
-import LoremBanner from "./components/lorem/LoremBanner";
+import BlackHole from "./components/blackhole/BlackHole";
 import BubbleStrip from "./components/BubbleStrip";
 
 type ProjectSlug =
@@ -336,12 +336,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Lorem banner — the voice-assistant add-on's front door */}
+      {/* Lorem banner — the voice-assistant add-on's front door. BlackHole
+          wraps it: the card is still the link to /lorem, but the orb is its
+          own button that folds the whole page into Lorem's space theme. */}
       <section
         className="pad-cards mx-auto w-full max-w-[1440px] seq pt-11"
         style={{ "--sd": "540ms" } as CSSProperties}
       >
-        <LoremBanner />
+        <BlackHole />
       </section>
 
       {/* Projects heading */}

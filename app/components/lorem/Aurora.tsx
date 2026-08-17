@@ -11,6 +11,13 @@ export interface AuroraProps {
   energy?: number;
   /** Overlay the fractal-noise grain (matches the portfolio's #agrain). Default true. */
   grain?: boolean;
+  /**
+   * Per-layer wave colors as "r,g,b" strings, front to back. Omitted, the
+   * field keeps its accent blues; the space theme passes near-whites. Read at
+   * draw time through a ref — same reason as `energy` — so a theme flip never
+   * rebuilds the canvas pipeline.
+   */
+  palette?: [string, string, string];
   className?: string;
   style?: React.CSSProperties;
 }
@@ -40,7 +47,7 @@ const WAVES = [
  * the accent blues, pinned to the bottom of its container. Decorative background;
  * fills its nearest positioned ancestor.
  */
-export function Aurora({ energy = 0.42, grain = true, className, style }: AuroraProps) {
+export function Aurora({ energy = 0.42, grain = true, palette, className, style }: AuroraProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // `energy` is re-set every animation frame while the mic level drives it.
@@ -50,6 +57,8 @@ export function Aurora({ energy = 0.42, grain = true, className, style }: Aurora
   // draw loop reads the live value through a ref instead; the effect runs once.
   const energyRef = useRef(energy);
   energyRef.current = energy;
+  const paletteRef = useRef(palette);
+  paletteRef.current = palette;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -128,10 +137,11 @@ export function Aurora({ energy = 0.42, grain = true, className, style }: Aurora
           }
           ctx.lineTo(w + 40, h + 40);
           ctx.closePath();
+          const rgb = paletteRef.current?.[i] ?? L.rgb;
           const g = ctx.createLinearGradient(0, yb - amp, 0, h);
-          g.addColorStop(0, `rgba(${L.rgb},0)`);
-          g.addColorStop(0.45, `rgba(${L.rgb},${L.a * e})`);
-          g.addColorStop(1, `rgba(${L.rgb},${L.a * 1.25 * e})`);
+          g.addColorStop(0, `rgba(${rgb},0)`);
+          g.addColorStop(0.45, `rgba(${rgb},${L.a * e})`);
+          g.addColorStop(1, `rgba(${rgb},${L.a * 1.25 * e})`);
           ctx.fillStyle = g;
           ctx.fill();
         });
@@ -162,10 +172,11 @@ export function Aurora({ energy = 0.42, grain = true, className, style }: Aurora
           }
           octx.lineTo(w2 + 8, h2 + 8);
           octx.closePath();
+          const rgb = paletteRef.current?.[i] ?? L.rgb;
           const g = octx.createLinearGradient(0, yb - amp, 0, h2);
-          g.addColorStop(0, `rgba(${L.rgb},0)`);
-          g.addColorStop(0.45, `rgba(${L.rgb},${L.a * e})`);
-          g.addColorStop(1, `rgba(${L.rgb},${L.a * 1.25 * e})`);
+          g.addColorStop(0, `rgba(${rgb},0)`);
+          g.addColorStop(0.45, `rgba(${rgb},${L.a * e})`);
+          g.addColorStop(1, `rgba(${rgb},${L.a * 1.25 * e})`);
           octx.fillStyle = g;
           octx.fill();
         });

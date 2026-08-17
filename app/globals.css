@@ -2360,6 +2360,20 @@ nav.top.cs-nav-morph.in.is-snapping {
   color: var(--ink, #16181d);
   border-color: #c9ddfa;
 }
+/* The card-wide link, stretched over the pill. The root is a div now (the orb
+   is a real <button>, and a button inside an <a> is invalid HTML), so this
+   carries the navigation. z-index 2 clears .loremv-txt/.loremv-go (z 1) —
+   under them, the text spans would eat clicks on half the card. */
+.loremv-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+}
+.loremv-cover:focus-visible {
+  outline: 3px solid var(--accent, #1c7cf5);
+  outline-offset: 3px;
+}
 .loremv-wave {
   position: absolute;
   inset: 0;
@@ -2376,14 +2390,20 @@ nav.top.cs-nav-morph.in.is-snapping {
   }
 }
 .loremv:hover .loremv-wave,
-.loremv:focus-visible .loremv-wave {
+.loremv:focus-within .loremv-wave {
   opacity: 1;
 }
+/* z 3: the orb rides above the cover link. The wrapper itself stays
+   click-transparent; only a real <button> orb (the black-hole trigger) takes
+   the pointer, so the decorative form leaves no dead zone over the card. */
 .loremv-mic {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   flex: none;
   pointer-events: none;
+}
+.loremv-mic button.lorem-micorb {
+  pointer-events: auto;
 }
 .loremv-txt {
   position: relative;
@@ -2435,10 +2455,6 @@ nav.top.cs-nav-morph.in.is-snapping {
 .loremv:hover .loremv-go {
   background: #ffffff;
 }
-.loremv:focus-visible {
-  outline: 3px solid var(--accent, #1c7cf5);
-  outline-offset: 3px;
-}
 /* Mid widths: close the gap before the CTA drifts too far from the text. */
 @media (max-width: 1024px) {
   .loremv {
@@ -2483,6 +2499,92 @@ nav.top.cs-nav-morph.in.is-snapping {
    ./components/lorem/lorem.css (imported in layout.tsx). The banner's own
    wrapper classes (.loremv / .loremv-*) stay above; the .lorem-* classes it
    uses (aurora, micorb) come from lorem.css. */
+
+/* =========================================================
+   Black hole — the orb-click entrance to Lorem (BlackHole.tsx).
+   Four portaled layers. The space field sits at z -1: the body's white
+   background paints on the root canvas BELOW it, and all in-flow page
+   content paints ABOVE it — so the sections visibly fly over deep space
+   as they're consumed, no overlay trickery. The same field then serves
+   as Lorem's backdrop (space-theme .lorem-home is transparent), which is
+   why there is one starfield and no crossfade seam anywhere.
+   ========================================================= */
+.bh-space {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(120% 90% at 50% 110%, #101a33 0%, rgba(16, 26, 51, 0) 55%),
+    radial-gradient(100% 100% at 80% -10%, #0b1226 0%, rgba(11, 18, 38, 0) 60%),
+    #05070f;
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bh-space.on {
+  opacity: 1;
+}
+.bh-space canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* Gravity made visible: dims the doomed page, never the orb (z 60) or the
+   arriving Lorem surface (z 50). Click-transparent — the skip handler
+   listens on the window instead. */
+.bh-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(2, 4, 12, 1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Lorem's seat. Mounted (hidden) the instant the orb is clicked so the
+   audio unlock runs inside the gesture and the gate orb is measurable —
+   visibility, not display, or the flight would have no destination rect. */
+.bh-lorem {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  visibility: hidden;
+}
+.bh-lorem.on {
+  visibility: visible;
+}
+/* The travelling orb. Same pattern as .lorem-orbfly: fixed, top-left
+   origin so measured position and scale resolve against the same corner. */
+.bh-orb {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  will-change: transform;
+  transform-origin: top left;
+}
+/* The event horizon. A soft ring the whole sequence breathes through —
+   box-shadow, not border, so the pulses can animate it cheaply. While
+   `landing` (the glide to the gate seat) it eases down to the exact rim
+   the space-theme orb wears, so the clone→Lorem swap is pixel-identical. */
+.bh-orb .bh-orb-pulse {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 0 34px 4px rgba(120, 160, 255, 0.28),
+    0 8px 24px rgba(20, 25, 35, 0.16);
+  transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bh-orb.landing .bh-orb-pulse {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 8px 24px rgba(0, 0, 0, 0.55);
+}
+.bh-orb .lorem-micorb {
+  width: 100%;
+  height: 100%;
+}
 
 /* Lorem — one-time entrance beats for each block the model composes (LoremHome). */
 @keyframes lorem-beatin {

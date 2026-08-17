@@ -40,6 +40,19 @@ export interface LoremHomeProps {
   skipGate?: boolean;
   /** Timing multiplier for the entrance beats (0.5–2). */
   pace?: number;
+  /** Visual theme. `space` is the through-the-black-hole variant: transparent
+   *  shell over the starfield, near-white ink, white aurora. Default light. */
+  theme?: "light" | "space";
+  /**
+   * How the visitor arrives. `blackhole` means BlackHole.tsx mounted this
+   * component (hidden) inside the orb-click gesture: unlock() runs on mount —
+   * the gesture is live NOW, not after the 3s consume animation — and the
+   * gate waits for `begin` instead of a tap. `gate` is the normal /lorem flow.
+   */
+  entrance?: "gate" | "blackhole";
+  /** With entrance="blackhole": flip true when the consume animation lands —
+   *  runs the same start() a gate tap would, gate→dock flight and greeting. */
+  begin?: boolean;
 }
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
@@ -64,7 +77,14 @@ const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
  *
  * The one thing the model does not get to improvise is a number. See `facts.ts`.
  */
-export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: LoremHomeProps) {
+export default function LoremHome({
+  speak = true,
+  skipGate = false,
+  pace = 1,
+  theme = "light",
+  entrance = "gate",
+  begin = false,
+}: LoremHomeProps) {
   const [gate, setGate] = useState(true);
   const [gone, setGone] = useState(false);
   const [phase, setPhase] = useState<Phase>("greet");
@@ -558,6 +578,35 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   const startRef = useRef(start);
   startRef.current = start;
 
+  /* ── Black-hole entrance ──────────────────────────────────────────────
+     Mounted by BlackHole.tsx at orb-click, hidden under the consume
+     animation. Two effects, one guard:
+
+     unlock() on mount — the click gesture is live for only moments; waiting
+     for the ~3s animation would land outside Safari's activation window and
+     the Audio element would never be created in-gesture, so Lorem would
+     arrive mute. (This is also why skipGate can't serve here: it disables
+     TTS wholesale and never unlocks.)
+
+     begin → start() — the same path a gate tap takes: gate→dock flight,
+     greeting on touchdown. gateDone stays untouched until then; pre-setting
+     it would make start() a no-op.
+
+     The hold guard keeps the window keydown handler (below) from letting
+     Enter/Space fire the gate while the surface is still hidden under the
+     consume animation. */
+  const entranceHold = entrance === "blackhole" && !begin;
+  const entranceHoldRef = useRef(entranceHold);
+  entranceHoldRef.current = entranceHold;
+
+  useEffect(() => {
+    if (entrance === "blackhole") void speechRef.current.unlock();
+  }, [entrance]);
+
+  useEffect(() => {
+    if (entrance === "blackhole" && begin) startRef.current();
+  }, [entrance, begin]);
+
   /**
    * Run the gate orb's flight exactly once per `fly`.
    *
@@ -590,6 +639,8 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (!gateDone.current) {
+        // Waiting for the black-hole handoff: the gate is not tappable yet.
+        if (entranceHoldRef.current) return;
         if (e.key === "Enter" || e.code === "Space") {
           e.preventDefault();
           startRef.current();
@@ -839,11 +890,22 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
         : "Ask me anything";
 
   return (
-    <div className="lorem-home" style={{ height: "100dvh" }} data-screen-label="Lorem">
+    <div
+      className="lorem-home"
+      style={{ height: "100dvh" }}
+      data-screen-label="Lorem"
+      data-theme={theme}
+    >
       <div className="lorem-home-aurora">
         {/* grain={false}: smooth gradient waves. The DS default stays grainy —
-            this surface is the exception, not a change to the component. */}
-        <Aurora energy={energy} grain={false} />
+            this surface is the exception, not a change to the component.
+            Space theme trades the accent blues for near-whites — an aurora
+            over a night sky, still driven by the same voice energy. */}
+        <Aurora
+          energy={energy}
+          grain={false}
+          palette={theme === "space" ? ["226,236,255", "255,255,255", "190,208,255"] : undefined}
+        />
       </div>
       {/* The way out. It read as a caption before ("dinesh · voice portfolio"),
           so the only exit from a full-screen voice takeover looked like a label.
@@ -1240,7 +1302,11 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
           >
             <MicOrb state="speaking" decorative />
           </span>
-          <div className="t">Tap to start</div>
+          {/* Through the black hole there is nothing to tap — the orb click
+              already happened, and the BlackHole clone is covering this seat.
+              A "Tap to start" flashing under it at the reveal frame would
+              read as a second, different gate. */}
+          {entrance !== "blackhole" && <div className="t">Tap to start</div>}
           {/* Expectation-setting for everyone off Chrome. Names the actual
               difference rather than waving at "best experience": the live
               caption is driven solely by the Web Speech recognizer's onresult,
@@ -1255,7 +1321,7 @@ export default function LoremHome({ speak = true, skipGate = false, pace = 1 }: 
 
               Absent on Chrome and on iOS — every iOS browser is WebKit, Chrome
               included, so the claim would have nothing behind it there. */}
-          {notChrome && (
+          {notChrome && entrance !== "blackhole" && (
             <div className="gnote" style={entryBeat(0.9)} role="note">
               Works best on Chrome.
             </div>

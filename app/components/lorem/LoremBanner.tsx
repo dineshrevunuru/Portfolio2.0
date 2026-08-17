@@ -13,13 +13,23 @@ const LINES = [
   "Why should you hire Dinesh?",
 ];
 
+export interface LoremBannerProps {
+  /**
+   * Makes the orb its own control. The card stays a link to /lorem (a
+   * stretched cover, since a <button> inside an <a> is invalid HTML); the orb
+   * lifts above the cover and fires this instead — the black-hole entrance.
+   * Omitted, the orb is decorative and the whole card is one click target,
+   * exactly the old behavior.
+   */
+  onOrbClick?: () => void;
+}
+
 /**
- * LoremBanner — the "Meet my best friend LOREM!" pill. A single link (the whole card)
- * with a decorative Aurora wave field behind it, a decorative MicOrb, and a
- * subtitle that types through the prompt lines. Lorem Home is a coming-soon
- * prototype, so the link is an inert placeholder for now.
+ * LoremBanner — the "Meet my best friend LOREM!" pill. A card-wide link to
+ * /lorem (as a stretched .loremv-cover) with a decorative Aurora wave field
+ * behind it, the MicOrb, and a subtitle that types through the prompt lines.
  */
-export default function LoremBanner() {
+export default function LoremBanner({ onOrbClick }: LoremBannerProps) {
   const typeRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
@@ -56,16 +66,25 @@ export default function LoremBanner() {
   }, []);
 
   return (
-    <Link
-      className="loremv"
-      href="/lorem"
-      aria-label="Ask Lorem, a voice-first way to explore Dinesh's work"
-    >
+    <div className="loremv">
+      <Link
+        className="loremv-cover"
+        href="/lorem"
+        aria-label="Ask Lorem, a voice-first way to explore Dinesh's work"
+      />
       <span className="loremv-wave">
         <Aurora energy={0.45} grain={false} />
       </span>
-      <span className="loremv-mic">
-        <MicOrb state="listening" decorative />
+      <span className="loremv-mic" data-bh-banner-orb>
+        {onOrbClick ? (
+          <MicOrb
+            state="listening"
+            onClick={onOrbClick}
+            aria-label="Ask Lorem — the page folds into the orb"
+          />
+        ) : (
+          <MicOrb state="listening" decorative />
+        )}
       </span>
       <span className="loremv-txt">
         <h3>
@@ -78,6 +97,6 @@ export default function LoremBanner() {
       <span className="loremv-go">
         Ask Lorem <span aria-hidden="true">&rarr;</span>
       </span>
-    </Link>
+    </div>
   );
 }
