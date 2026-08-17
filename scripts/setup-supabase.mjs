@@ -38,6 +38,34 @@ function env(name) {
   return l ? l.slice(name.length + 1).trim() : "";
 }
 
+/* ── already done? ─────────────────────────────────────────────────────────
+   Re-running a finished setup should be calm, not a red npm error block. If
+   the two real values are present and the table answers, say so and exit 0 —
+   there is nothing to redo, and the access token can be gone by now. Only a
+   force-arg or missing config falls through to the full flow below.        */
+const haveUrl = env("SUPABASE_URL");
+const haveKey = env("SUPABASE_SERVICE_ROLE_KEY");
+if (haveUrl && haveKey && process.argv[2] !== "--force") {
+  const probe = await fetch(`${haveUrl}/rest/v1/lorem_turns?select=id&limit=1`, {
+    headers: { apikey: haveKey, authorization: `Bearer ${haveKey}` },
+  }).catch(() => null);
+  if (probe && probe.ok) {
+    const ref = haveUrl.match(/https:\/\/([a-z0-9]+)\./)?.[1] ?? "?";
+    ok(`Already set up — logging to ${ref}, table reachable. Nothing to do.`);
+    console.log(`
+  Local + production are wired. Real visitors' turns are landing; pull them:
+
+      npm run pull:conversations
+
+  Re-run with  npm run setup:supabase -- --force  only to point at a different
+  project. And revoke the access token if you have not — nothing needs it now:
+  https://supabase.com/dashboard/account/tokens
+`);
+    process.exit(0);
+  }
+  // config present but the project did not answer — fall through and re-verify.
+}
+
 const TOKEN = env("SUPABASE_ACCESS_TOKEN");
 if (!TOKEN) {
   console.log(`
