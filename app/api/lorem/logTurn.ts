@@ -47,8 +47,61 @@ export type LoggedTurn = {
   ms: number;
 };
 
+/**
+ * The local sink — same rows, a JSONL file instead of a table.
+ *
+ * Two jobs. It makes the pipe PROVABLE before any account exists: real turns
+ * off this machine flow through the same shape, the same pull script and into
+ * the same bench, so wiring Supabase later is a switch rather than a leap.
+ * And it stays useful afterwards, because a dev turn belongs in a scratch file
+ * rather than in the same table the real visitors land in.
+ *
+ * DEV ONLY, gated on NODE_ENV exactly like the rate limiter: Vercel's
+ * filesystem is read-only outside /tmp, and more to the point production has a
+ * database. Writes go to .lorem-logs/, which is gitignored and — deliberately
+ * — outside public/, since only public/ is served and this repo has published
+ * files it did not mean to before.
+ */
+const LOCAL_DIR = ".lorem-logs";
+
+async function logLocal(turn: LoggedTurn): Promise<void> {
+  try {
+    const { appendFile, mkdir } = await import("node:fs/promises");
+    await mkdir(LOCAL_DIR, { recursive: true });
+    const day = new Date().toISOString().slice(0, 10);
+    await appendFile(
+      `${LOCAL_DIR}/turns-${day}.jsonl`,
+      JSON.stringify({
+        session_id: turn.sessionId,
+        mode: turn.mode,
+        message: turn.message.slice(0, 500),
+        say: turn.say.slice(0, 1000),
+        show: turn.show,
+        chips: turn.chips,
+        model: turn.model,
+        ms: Math.round(turn.ms),
+        created_at: new Date().toISOString(),
+      }) + "\n",
+      "utf8",
+    );
+  } catch {
+    /* a dev convenience is never worth an error a visitor could feel */
+  }
+}
+
 export function logTurn(turn: LoggedTurn): void {
   if (!URL_ || !KEY) {
+    // No database configured. Off Vercel that means "log locally so the loop
+    // still closes"; on Vercel it means the env is genuinely missing, and the
+    // one-time line is the thing that says so.
+    if (process.env.NODE_ENV !== "production") {
+      void logLocal(turn);
+      if (!warned) {
+        warned = true;
+        console.log(`[lorem] logging to ${LOCAL_DIR}/ — set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY for the real table`);
+      }
+      return;
+    }
     if (!warned) {
       warned = true;
       console.log("[lorem] conversation logging off — SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY unset");

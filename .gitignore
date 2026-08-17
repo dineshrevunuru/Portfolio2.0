@@ -54,3 +54,7 @@ next-env.d.ts
 # prompt; not a fixture — the model varies run to run, so committing them would
 # read as a baseline nobody can reproduce.
 test/snapshots/
+
+# Local conversation log (dev sink for the training loop — never commit
+# transcripts of real people, and never let a CLI deploy upload them).
+.lorem-logs/

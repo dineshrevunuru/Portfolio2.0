@@ -20,7 +20,7 @@
  * opener, so cross-run deltas mean nothing here — these are for READING and
  * GRADING, and the judged defects feed distill like any other feedback.
  */
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = process.cwd();
@@ -35,28 +35,57 @@ function env(name) {
 
 const URL_ = env("SUPABASE_URL");
 const KEY = env("SUPABASE_SERVICE_ROLE_KEY");
-if (!URL_ || !KEY) {
-  console.error(
-    "SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing from .env.local.\n" +
-      "Logging is off until they exist — nothing to pull.",
-  );
-  process.exit(1);
-}
 
 const since =
   process.argv[2] ?? new Date(Date.now() - 48 * 3600 * 1000).toISOString().slice(0, 10);
 
-const res = await fetch(
-  `${URL_}/rest/v1/lorem_turns?created_at=gte.${since}&order=session_id,created_at&limit=2000`,
-  { headers: { apikey: KEY, authorization: `Bearer ${KEY}` } },
-);
-if (!res.ok) {
-  console.error(`Supabase said ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  process.exit(1);
+/* Two sources, one shape. Supabase when it is configured, otherwise the local
+   JSONL that logTurn.ts writes in dev — so the loop closes and can be proven
+   before any account exists, and everything downstream is identical either
+   way. Rows carry the same keys from both, which is the point. */
+let rows;
+let source;
+if (URL_ && KEY) {
+  source = "supabase";
+  const res = await fetch(
+    `${URL_}/rest/v1/lorem_turns?created_at=gte.${since}&order=session_id,created_at&limit=2000`,
+    { headers: { apikey: KEY, authorization: `Bearer ${KEY}` } },
+  );
+  if (!res.ok) {
+    console.error(`Supabase said ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    process.exit(1);
+  }
+  rows = await res.json();
+} else {
+  source = "local";
+  const dir = join(ROOT, ".lorem-logs");
+  if (!existsSync(dir)) {
+    console.error(
+      "No Supabase keys and no .lorem-logs/ yet.\n" +
+        "Talk to Lorem on localhost:3000/lorem and the turns land there, or set\n" +
+        "SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY to pull the real table.",
+    );
+    process.exit(1);
+  }
+  rows = readdirSync(dir)
+    .filter((f) => f.endsWith(".jsonl") && f.slice(6, 16) >= since)
+    .flatMap((f) =>
+      readFileSync(join(dir, f), "utf8")
+        .split("\n")
+        .filter(Boolean)
+        .map((l) => {
+          try {
+            return JSON.parse(l);
+          } catch {
+            return null; // a half-written last line is normal on a live tail
+          }
+        })
+        .filter(Boolean),
+    )
+    .sort((a, b) => (a.session_id + a.created_at).localeCompare(b.session_id + b.created_at));
 }
-const rows = await res.json();
 if (!rows.length) {
-  console.log(`No real conversations since ${since}. The table fills as visitors talk.`);
+  console.log(`No conversations since ${since} (source: ${source}). It fills as people talk.`);
   process.exit(0);
 }
 
@@ -107,12 +136,12 @@ function median(xs) {
 writeFileSync(
   join(dir, "meta.json"),
   JSON.stringify(
-    { source: "real-visitors", since, pulledAt: new Date().toISOString(), conversations: n, turns: rows.length },
+    { source, since, pulledAt: new Date().toISOString(), conversations: n, turns: rows.length },
     null,
     2,
   ) + "\n",
 );
 
-console.log(`\n  ${n} real conversation${n === 1 ? "" : "s"} (${rows.length} turns) → test/gym/runs/real-${stamp}/`);
+console.log(`\n  ${n} conversation${n === 1 ? "" : "s"} (${rows.length} turns, source: ${source}) → test/gym/runs/real-${stamp}/`);
 console.log(`  Read + grade them:  node test/gym/bench.mjs real-${stamp}`);
 console.log(`  Judge them:         node test/gym/eval.mjs real-${stamp}\n`);
