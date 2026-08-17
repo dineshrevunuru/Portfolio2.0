@@ -179,17 +179,56 @@ set("SUPABASE_SERVICE_ROLE_KEY", key);
 writeFileSync(ENV, text);
 ok(".env.local updated (gitignored — the key never enters git)");
 
+/* ── production, when Vercel is authenticated here ─────────────────────────
+   Same two values into Vercel's Production scope, so REAL visitors' turns
+   land in the table and not just local dev ones. Adding an env var is
+   reversible and changes nothing live on its own — production only picks it
+   up on the next build, which is why the redeploy is a separate, reported
+   step and NOT `vercel --prod` (that uploads the working tree, the leak this
+   project has already been bitten by). Skipped silently if Vercel is not
+   linked/authed here — the printed steps below cover that case.            */
+let prodWired = false;
+try {
+  execFileSync("npx", ["vercel", "whoami"], { stdio: "pipe" });
+  for (const [name, value] of [
+    ["SUPABASE_URL", url],
+    ["SUPABASE_SERVICE_ROLE_KEY", key],
+  ]) {
+    // Remove-then-add so a re-run overwrites cleanly; both are quiet on a
+    // first run where nothing exists yet.
+    try {
+      execFileSync("npx", ["vercel", "env", "rm", name, "production", "-y"], { stdio: "pipe" });
+    } catch {
+      /* not previously set — fine */
+    }
+    execFileSync("npx", ["vercel", "env", "add", name, "production"], {
+      input: `${value}\n`,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+  }
+  prodWired = true;
+  ok("Vercel Production env set (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY)");
+} catch {
+  console.log("  · Vercel not wired from here — add the two vars in the dashboard, Production scope");
+}
+
 console.log(`
-  Done locally. Talk to Lorem on localhost:3000/lorem, then:
+  \x1b[32mLocal logging is live.\x1b[0m Talk to Lorem on localhost:3000/lorem, then:
 
       npm run pull:conversations
+${
+  prodWired
+    ? `
+  Production has the vars but reads them at BUILD time, so it needs one
+  redeploy to start logging real visitors. Safe redeploy (no working-tree
+  upload — reruns the latest git commit):
 
-  For REAL visitors, production needs the same two values. From this repo:
+      npx vercel redeploy --yes $(git rev-parse --short HEAD 2>/dev/null || echo HEAD)
 
-      npx vercel env add SUPABASE_URL production
-      npx vercel env add SUPABASE_SERVICE_ROLE_KEY production
-
-  then redeploy. Until then production logs nothing and Lorem is unaffected.
+  or just push any commit. Until it redeploys, production logs nothing.`
+    : `
+  For REAL visitors, add the two values to Vercel → Production, then redeploy.`
+}
 
   \x1b[33mRevoke the access token now\x1b[0m — nothing here needs it again:
   https://supabase.com/dashboard/account/tokens
