@@ -44,7 +44,7 @@ import Starfield from "./Starfield";
 type Rect = { x: number; y: number; w: number; h: number };
 
 const ANTICIPATE_MS = 350;
-const CONSUME_MS = 550; // per element
+const CONSUME_MS = 600; // per element
 const FLIGHT_MS = 420; // orb → gate seat
 const CONSUME_EASE = "cubic-bezier(.55,0,.85,.4)"; // exits accelerate
 const SETTLE_EASE = "cubic-bezier(.22,.85,.25,1)"; // arrivals decelerate
@@ -67,6 +67,9 @@ export default function BlackHole() {
   const animsRef = useRef<Animation[]>([]);
   const timersRef = useRef<number[]>([]);
   const hiddenElsRef = useRef<HTMLElement[]>([]);
+  /** Elements given an inline transform-origin for the flight, with what was
+   *  there before — restored on unwind. */
+  const flownRef = useRef<{ el: HTMLElement; origin: string }[]>([]);
   const bannerOrbRef = useRef<HTMLElement | null>(null);
   const flightDoneRef = useRef(false);
   const prevTitleRef = useRef<string>("");
@@ -183,33 +186,30 @@ export default function BlackHole() {
       return db - da;
     });
 
-    const stagger = Math.min(100, 1200 / Math.max(1, onscreen.length));
+    const stagger = Math.min(130, 1400 / Math.max(1, onscreen.length));
     onscreen.forEach(({ el, r }, i) => {
-      const dx = ocx - (r.left + r.width / 2);
-      const dy = ocy - (r.top + r.height / 2);
-      // A perpendicular bow at the mid keyframe fakes the spiral — the
-      // element curves into the drain instead of sliding straight in.
-      const len = Math.hypot(dx, dy) || 1;
-      const px = (-dy / len) * 60;
-      const py = (dx / len) * 60;
+      // The whole trick: scale about the ORB'S point in this element's local
+      // coordinates (transform-origin may sit outside the element — that's
+      // valid). Contraction toward an external origin IS motion toward it:
+      // every corner converges along its own ray into the hole, the element
+      // is small from its first airborne frames instead of sweeping the
+      // screen full-size, and one shared rotation reads as a coherent swirl
+      // around the drain rather than tilting sheets. The first version
+      // translated whole sections and only collapsed them at the end —
+      // several 600–1400px slabs mid-flight at once, pure chaos.
+      flownRef.current.push({ el, origin: el.style.transformOrigin });
+      el.style.transformOrigin = `${ocx - r.left}px ${ocy - r.top}px`;
       const delay = (ANTICIPATE_MS + i * stagger) / pace;
       anims.push(
         el.animate(
           [
-            { transform: "translate(0,0) rotate(0deg) scale(1)", opacity: 1, filter: "blur(0px)" },
-            {
-              transform: `translate(${dx * 0.45 + px}px,${dy * 0.45 + py}px) rotate(-16deg) scale(.6)`,
-              opacity: 0.9,
-              filter: "blur(0px)",
-              offset: 0.55,
-            },
+            { transform: "rotate(0deg) scale(1)", opacity: 1 },
+            // Half its size by mid-flight — the grip is immediate.
+            { transform: "rotate(-14deg) scale(.5)", opacity: 0.95, offset: 0.45 },
             // scale(.001), never 0 — a non-invertible matrix glitches the
-            // interpolation in more than one engine.
-            {
-              transform: `translate(${dx}px,${dy}px) rotate(-75deg) scale(.001)`,
-              opacity: 0,
-              filter: "blur(2px)",
-            },
+            // interpolation in more than one engine. Opacity holds until the
+            // very end: things ENTER the hole, they don't evaporate.
+            { transform: "rotate(-40deg) scale(.001)", opacity: 0 },
           ],
           { duration: CONSUME_MS / pace, delay, easing: CONSUME_EASE, fill: "forwards" },
         ),
@@ -374,6 +374,8 @@ export default function BlackHole() {
       animsRef.current = [];
       for (const el of hiddenElsRef.current) el.style.opacity = "";
       hiddenElsRef.current = [];
+      for (const { el, origin } of flownRef.current) el.style.transformOrigin = origin;
+      flownRef.current = [];
       if (bannerOrbRef.current) bannerOrbRef.current.style.visibility = "";
       document.documentElement.style.overflow = "";
       document.documentElement.style.paddingRight = "";
