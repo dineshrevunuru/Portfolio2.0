@@ -223,7 +223,7 @@ ${
   redeploy to start logging real visitors. Safe redeploy (no working-tree
   upload — reruns the latest git commit):
 
-      npx vercel redeploy --yes $(git rev-parse --short HEAD 2>/dev/null || echo HEAD)
+      npx vercel redeploy $(npx vercel ls portfolio-2 2>/dev/null | grep -oE "https://[^ ]*vercel.app" | head -1)
 
   or just push any commit. Until it redeploys, production logs nothing.`
     : `
