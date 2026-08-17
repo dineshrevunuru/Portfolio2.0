@@ -72,6 +72,9 @@ export default function BlackHole() {
   const prevTitleRef = useRef<string>("");
   const removeSkipRef = useRef<(() => void) | null>(null);
   const triggerAtRef = useRef(0);
+  /** Debug slow-motion: ?bhpace=0.2 stretches the whole run 5x (same
+   *  convention as LoremHome's pace prop — durations divide by it). */
+  const paceRef = useRef(1);
 
   const timer = (ms: number, fn: () => void) => {
     timersRef.current.push(window.setTimeout(fn, ms));
@@ -95,6 +98,8 @@ export default function BlackHole() {
     }
     phaseRef.current = "running";
     triggerAtRef.current = performance.now();
+    paceRef.current =
+      Number(new URLSearchParams(window.location.search).get("bhpace")) || 1;
 
     // Lock first, measure second: removing the scrollbar reflows the page,
     // and every rect below must be post-reflow or the flights land wide.
@@ -124,19 +129,26 @@ export default function BlackHole() {
     const ocx = rect.x + rect.w / 2;
     const ocy = rect.y + rect.h / 2;
     const anims = animsRef.current;
+    const pace = paceRef.current;
 
     // Space fades in behind the page (z -1); the dim veil settles over it.
     // rAF so the layer paints its from-state first — but rAF starves in a
     // throttled/background tab, so a timer backstops it (add is idempotent).
     requestAnimationFrame(() => spaceRef.current?.classList.add("on"));
     timer(80, () => spaceRef.current?.classList.add("on"));
-    if (dimRef.current) dimRef.current.style.opacity = "0.3";
+    if (dimRef.current) {
+      dimRef.current.style.opacity = "0.3";
+      // The veil catches clicks while the show runs: links are still flying
+      // beneath it, and a click that lands on one would start a real
+      // navigation mid-consume. The click bubbles on to the skip listener.
+      dimRef.current.style.pointerEvents = "auto";
+    }
 
     // Anticipation: the inhale. A breath in before the feast.
     anims.push(
       pulse.animate(
         [{ transform: "scale(1)" }, { transform: "scale(0.92)" }, { transform: "scale(1.06)" }, { transform: "scale(1)" }],
-        { duration: ANTICIPATE_MS, easing: "cubic-bezier(.4,0,.2,1)" },
+        { duration: ANTICIPATE_MS / pace, easing: "cubic-bezier(.4,0,.2,1)" },
       ),
     );
 
@@ -180,7 +192,7 @@ export default function BlackHole() {
       const len = Math.hypot(dx, dy) || 1;
       const px = (-dy / len) * 60;
       const py = (dx / len) * 60;
-      const delay = ANTICIPATE_MS + i * stagger;
+      const delay = (ANTICIPATE_MS + i * stagger) / pace;
       anims.push(
         el.animate(
           [
@@ -199,25 +211,26 @@ export default function BlackHole() {
               filter: "blur(2px)",
             },
           ],
-          { duration: CONSUME_MS, delay, easing: CONSUME_EASE, fill: "forwards" },
+          { duration: CONSUME_MS / pace, delay, easing: CONSUME_EASE, fill: "forwards" },
         ),
       );
       // The swallow: a satisfied little pulse as each one goes down.
-      timer(delay + CONSUME_MS - 40, () => {
+      timer(delay + (CONSUME_MS - 40) / pace, () => {
         animsRef.current.push(
           pulse.animate(
             [{ transform: "scale(1)" }, { transform: "scale(1.1)" }, { transform: "scale(1)" }],
-            { duration: 180, easing: "cubic-bezier(.4,0,.2,1)" },
+            { duration: 180 / pace, easing: "cubic-bezier(.4,0,.2,1)" },
           ),
         );
       });
     });
 
-    timer(ANTICIPATE_MS, () => {
+    timer(ANTICIPATE_MS / pace, () => {
       if (dimRef.current) dimRef.current.style.opacity = "0.55";
     });
 
-    const consumeEnd = ANTICIPATE_MS + Math.max(0, onscreen.length - 1) * stagger + CONSUME_MS;
+    const consumeEnd =
+      (ANTICIPATE_MS + Math.max(0, onscreen.length - 1) * stagger + CONSUME_MS) / pace;
 
     // Singularity: everything is in. One overshooting gulp, then glide to
     // the seat Lorem's gate holds for the orb (measured from the hidden
@@ -233,11 +246,11 @@ export default function BlackHole() {
               { transform: "scale(0.94)" },
               { transform: "scale(1)" },
             ],
-            { duration: 340, easing: "cubic-bezier(.4,0,.2,1)" },
+            { duration: 340 / pace, easing: "cubic-bezier(.4,0,.2,1)" },
           ),
         );
       flyToGate();
-      timer(FLIGHT_MS, arrive);
+      timer(FLIGHT_MS / pace, arrive);
     });
 
     // Escape hatches: Esc or a click jumps to the end. The 500ms grace
@@ -288,7 +301,7 @@ export default function BlackHole() {
             transform: `translate(${to.left - rect.x}px,${to.top - rect.y}px) scale(${to.width / rect.w})`,
           },
         ],
-        { duration: FLIGHT_MS, easing: SETTLE_EASE, fill: "forwards" },
+        { duration: FLIGHT_MS / paceRef.current, easing: SETTLE_EASE, fill: "forwards" },
       ),
     );
   };
@@ -309,7 +322,10 @@ export default function BlackHole() {
       /* URL nicety only; the experience continues regardless */
     }
 
-    if (dimRef.current) dimRef.current.style.opacity = "0";
+    if (dimRef.current) {
+      dimRef.current.style.opacity = "0";
+      dimRef.current.style.pointerEvents = "none"; // Lorem owns the screen now
+    }
     // Reveal + begin → LoremHome's own start(): gate→dock flight, greeting.
     setBegin(true);
     // Our clone and the gate orb are pixel-identical at the same seat; two
