@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import LoremHome from "../components/lorem/LoremHome";
 
 export const metadata: Metadata = {
-  title: "Lorem — Dinesh's voice portfolio",
+  title: "Lorem — talk to Dinesh's best friend",
   description:
-    "A portfolio you talk to. Lorem answers out loud and draws the parts you can't hold in your head. Ask it about the work, the numbers, or how it was built.",
+    "Lorem is Dinesh Revunuru's best friend and work buddy, on the door of his site. Say hi, talk about whatever you're into, and if you want to know about Dinesh or reach him, Lorem knows the way.",
 };
 
 export default function LoremPage() {

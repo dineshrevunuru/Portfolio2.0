@@ -54,17 +54,20 @@ for (const s of [
   assert.ok(claimsAnInnerLife(s), `copula form not caught: ${JSON.stringify(s)}`);
 }
 
-/* 3 ─ preference and appetite stated in first person. */
+/* 3 ─ performed warmth and appetite stay caught; TASTE does not.
+      Since 2026-08-20 Lorem shares Dinesh's interests, so an opinion about a
+      thing is the friend bringing something — allowed. Appetite is a body. */
+for (const s of ["I miss that.", "I crave good bread.", "Happy to get into it.", "I feel that."]) {
+  assert.ok(claimsAnInnerLife(s), `performed warmth / appetite not caught: ${JSON.stringify(s)}`);
+}
 for (const s of [
   "I love that one.",
-  "I miss that.",
-  "I crave good bread.",
   "My favourite is the bread.",
   "My favorite is the bread.",
-  "I'd rather talk about the other one.",
-  "Happy to get into it.",
+  "I'd rather the dosa place, every time.",
+  "I like the second album more than the first.",
 ]) {
-  assert.ok(claimsAnInnerLife(s), `first-person claim not caught: ${JSON.stringify(s)}`);
+  assert.ok(!claimsAnInnerLife(s), `taste was flagged mechanically — that is allowed now: ${JSON.stringify(s)}`);
 }
 
 /* 4 ─ bodily states with no subject at all — the marker-free form. */

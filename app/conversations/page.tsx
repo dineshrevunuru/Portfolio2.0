@@ -30,6 +30,37 @@ type Row = {
   created_at: string;
 };
 
+type ContactRow = {
+  session_id: string;
+  name: string | null;
+  email: string | null;
+  linkedin: string | null;
+  note: string | null;
+  created_at: string;
+};
+
+/**
+ * People who asked Lorem to have Dinesh follow up. Tolerant of the table not
+ * existing yet — contact capture ships behind LOREM_CONTACT_CAPTURE, and the
+ * table is created when that is turned on. A 404 here is "not enabled", not
+ * an error worth a red line.
+ */
+async function fetchContacts(): Promise<ContactRow[]> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return [];
+  try {
+    const res = await fetch(`${url}/rest/v1/lorem_contacts?order=created_at.desc&limit=200`, {
+      headers: { apikey: key, authorization: `Bearer ${key}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return (await res.json()) as ContactRow[];
+  } catch {
+    return [];
+  }
+}
+
 async function fetchRows(): Promise<{ rows: Row[]; error: string | null }> {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -82,7 +113,7 @@ export default async function ConversationsPage({
     return <Locked error={e} />;
   }
 
-  const { rows, error } = await fetchRows();
+  const [{ rows, error }, contacts] = await Promise.all([fetchRows(), fetchContacts()]);
 
   // Group turns into conversations, most recent conversation first.
   const bySession = new Map<string, Row[]>();
@@ -110,6 +141,28 @@ export default async function ConversationsPage({
           <button type="submit" style={S.signout}>Sign out</button>
         </form>
       </header>
+
+      {contacts.length > 0 && (
+        <section style={{ ...S.convo, marginBottom: 40, borderColor: "#cfe0ff", background: "#f7faff" }}>
+          <div style={S.convoHead}>
+            <span style={{ ...S.sid, color: "#1c7cf5" }}>wants to hear from you</span>
+            <span style={S.convoMeta}>{contacts.length} · newest first</span>
+          </div>
+          {contacts.map((c, i) => (
+            <div key={i} style={S.turn}>
+              <p style={S.visitor}>
+                {c.name ?? "Someone"}
+                {c.email ? ` · ${c.email}` : ""}
+                {c.linkedin ? ` · ${c.linkedin}` : ""}
+              </p>
+              <p style={S.lorem}>{c.note ?? "No note — they just wanted you to follow up."}</p>
+              <p style={S.aux}>
+                {new Date(c.created_at).toLocaleString()} · conversation {c.session_id.slice(0, 8)}
+              </p>
+            </div>
+          ))}
+        </section>
+      )}
 
       {error && <p style={S.err}>{error}</p>}
       {!error && !convos.length && (

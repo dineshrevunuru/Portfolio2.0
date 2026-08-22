@@ -7,7 +7,7 @@ import { MicOrb, type MicOrbState } from "./MicOrb";
 import { Surface, type FactLookup, type QuoteLookup } from "./Surface";
 import type { Block } from "./protocol";
 import { useSpeech } from "./useSpeech";
-import { beginVisit, daysSince, forgetVisitor, rememberName, type Visitor } from "./memory";
+import { beginVisit, daysSince, forgetVisitor, rememberName, rememberNote, readVisitor, type Visitor } from "./memory";
 import { buildGreeting } from "./greeting";
 import { icebreakerHint, pickIcebreakers } from "./icebreakers";
 
@@ -230,7 +230,19 @@ export default function LoremHome({
         res = await fetch("/api/lorem", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ message: q, history: history.current, mode, sessionId: sessionId.current }),
+          body: JSON.stringify({
+            message: q,
+            history: history.current,
+            mode,
+            sessionId: sessionId.current,
+            // What this browser remembers — so Lorem can pick up the thread.
+            // Read fresh each turn: a name captured two turns ago should be
+            // known on this one.
+            visitor: (() => {
+              const v = readVisitor();
+              return v.name || v.note ? { name: v.name, note: v.note, visits: v.visits } : undefined;
+            })(),
+          }),
           signal: ctl.signal,
         });
       } catch (e) {
@@ -280,7 +292,7 @@ export default function LoremHome({
 
       // A name only ever arrives because the visitor said it. memory.ts trims
       // anything that doesn't look like one, and returns null if unsure.
-      const memo = data as { rememberName?: string; forgetName?: boolean };
+      const memo = data as { rememberName?: string; forgetName?: boolean; rememberNote?: string };
       if (memo.forgetName) {
         // Retraction beats capture. Someone saying "that's not me" in the same
         // breath they were misidentified must end up forgotten, not re-stored.
@@ -290,6 +302,8 @@ export default function LoremHome({
         const stored = rememberName(memo.rememberName);
         if (stored) setGreetedName(stored);
       }
+      // The thread of this conversation, for next time. Same home as the name.
+      if (!memo.forgetName && memo.rememberNote) rememberNote(memo.rememberNote);
 
       const next: Turn = {
         asked: q,

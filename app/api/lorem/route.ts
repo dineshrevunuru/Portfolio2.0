@@ -19,6 +19,7 @@ import {
 } from "../config";
 import { systemPrompt } from "./prompt";
 import { logTurn } from "./logTurn";
+import { logContact } from "./logContact";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -87,11 +88,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
 
-  const { message, history, mode, sessionId } = (body ?? {}) as {
+  const { message, history, mode, sessionId, visitor } = (body ?? {}) as {
     message?: unknown;
     history?: unknown;
     mode?: unknown;
     sessionId?: unknown;
+    visitor?: unknown;
+  };
+  // What their browser remembers about them — name, last thread, visit count.
+  // Validated to shape and length because it is interpolated into the prompt:
+  // a visitor can send anything here, and "anything" must not be a page of
+  // instructions wearing a name badge.
+  const vc = (visitor && typeof visitor === "object" ? visitor : {}) as Record<string, unknown>;
+  const visitorCtx = {
+    name: typeof vc.name === "string" ? vc.name.trim().slice(0, 24) : undefined,
+    note: typeof vc.note === "string" ? vc.note.trim().slice(0, 80) : undefined,
+    visits: typeof vc.visits === "number" && Number.isFinite(vc.visits) ? Math.min(vc.visits, 999) : undefined,
   };
   // A conversation key, minted client-side per page load so it links turns to
   // each other and never to a person. Validated to a UUID shape because it is
@@ -161,7 +173,7 @@ export async function POST(req: Request) {
     // Effort is nested in output_config — it is not a top-level field.
     output_config: { effort: LOREM_EFFORT },
     thinking: { type: LOREM_THINKING },
-    system: systemPrompt(inputMode),
+    system: systemPrompt(inputMode, visitorCtx),
     messages,
     tools: [tool],
     tool_choice: { type: "tool", name: "respond" },
@@ -173,7 +185,7 @@ export async function POST(req: Request) {
     // OpenAI-compatible: the system prompt is the first message, and effort is
     // a top-level string rather than a nested object.
     reasoning_effort: LOREM_EFFORT,
-    messages: [{ role: "system" as const, content: systemPrompt(inputMode) }, ...messages],
+    messages: [{ role: "system" as const, content: systemPrompt(inputMode, visitorCtx) }, ...messages],
     // The FLAT schema, not the strict one. Google accepts `oneOf` and then
     // ignores it, leaving the model to answer `show: [{}]` — see the comment
     // above RESPOND_TOOL_FLAT. This is the fifth wire-level difference between
@@ -292,7 +304,24 @@ export async function POST(req: Request) {
         ? input.rememberName.trim().slice(0, 24)
         : undefined,
     forgetName: input.forgetName === true ? true : undefined,
+    rememberNote:
+      typeof input.rememberNote === "string" && input.rememberNote.trim()
+        ? input.rememberNote.trim().slice(0, 80)
+        : undefined,
   };
+
+  // A volunteered way to reach them goes to Dinesh and NOT back to the client:
+  // it is logged server-side (logContact.ts) and stripped from the response,
+  // so the visitor's own contact details never round-trip through the page.
+  const rawContact = input.contact && typeof input.contact === "object" ? (input.contact as Record<string, unknown>) : null;
+  if (rawContact) {
+    const clean = (k: string, max: number) =>
+      typeof rawContact[k] === "string" && (rawContact[k] as string).trim() ? (rawContact[k] as string).trim().slice(0, max) : undefined;
+    const contact = { email: clean("email", 120), linkedin: clean("linkedin", 160), note: clean("note", 160) };
+    if (contact.email || contact.linkedin) {
+      logContact({ sessionId: session, name: visitorCtx.name, ...contact });
+    }
+  }
 
   if (rejected.length) {
     // Visible in `vercel logs`. A recurring rejection means the prompt needs

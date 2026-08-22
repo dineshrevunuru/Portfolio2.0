@@ -182,6 +182,31 @@ export const FACTS = {
 
 export type FactId = keyof typeof FACTS;
 
+/**
+ * What Dinesh and Lorem are into — the material a friend brings to a
+ * conversation. Lorem shares these in first person ("I'd take the dosa place
+ * every time") because, per Dinesh's call on 2026-08-20, the two are best
+ * friends and work buddies with most interests in common.
+ *
+ * `take` matters more than `topic`: an opinion is something to talk about, a
+ * category is a menu. Every line is DINESH'S ACTUAL taste, supplied by him —
+ * nothing here is invented to fill a gap, and an empty list simply removes the
+ * section from the prompt rather than letting the model improvise one. The
+ * no-physical-life rule is untouched: Lorem can hold the opinion, not have
+ * eaten the meal.
+ */
+export type Interest = {
+  /** The thing, as a friend would name it: "biryani", "late-night Chicago walks". */
+  topic: string;
+  /** Dinesh's real opinion or relationship to it, in plain speech. */
+  take: string;
+};
+
+export const INTERESTS: Interest[] = [
+  // Filled from Dinesh's list. Until then, Lorem leans on curiosity about the
+  // visitor and on the work the two of them actually do together.
+];
+
 /** Quotes are the other thing the model must never author. */
 export type Quote = { id: string; text: string; by: string; source: string };
 

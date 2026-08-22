@@ -19,6 +19,7 @@
 export type Icebreaker = {
   text: string;
   register:
+    | /** About the visitor. A friend's first question. */ "invite"
     | /** Answers with a hard, checkable fact. */ "proof"
     | /** Answers with something unflattering and true. */ "candor"
     | /** Permission to not be an interviewer. */ "social"
@@ -26,6 +27,17 @@ export type Icebreaker = {
 };
 
 const POOL: Icebreaker[] = [
+  // invite — about the visitor. The default row, since 2026-08-20: Lorem is
+  // a friend first, and a friend's first question is about you. This reverses
+  // the proof-first finding above on purpose — the product changed from "a
+  // portfolio you talk to" to "Dinesh's best friend, on the door" — and the
+  // gym re-tests the reversal rather than assuming it.
+  { text: "What are you into lately?", register: "invite" },
+  { text: "How's your week going?", register: "invite" },
+  { text: "Working on anything fun?", register: "invite" },
+  { text: "Where are you talking from?", register: "invite" },
+  { text: "What brought you here?", register: "invite" },
+
   // proof — the answer is a number or a named artefact, immediately
   { text: "What did he actually ship?", register: "proof" },
   { text: "Show me the numbers", register: "proof" },
@@ -64,12 +76,17 @@ const POOL: Icebreaker[] = [
  * changes what they think this is; returns rotate through the rest.
  */
 export function pickIcebreakers(visit = 0): string[] {
+  // Invite leads every row now (2026-08-20): two questions about the visitor,
+  // then one about the thing itself. Proof and candor are still in the pool
+  // for the model's own follow-up chips once someone steers to the work — they
+  // are no longer what a stranger sees first. The earlier proof-first finding
+  // was real; the product it was measured on is not the product any more.
   const order: Icebreaker["register"][] =
     visit === 0
-      ? ["meta", "proof", "candor"]
+      ? ["invite", "invite", "meta"]
       : visit % 2 === 0
-        ? ["proof", "candor", "social"]
-        : ["proof", "candor", "meta"];
+        ? ["invite", "social", "meta"]
+        : ["invite", "invite", "social"];
 
   return order.map((register, slot) => {
     const options = POOL.filter((o) => o.register === register);
@@ -84,5 +101,5 @@ export function pickIcebreakers(visit = 0): string[] {
 export function icebreakerHint(returning: boolean): string {
   return returning
     ? "Pick up where we left off, or start somewhere new."
-    : "Ask about the work, or don't. This isn't only a portfolio.";
+    : "Say hi. Tell me what you're into. The work can wait.";
 }

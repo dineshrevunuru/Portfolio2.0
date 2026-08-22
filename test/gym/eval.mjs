@@ -69,14 +69,21 @@ function turnsOf(md) {
 const BANNED_WORDS =
   /\b(delv(?:e|es|ed|ing)|foster(?:s|ed|ing)?|leverag(?:e|es|ed|ing)|utiliz(?:e|es|ed|ing|ation)|facilitat(?:e|es|ed|ing|ion)|empower(?:s|ed|ing|ment)?|streamlin(?:e|es|ed|ing)|robust(?:ly|ness)?|tapestry|realm|beacon|multifaceted|meticulous(?:ly)?|paramount|transformative|elevat(?:e|es|ed|ing)|embark(?:s|ed|ing)?|supercharg(?:e|es|ed|ing)|harness(?:es|ed|ing)?|disruptive|innovative|seamless(?:ly)?|delightful(?:ly)?|cutting[- ]edge|game[- ]chang(?:er|ing)|paradigm shift)\b/i;
 /**
- * A claimed inner state, in first person.
+ * A performed feeling, in first person.
  *
  * `i'?m` matched "i'm" and "im" but NOT "i am", so "I am excited about that"
  * passed a rule whose entire purpose is the word excited. Widened to every form
  * of the copula, and the feeling list widened with it.
+ *
+ * NARROWED on 2026-08-20, when Lorem became Dinesh's best friend with shared
+ * interests: "I love that album", "I'd rather the dosa place", "my favourite"
+ * are now TASTE — allowed, real, and the thing a friend brings. They left the
+ * mechanical list. What stays is feeling performed at the visitor (excited,
+ * glad, happy to, I find that fascinating) and the body words. Whether an
+ * opinion is genuine taste or decoration is the judge's call (claimedFeeling).
  */
 const INNER_STATE =
-  /\b(i(?:'?m| am| was|'ve been| have been)\s+(?:so |very |really |quite |genuinely |honestly )?(?:excited|glad|happy|thrilled|delighted|curious|proud|sad|sorry|tired|hungry|impressed|fascinated|nervous|moved)|happy to\b|i (?:love|enjoy|like|prefer|feel|miss|hate|adore|crave)\b|i'?d rather\b|i was surprised|my favou?rite\b)/i;
+  /\b(i(?:'?m| am| was|'ve been| have been)\s+(?:so |very |really |quite |genuinely |honestly )?(?:excited|glad|happy|thrilled|delighted|curious|proud|sorry|tired|hungry|impressed|fascinated|nervous|moved)|happy to\b|i (?:feel|miss|crave)\b|i was surprised)/i;
 
 /**
  * The SAME claim with the subject dropped, which is how it actually shows up.

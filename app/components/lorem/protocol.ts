@@ -101,7 +101,16 @@ export type LoremTurn = {
   rememberName?: string;
   /** The visitor disowned a name we had. The client erases it. */
   forgetName?: boolean;
+  /** What they were into, one line, for the client to store locally. */
+  rememberNote?: string;
+  /** A way to reach them, volunteered so Dinesh can follow up. Server-side
+   *  only: logged for Dinesh, never echoed to the client. */
+  contact?: { email?: string; linkedin?: string; note?: string };
 };
+
+/** What the client knows about a returning visitor, sent with each turn so
+ *  Lorem can pick up the thread. All of it lives in their browser. */
+export type VisitorContext = { name?: string; note?: string; visits?: number };
 
 export type LoremRequest = {
   message: string;
@@ -467,6 +476,34 @@ export const RESPOND_TOOL = {
           "address, never infer from context, never fill this from a name they " +
           "mentioned about someone else. Omit the field entirely if unsure — a " +
           "wrong name greeting them next visit is worse than no name at all.",
+      },
+      rememberNote: {
+        type: "string",
+        maxLength: 80,
+        description:
+          "One short line, in the visitor's own words, about the real thread of " +
+          "this conversation — 'redoing their portfolio after a layoff', 'film " +
+          "cameras, just bought a Nikon F' — so a return visit can pick it up. " +
+          "Stored in their browser like the name. Only when there is a thread " +
+          "worth picking up; most drive-bys get nothing. Never anything said in " +
+          "confidence.",
+      },
+      contact: {
+        type: "object",
+        description:
+          "ONLY when the visitor explicitly wants Dinesh to follow up and gives " +
+          "a way to reach them for that purpose. Exactly as they gave it. Never " +
+          "an address mentioned in passing, never inferred, never asked twice.",
+        properties: {
+          email: { type: "string", maxLength: 120 },
+          linkedin: { type: "string", maxLength: 160 },
+          note: {
+            type: "string",
+            maxLength: 160,
+            description: "Why they want to connect, in their words, if they said.",
+          },
+        },
+        additionalProperties: false,
       },
     },
     required: ["say"],

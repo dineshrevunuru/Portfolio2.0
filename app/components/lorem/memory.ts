@@ -25,6 +25,9 @@ export type Visitor = {
   visits: number;
   /** ISO date of the previous visit — lets Lorem say "the other day" honestly. */
   lastSeen?: string;
+  /** One line about what they were into last time, in their words — so a
+   *  return visit can pick the thread up. Same home as the name: their browser. */
+  note?: string;
 };
 
 const EMPTY: Visitor = { visits: 0 };
@@ -39,6 +42,7 @@ export function readVisitor(): Visitor {
       name: typeof v.name === "string" ? v.name.slice(0, 40) : undefined,
       visits: Number.isFinite(v.visits) ? v.visits : 0,
       lastSeen: typeof v.lastSeen === "string" ? v.lastSeen : undefined,
+      note: typeof v.note === "string" ? v.note.slice(0, 80) : undefined,
     };
   } catch {
     return EMPTY; // private browsing, quota, corrupt value — all just mean "new here"
@@ -73,6 +77,19 @@ export function rememberName(raw: string): string | null {
   const v = readVisitor();
   write({ ...v, name });
   return name;
+}
+
+/**
+ * Store the thread of this conversation, for next time. Trimmed to one short
+ * line; anything that reads like a paragraph is probably the model narrating
+ * rather than noting, and is dropped.
+ */
+export function rememberNote(raw: string): string | null {
+  const note = raw.trim().replace(/\s+/g, " ").slice(0, 80);
+  if (note.length < 4) return null;
+  const v = readVisitor();
+  write({ ...v, note });
+  return note;
 }
 
 export function forgetVisitor() {
