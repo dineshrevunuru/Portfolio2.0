@@ -1296,7 +1296,7 @@ export default function LoremHome({
         <button
           type="button"
           className={`lorem-startgate${gone ? " gone" : ""}`}
-          aria-label="Start the voice portfolio"
+          aria-label="Start talking to Lorem"
           // The fade must track the same pace as the 520ms unmount timer.
           style={{ transition: `opacity ${(0.5 / (pace || 1)).toFixed(2)}s` }}
           onClick={start}
