@@ -14,6 +14,10 @@
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 .agents-term {
+  /* The close plays from the red button's corner: a window collapses toward
+     its control, not toward its own center. 260ms, accelerate-out — closing
+     is an exit, it should not linger. */
+  transform-origin: 24px 24px;
   width: min(1040px, 100%);
   background: #16181f;
   border-radius: 18px;
@@ -85,4 +89,16 @@
 
 @media (max-width: 640px) {
   .agents-body { padding-left: 18px; padding-right: 18px; font-size: 13.5px; }
+}
+
+/* ── the close ── */
+.agents-term.closing {
+  animation: agents-close 0.26s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+@keyframes agents-close {
+  to { transform: scale(0.9) translateY(6px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agents-term.closing { animation: none; }
 }

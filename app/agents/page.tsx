@@ -16,6 +16,7 @@
  */
 import type { Metadata } from "next";
 import { IDENTITY, SECTIONS, jsonLd } from "./dossier";
+import CloseButton from "./CloseButton";
 import "./agents.css";
 
 export const metadata: Metadata = {
@@ -36,11 +37,10 @@ export default function AgentsPage() {
       <div className="agents-term">
         <div className="agents-bar">
           {/* One window control, and it works: the red button closes this
-              "window" back to Lorem. The other two lights are gone rather
-              than decorative — a control that does nothing is a small lie. */}
-          <a className="close" href="/lorem" aria-label="Close — back to Lorem">
-            <span aria-hidden>×</span>
-          </a>
+              "window" — a real close animation, then /lorem. The other two
+              lights are gone rather than decorative — a control that does
+              nothing is a small lie. */}
+          <CloseButton />
           <span className="title">dinesh@portfolio — ~</span>
         </div>
 
