@@ -104,6 +104,18 @@ export default function BlackHole() {
     paceRef.current =
       Number(new URLSearchParams(window.location.search).get("bhpace")) || 1;
 
+    // Watchdog. Once the run starts, the phase guard above swallows every
+    // further click — so if the choreography stalls (throttled tab, a WAAPI
+    // hiccup, anything), the visitor is on a scroll-locked page where clicking
+    // Lorem does nothing, forever. Reported live as exactly that: "when I
+    // click on Lorem, nothing happens." The theater is optional; reaching
+    // Lorem is not. If the flight hasn't handed over in time, stop acting and
+    // go — a hard navigation, because it must work even if React state is
+    // wedged mid-animation.
+    timer(9000 / paceRef.current, () => {
+      if (!flightDoneRef.current) window.location.href = "/lorem";
+    });
+
     // Lock first, measure second: removing the scrollbar reflows the page,
     // and every rect below must be post-reflow or the flights land wide.
     const sw = window.innerWidth - document.documentElement.clientWidth;

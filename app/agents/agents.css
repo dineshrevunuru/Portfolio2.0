@@ -1,0 +1,97 @@
+/* /agents — the terminal dossier. Register matches the reference Dinesh
+   supplied: dark window, traffic lights, mono type, pink identity line, green
+   commands. One deliberate difference from a real terminal: generous line
+   height and measure, because half the readers are humans deciding whether to
+   trust the other half. */
+
+.agents-wrap {
+  min-height: 100dvh;
+  background: #f6f4f1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 56px);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.agents-term {
+  width: min(1040px, 100%);
+  background: #16181f;
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(20, 22, 30, 0.35);
+  overflow: hidden;
+  color: #c6cad4;
+}
+.agents-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: #1e2129;
+  color: #9aa1ac;
+  font-size: 13.5px;
+}
+.agents-bar .dots { display: flex; gap: 8px; }
+.agents-bar .dots i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.agents-bar .dots i:nth-child(1) { background: #ff5f57; }
+.agents-bar .dots i:nth-child(2) { background: #febc2e; }
+.agents-bar .dots i:nth-child(3) { background: #28c840; }
+.agents-bar .title { flex: 1; text-align: center; }
+
+.agents-body {
+  padding: 26px 30px 34px;
+  font-size: 14.5px;
+  line-height: 1.75;
+}
+.agents-body .boot { color: #8b93a1; }
+.agents-body .id { color: #ee5d99; font-weight: 600; }
+.agents-body .id-rest { color: #c6cad4; }
+.agents-body .cmd { color: #7ee787; }
+.agents-body .muted { color: #6d7480; }
+.agents-body .prompt-line { color: #c6cad4; margin-top: 26px; }
+.agents-body .prompt-line .arrow { color: #ee5d99; }
+
+.agents-body section { margin-top: 26px; }
+.agents-body .cat { color: #8b93a1; margin: 0 0 6px; }
+.agents-body .cat .cmd { color: #7ee787; }
+.agents-body h2 {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #e8eaf0;
+  margin: 0 0 6px;
+}
+.agents-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font: inherit;
+  color: #c6cad4;
+}
+.agents-body a { color: #6cb2ff; text-decoration: none; }
+.agents-body a:hover { text-decoration: underline; }
+
+.agents-input {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 30px;
+  border-top: 1px solid #262a34;
+  background: #14161d;
+  font-size: 14.5px;
+}
+.agents-input .arrow { color: #ee5d99; }
+.agents-input input {
+  flex: 1;
+  background: none;
+  border: 0;
+  outline: none;
+  color: #e8eaf0;
+  font: inherit;
+  caret-color: #7ee787;
+}
+.agents-out { padding: 0 30px 8px; font-size: 14.5px; line-height: 1.75; }
+.agents-out .echo { color: #8b93a1; }
+.agents-out .echo .cmd { color: #7ee787; }
+
+@media (max-width: 640px) {
+  .agents-body, .agents-input { padding-left: 18px; padding-right: 18px; }
+  .agents-body { font-size: 13.5px; }
+}

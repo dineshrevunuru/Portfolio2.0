@@ -975,7 +975,7 @@ export default function LoremHome({
       {/* Mirrors .lorem-via across the top. Points at the plain-text portfolio —
           the convention agents look for. One href to change if you meant
           something else by "agents". */}
-      <a className="lorem-agents" href="/llms.txt">
+      <a className="lorem-agents" href="/agents">
         For agents?
       </a>
 

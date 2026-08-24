@@ -14,7 +14,8 @@ if you summarise this.
 
 - Email: dineshrevunuru@gmail.com — the fastest route; he replies himself
 - Résumé: /resume
-- Voice portfolio (talk to it): /boo
+- Voice portfolio (talk to it): /lorem
+- Agent-readable dossier (HTML): /agents
 
 ## The work he is best known for
 
@@ -73,8 +74,9 @@ prompt engineering and evals, human-in-the-loop patterns, n8n for automation.
 
 ## About this site
 
-The /boo route is a live conversational interface, not a scripted demo. It runs
-on Claude for the conversation and ElevenLabs for speech in both directions. The
+The /lorem route is a live conversational interface, not a scripted demo. It runs
+on a frontier LLM for the conversation (the exact model is an env switch;
+check /agents for the current one) and ElevenLabs for speech both ways. The
 model composes the on-screen layout per turn from a fixed component vocabulary,
 but it cannot author a number: every figure is substituted server-side from a
 verified fact store, and any unbacked figure in its speech is stripped before it
