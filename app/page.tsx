@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import SiteNav from "./components/SiteNav";
 import SiteFooter from "./components/SiteFooter";
-import BlackHole from "./components/blackhole/BlackHole";
+import LoremBanner from "./components/lorem/LoremBanner";
 import BubbleStrip from "./components/BubbleStrip";
 
 type ProjectSlug =
@@ -336,14 +336,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Lorem banner — the voice-assistant add-on's front door. BlackHole
-          wraps it: the card is still the link to /lorem, but the orb is its
-          own button that folds the whole page into Lorem's space theme. */}
+      {/* Lorem banner — the voice-assistant add-on's front door. The whole
+          card links to /lorem; the orb is decorative.
+
+          PARKED (2026-08-21, Dinesh's call): the BlackHole entrance — orb
+          click folds the page into Lorem's space theme — reached production
+          by accident. Two sessions shared this checkout; one had moved the
+          working branch onto the feature, and the other's `push origin
+          HEAD:main` carried it live, unreviewed. The code is intact in
+          components/blackhole/. To un-park: render <BlackHole /> here in
+          place of <LoremBanner /> — and this time, on purpose. */}
       <section
         className="pad-cards mx-auto w-full max-w-[1440px] seq pt-11"
         style={{ "--sd": "540ms" } as CSSProperties}
       >
-        <BlackHole />
+        <LoremBanner />
       </section>
 
       {/* Projects heading */}
