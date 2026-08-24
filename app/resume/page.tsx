@@ -219,28 +219,50 @@ export default function Resume() {
         className="rhead gut seq mx-auto w-full max-w-[1440px] pt-10"
         style={{ "--sd": "120ms" } as CSSProperties}
       >
-        <h1>
-          Dinesh
-          <br />
-          Revunuru
-        </h1>
-        <h2>Senior Product Designer</h2>
-        <div className="c">
-          <a href="mailto:dineshrevunuru@gmail.com">dineshrevunuru@gmail.com</a>
-          <br />
-          +1 (312) 838-4876
+        <div className="rhead-main">
+          <h1>
+            Dinesh
+            <br />
+            Revunuru
+          </h1>
+          <h2>Senior Product Designer</h2>
+          <div className="c">
+            <a href="mailto:dineshrevunuru@gmail.com">dineshrevunuru@gmail.com</a>
+            <br />
+            +1 (312) 838-4876
+          </div>
+          <p style={{ margin: "24px 0 0" }}>
+            <a
+              href="https://www.linkedin.com/in/dinesh-revunuru/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center t-cta text-[color:var(--color-brand-blue)]"
+            >
+              My Linkedin profile
+              <WArrow />
+            </a>
+          </p>
         </div>
-        <p style={{ margin: "24px 0 0" }}>
-          <a
-            href="https://www.linkedin.com/in/dinesh-revunuru/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center t-cta text-[color:var(--color-brand-blue)]"
-          >
-            My Linkedin profile
-            <WArrow />
+
+        {/* The download. A real same-origin <a download>, so a recruiter gets a
+            cleanly-named file to drop into an ATS or share internally — the
+            reason Dinesh asked for it. The filename served is neutral, not the
+            "AMex" the source happened to be called; the PDF content is a
+            general senior-product-designer resume, verified before publishing. */}
+        <div className="rhead-side">
+          <a className="resume-dl" href="/Dinesh-Revunuru-Resume.pdf" download>
+            Download Resume
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </a>
-        </p>
+        </div>
       </section>
 
       {/* Skills / Tools / Industries / Code / Languages */}
