@@ -75,7 +75,7 @@ const bump = argv.includes("--major")
   : argv.includes("--minor")
     ? [base[0], base[1] + 1, 0]
     : [base[0], base[1], base[2] + 1];
-// First release: no v-tag exists yet, so package.json (2.0.0) IS the version.
+// First release: no v-tag exists yet, so package.json (1.0.1, Dinesh's call) IS the version.
 const version = explicit ?? (lastTag ? bump.join(".") : pkg.version);
 const tag = `v${version}`;
 
