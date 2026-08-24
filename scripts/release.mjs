@@ -163,10 +163,14 @@ git("commit", "-q", "-m", `release: ${tag}`);
 git("checkout", "-q", "main");
 git("merge", "--no-ff", "-q", "-m", `Release ${tag}`, "dev");
 git("tag", "-a", tag, "-m", `Release ${tag}\n\n${review}`);
-git("push", "-q", "origin", "main", "dev", tag);
 git("checkout", "-q", "dev");
+// Reconcile dev with the release merge commit, or the NEXT release trips the
+// "main diverged" guard on this release's own merge — which is exactly what
+// happened after v1.0.1. dev has nothing main lacks here, so this fast-forwards.
+git("merge", "-q", "main");
+git("push", "-q", "origin", "main", "dev", tag);
 
 console.log(`
   ✓ ${tag} merged to main, tagged, pushed — Vercel is deploying it now.
-  ✓ RELEASES.md updated · back on dev for the next cycle.
+  ✓ dev reconciled · RELEASES.md updated · ready for the next cycle.
 `);
