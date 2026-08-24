@@ -30,7 +30,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { createInterface } from "node:readline";
 
-const sh = (cmd, args) => execFileSync(cmd, args, { encoding: "utf8" }).trim();
+const sh = (cmd, args) => execFileSync(cmd, args, { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] }).trim();
 const git = (...args) => sh("git", args);
 const fail = (msg) => {
   console.error(`\n  ✗ ${msg}\n`);
