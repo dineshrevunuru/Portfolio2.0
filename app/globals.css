@@ -623,11 +623,15 @@ body {
     }
   }
 
-  /* header — contact block left, download button right (wraps on mobile) */
+  /* header — contact block left, download button right.
+
+     align-items: flex-end, not flex-start: the button sits on the same
+     baseline row as "My Linkedin profile" rather than floating at the top of
+     the block. The two are the header's two actions, so they read as a pair. */
   .rhead {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 24px;
     flex-wrap: wrap;
   }
@@ -636,9 +640,18 @@ body {
   }
   .rhead-side {
     flex: none;
+    /* Optical alignment, not edge alignment. flex-end matched the two boxes'
+       BOTTOMS (measured: 1px apart) while their centres sat 14px apart, so
+       the button read as sitting low against the LinkedIn line. The pill is
+       ~48px tall and the link ~23px, so lifting by half that difference puts
+       their centres on one line — which is what the eye actually reads. */
+    margin-bottom: -13px;
   }
-  /* The download CTA. Solid brand-blue pill, matching the reference; the
-     down-into-tray glyph reads as "save" rather than a link arrow. */
+  /* The download CTA. Flat solid PILL — fully rounded ends, no shadow, no
+     hover transform, no transition. Dinesh's call: the header is a document,
+     and a button that lifts off the page competes with the name for
+     attention. Only the focus ring remains, because keyboard users need to
+     see where they are. */
   .resume-dl {
     display: inline-flex;
     align-items: center;
@@ -647,35 +660,19 @@ body {
     color: #fff;
     font-size: 15px;
     font-weight: 600;
-    padding: 13px 22px;
-    border-radius: 12px;
+    padding: 13px 26px;
+    border-radius: 999px;
     text-decoration: none;
-    box-shadow: 0 8px 24px rgba(47, 107, 255, 0.22);
-    transition:
-      transform 0.15s,
-      box-shadow 0.2s,
-      background 0.2s;
-  }
-  .resume-dl:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 30px rgba(47, 107, 255, 0.3);
-  }
-  .resume-dl:active {
-    transform: translateY(0);
   }
   .resume-dl:focus-visible {
     outline: 3px solid var(--color-brand-blue, #2f6bff);
     outline-offset: 3px;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .resume-dl {
-      transition: none;
-    }
-  }
   @media (max-width: 640px) {
     /* Full-width on phones, so the tap target is the whole row. */
     .rhead-side {
       width: 100%;
+      padding-bottom: 0;
     }
     .resume-dl {
       width: 100%;
