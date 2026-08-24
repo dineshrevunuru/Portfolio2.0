@@ -623,7 +623,65 @@ body {
     }
   }
 
-  /* header */
+  /* header — contact block left, download button right (wraps on mobile) */
+  .rhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .rhead-main {
+    min-width: 0;
+  }
+  .rhead-side {
+    flex: none;
+  }
+  /* The download CTA. Solid brand-blue pill, matching the reference; the
+     down-into-tray glyph reads as "save" rather than a link arrow. */
+  .resume-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-brand-blue, #2f6bff);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 13px 22px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(47, 107, 255, 0.22);
+    transition:
+      transform 0.15s,
+      box-shadow 0.2s,
+      background 0.2s;
+  }
+  .resume-dl:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 30px rgba(47, 107, 255, 0.3);
+  }
+  .resume-dl:active {
+    transform: translateY(0);
+  }
+  .resume-dl:focus-visible {
+    outline: 3px solid var(--color-brand-blue, #2f6bff);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .resume-dl {
+      transition: none;
+    }
+  }
+  @media (max-width: 640px) {
+    /* Full-width on phones, so the tap target is the whole row. */
+    .rhead-side {
+      width: 100%;
+    }
+    .resume-dl {
+      width: 100%;
+      justify-content: center;
+    }
+  }
   .rhead h1 {
     font-family: var(--font-serif), Georgia, serif;
     font-size: clamp(44px, 6vw, 72px);
