@@ -339,13 +339,12 @@ export default function Home() {
       {/* Lorem banner — the voice-assistant add-on's front door. The whole
           card links to /lorem; the orb is decorative.
 
-          PARKED (2026-08-21, Dinesh's call): the BlackHole entrance — orb
-          click folds the page into Lorem's space theme — reached production
-          by accident. Two sessions shared this checkout; one had moved the
-          working branch onto the feature, and the other's `push origin
-          HEAD:main` carried it live, unreviewed. The code is intact in
-          components/blackhole/. To un-park: render <BlackHole /> here in
-          place of <LoremBanner /> — and this time, on purpose. */}
+          The BlackHole entrance (orb click folded the page into Lorem's
+          space theme) is PARKED FOREVER — Dinesh's call, 2026-08-21, after
+          it reached production by accident through a shared checkout. The
+          code is deleted from the tree, not from history: it lives at
+          commits fb9f894 · f6f0a83 · 43776fe (`git show 43776fe`) and on
+          branch feat/black-hole-lorem if it is ever reconsidered. */}
       <section
         className="pad-cards mx-auto w-full max-w-[1440px] seq pt-11"
         style={{ "--sd": "540ms" } as CSSProperties}
