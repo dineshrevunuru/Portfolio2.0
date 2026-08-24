@@ -101,6 +101,30 @@ number the fact store cannot back. Do not weaken it to make a test pass.
 - Minimal diffs. Change what needs changing.
 - Readability over cleverness.
 
+## Deployment — the release gate (Dinesh's rule, 2026-08-21)
+
+Production deploys are VERSIONED, REVIEWED, and APPROVED. No exceptions.
+This rule exists because a feature once reached production by accident: two
+sessions shared one checkout, and a push meant for one feature silently
+carried another underneath it.
+
+- **Never push `main`.** Vercel deploys main to production on push. All work
+  lands on `dev` (or a feature branch merged to dev). Pushing dev is safe —
+  it only makes previews.
+- **The only path to production is `npm run release`.** It generates the
+  review (commits + files added/removed/modified between main and dev),
+  requires the version typed back as approval, then merges dev → main with a
+  merge commit, tags vX.Y.Z, and pushes.
+- **Agents do not approve releases.** Show Dinesh the review (`npm run
+  release -- --review` prints it without deploying). His yes, in his words,
+  is the approval — only then run the release and type the version.
+- **One checkout per session.** A second concurrent session works in a git
+  worktree (`git worktree add ../portfolio-<name> <branch>`), never in this
+  directory. Branch switches under a running session are how the accident
+  happened.
+- `git log --first-parent main` is the version history; RELEASES.md is the
+  readable copy.
+
 ## Before opening a PR
 
 1. `npm run build` passes, TypeScript clean

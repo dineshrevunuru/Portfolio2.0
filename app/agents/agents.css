@@ -14,6 +14,10 @@
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 .agents-term {
+  /* The close plays from the red button's corner: a window collapses toward
+     its control, not toward its own center. 260ms, accelerate-out — closing
+     is an exit, it should not linger. */
+  transform-origin: 24px 24px;
   width: min(1040px, 100%);
   background: #16181f;
   border-radius: 18px;
@@ -30,11 +34,25 @@
   color: #9aa1ac;
   font-size: 13.5px;
 }
-.agents-bar .dots { display: flex; gap: 8px; }
-.agents-bar .dots i { width: 12px; height: 12px; border-radius: 50%; display: block; }
-.agents-bar .dots i:nth-child(1) { background: #ff5f57; }
-.agents-bar .dots i:nth-child(2) { background: #febc2e; }
-.agents-bar .dots i:nth-child(3) { background: #28c840; }
+/* The dot LOOKS 14px, macOS-faithful; the hit area is 28px — WCAG target
+   minimum, and a browser-pane click test genuinely missed the bare 14px. */
+.agents-bar .close {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: transparent; font-size: 11px; line-height: 1;
+  text-decoration: none; flex: none;
+  margin: -7px 0 -7px -7px;
+}
+.agents-bar .close::before {
+  content: ""; grid-area: 1 / 1;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #ff5f57;
+  transition: transform 0.15s;
+}
+.agents-bar .close span { grid-area: 1 / 1; z-index: 1; }
+.agents-bar .close:hover span, .agents-bar .close:focus-visible span { color: #7a1410; }
+.agents-bar .close:hover::before, .agents-bar .close:focus-visible::before { transform: scale(1.12); }
+.agents-bar .close:focus-visible { outline: 2px solid #ff5f57; outline-offset: 2px; }
 .agents-bar .title { flex: 1; text-align: center; }
 
 .agents-body {
@@ -68,30 +86,19 @@
 .agents-body a { color: #6cb2ff; text-decoration: none; }
 .agents-body a:hover { text-decoration: underline; }
 
-.agents-input {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 14px 30px;
-  border-top: 1px solid #262a34;
-  background: #14161d;
-  font-size: 14.5px;
-}
-.agents-input .arrow { color: #ee5d99; }
-.agents-input input {
-  flex: 1;
-  background: none;
-  border: 0;
-  outline: none;
-  color: #e8eaf0;
-  font: inherit;
-  caret-color: #7ee787;
-}
-.agents-out { padding: 0 30px 8px; font-size: 14.5px; line-height: 1.75; }
-.agents-out .echo { color: #8b93a1; }
-.agents-out .echo .cmd { color: #7ee787; }
 
 @media (max-width: 640px) {
-  .agents-body, .agents-input { padding-left: 18px; padding-right: 18px; }
-  .agents-body { font-size: 13.5px; }
+  .agents-body { padding-left: 18px; padding-right: 18px; font-size: 13.5px; }
+}
+
+/* ── the close ── */
+.agents-term.closing {
+  animation: agents-close 0.26s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+@keyframes agents-close {
+  to { transform: scale(0.9) translateY(6px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agents-term.closing { animation: none; }
 }

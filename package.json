@@ -1,6 +1,6 @@
 {
   "name": "portfolio-temp",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -21,7 +21,8 @@
     "pull:conversations": "node scripts/pull-conversations.mjs",
     "setup:logging": "node scripts/setup-logging.mjs",
     "setup:supabase": "node scripts/setup-supabase.mjs",
-    "conversations": "node scripts/conversations.mjs"
+    "conversations": "node scripts/conversations.mjs",
+    "release": "node scripts/release.mjs"
   },
   "dependencies": {
     "next": "16.2.4",
