@@ -9,7 +9,7 @@ export default function SiteFooter({ tagline }: SiteFooterProps) {
       <div className="inner">
         <div>
           <h2>Dinesh Revunuru</h2>
-          <div className="role">AI Product Designer</div>
+          <div className="role">Senior Product Designer</div>
           <div className="role sub">Chicago, IL USA</div>
           <p className="intro">
             If you are thinking about hiring me or would like to

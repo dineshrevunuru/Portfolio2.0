@@ -19,9 +19,9 @@ const playfair = Playfair_Display({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const TITLE = "Dinesh Revunuru — AI Product Designer";
+const TITLE = "Dinesh Revunuru — Senior Product Designer";
 const DESCRIPTION =
-  "Portfolio of Dinesh Revunuru, AI Product Designer. HCI grad student at DePaul; earlier Generative A.I at Neudesic (an IBM Company).";
+  "Portfolio of Dinesh Revunuru, Senior Product Designer. HCI grad student at DePaul; earlier Generative A.I at Neudesic (an IBM Company).";
 
 export const metadata: Metadata = {
   /* metadataBase is what makes a relative og:image resolve to an absolute URL.

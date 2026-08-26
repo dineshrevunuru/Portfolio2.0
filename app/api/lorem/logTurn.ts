@@ -45,6 +45,10 @@ export type LoggedTurn = {
   /** Whole-turn latency in ms, brain call included — free to capture here,
    *  impossible to reconstruct later. */
   ms: number;
+  /** Set only on failure turns — 'upstream' | 'no_tool' | 'echo' | 'scrubbed'
+   *  | 'self_repeat'. A failed turn is the most valuable training data there
+   *  is; before this field, every guardrail return was invisible. */
+  error?: string;
 };
 
 /**
@@ -80,6 +84,7 @@ async function logLocal(turn: LoggedTurn): Promise<void> {
         chips: turn.chips,
         model: turn.model,
         ms: Math.round(turn.ms),
+        ...(turn.error ? { error: turn.error } : {}),
         created_at: new Date().toISOString(),
       }) + "\n",
       "utf8",
@@ -89,27 +94,34 @@ async function logLocal(turn: LoggedTurn): Promise<void> {
   }
 }
 
-export function logTurn(turn: LoggedTurn): void {
+/**
+ * Returns the insert's promise so the route can pass it to next/server's
+ * after(): on Vercel the function is frozen the moment the response returns,
+ * and a fire-and-forget fetch dies with it. That is not theoretical — a real
+ * voice conversation observed in Clarity (2026-08-24) never reached the
+ * table. after() keeps the instance alive until the insert settles. Errors
+ * still never propagate: the chain swallows everything after one console line.
+ */
+export function logTurn(turn: LoggedTurn): Promise<void> {
   if (!URL_ || !KEY) {
     // No database configured. Off Vercel that means "log locally so the loop
     // still closes"; on Vercel it means the env is genuinely missing, and the
     // one-time line is the thing that says so.
     if (process.env.NODE_ENV !== "production") {
-      void logLocal(turn);
       if (!warned) {
         warned = true;
         console.log(`[lorem] logging to ${LOCAL_DIR}/ — set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY for the real table`);
       }
-      return;
+      return logLocal(turn);
     }
     if (!warned) {
       warned = true;
       console.log("[lorem] conversation logging off — SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY unset");
     }
-    return;
+    return Promise.resolve();
   }
   // PostgREST straight over fetch: one insert, no SDK, no new dependency.
-  void fetch(`${URL_}/rest/v1/lorem_turns`, {
+  return fetch(`${URL_}/rest/v1/lorem_turns`, {
     method: "POST",
     headers: {
       apikey: KEY,
@@ -126,6 +138,7 @@ export function logTurn(turn: LoggedTurn): void {
       chips: turn.chips,
       model: turn.model,
       ms: Math.round(turn.ms),
+      ...(turn.error ? { error: turn.error } : {}),
     }),
     signal: AbortSignal.timeout(4_000),
   })

@@ -20,7 +20,7 @@
 
 export const IDENTITY = {
   name: "Dinesh Reddy Revunuru",
-  title: "AI Product Designer",
+  title: "Senior Product Designer",
   location: "Chicago, IL",
   email: "dineshrevunuru@gmail.com",
   education: "MS Human-Computer Interaction, DePaul University (completed August 2026)",

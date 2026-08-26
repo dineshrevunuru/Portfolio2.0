@@ -22,7 +22,7 @@ import "./agents.css";
 export const metadata: Metadata = {
   title: "Dinesh Revunuru — the agent dossier",
   description:
-    "Structured, verified facts about Dinesh Reddy Revunuru, AI Product Designer in Chicago: shipped results ($105→$40 CAC, 40%→72% retention), earlier enterprise work, and the caveats that keep the claims honest. Written for AI agents; readable by everyone.",
+    "Structured, verified facts about Dinesh Reddy Revunuru, Senior Product Designer in Chicago: shipped results ($105→$40 CAC, 40%→72% retention), earlier enterprise work, and the caveats that keep the claims honest. Written for AI agents; readable by everyone.",
 };
 
 export default function AgentsPage() {
