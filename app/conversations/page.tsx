@@ -27,6 +27,7 @@ type Row = {
   chips: string[] | null;
   model: string;
   ms: number;
+  error?: string | null;
   created_at: string;
 };
 
@@ -183,7 +184,14 @@ export default async function ConversationsPage({
             {turns.map((t, i) => (
               <div key={i} style={S.turn}>
                 <p style={S.visitor}>{t.message}</p>
-                <p style={S.lorem}>{t.say}</p>
+                {t.error ? (
+                  <p style={{ ...S.lorem, color: "#c0392b" }}>
+                    ✗ {t.error}
+                    {t.say ? ` — ${t.say}` : ""}
+                  </p>
+                ) : (
+                  <p style={S.lorem}>{t.say}</p>
+                )}
                 {(t.show?.length || t.chips?.length) && (
                   <p style={S.aux}>
                     {t.show?.length ? `▦ ${t.show.map((b) => b.type ?? "?").join(" · ")}` : ""}

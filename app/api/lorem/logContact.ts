@@ -31,22 +31,23 @@ export type Contact = {
   note?: string;
 };
 
-export function logContact(c: Contact): void {
+/** Returns the insert's promise for next/server after() — see logTurn.ts. */
+export function logContact(c: Contact): Promise<void> {
   if (!ON) {
     if (!warned) {
       warned = true;
       console.log("[lorem] contact capture is OFF (LOREM_CONTACT_CAPTURE) — a volunteered contact was dropped");
     }
-    return;
+    return Promise.resolve();
   }
   if (!URL_ || !KEY) {
     if (!warned) {
       warned = true;
       console.log("[lorem] contact capture on but SUPABASE_* unset — dropped");
     }
-    return;
+    return Promise.resolve();
   }
-  void fetch(`${URL_}/rest/v1/lorem_contacts`, {
+  return fetch(`${URL_}/rest/v1/lorem_contacts`, {
     method: "POST",
     headers: {
       apikey: KEY,

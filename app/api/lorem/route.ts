@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { resolve, sanitizeBlocks, scrubProse, type Rejection } from "../../components/lorem/guardrail";
 import { gateChips, isEcho, isFarewell, visitorSteeredToWork } from "../../components/lorem/closing";
 import {
@@ -120,6 +120,25 @@ export async function POST(req: Request) {
   // The client knows this and never told the model; now it does.
   const inputMode = mode === "voice" ? "voice" : "text";
 
+  // Failure turns get logged too — a guardrail return used to be invisible,
+  // which meant the exact turns worth studying (what did they ask when it
+  // broke?) never reached the table. after() because Vercel freezes the
+  // function once the response is out; see logTurn.ts.
+  const logFail = (error: string, say = "") =>
+    after(
+      logTurn({
+        sessionId: session,
+        mode: inputMode,
+        message: message.slice(0, MAX_MESSAGE_CHARS),
+        say,
+        show: [],
+        chips: [],
+        model: LOREM_MODEL,
+        ms: Date.now() - started,
+        error,
+      }),
+    );
+
   const priorTurns = (Array.isArray(history) ? history : [])
     .filter(
       (m): m is { role: "user" | "assistant"; content: string } =>
@@ -226,6 +245,7 @@ export async function POST(req: Request) {
       signal: AbortSignal.timeout(25_000),
     });
   } catch {
+    logFail("upstream");
     return NextResponse.json(
       { error: "upstream", say: "I lost my connection there. Try me again?" },
       { status: 502 },
@@ -235,6 +255,7 @@ export async function POST(req: Request) {
   if (!res.ok) {
     // Never surface the upstream body — it can echo request details.
     console.error(`[lorem] upstream ${res.status}`);
+    logFail(`upstream_${res.status}`);
     return NextResponse.json(
       { error: "upstream", say: "Something went wrong on my end. Try me again?" },
       { status: 502 },
@@ -276,6 +297,7 @@ export async function POST(req: Request) {
   // own parse failure.
   if (typeof input.say !== "string" || !input.say.trim()) {
     console.error("[lorem] model returned no usable respond call");
+    logFail("no_tool");
     return NextResponse.json(
       { error: "no_tool", say: "I didn't quite catch that — try me again?" },
       { status: 502 },
@@ -319,7 +341,7 @@ export async function POST(req: Request) {
       typeof rawContact[k] === "string" && (rawContact[k] as string).trim() ? (rawContact[k] as string).trim().slice(0, max) : undefined;
     const contact = { email: clean("email", 120), linkedin: clean("linkedin", 160), note: clean("note", 160) };
     if (contact.email || contact.linkedin) {
-      logContact({ sessionId: session, name: visitorCtx.name, ...contact });
+      after(logContact({ sessionId: session, name: visitorCtx.name, ...contact }));
     }
   }
 
@@ -337,6 +359,7 @@ export async function POST(req: Request) {
   // exists for, so it closes.
   if (lastAssistant && isEcho(turn.say, lastAssistant.content)) {
     console.warn("[lorem] model repeated its own previous turn");
+    logFail("self_repeat", turn.say);
     return NextResponse.json({ closed: true, say: "", show: [], chips: [] });
   }
 
@@ -352,6 +375,7 @@ export async function POST(req: Request) {
   // failure they can retry, because leaving them at a dead end would be worse.
   if (isEcho(turn.say, message)) {
     console.warn("[lorem] model echoed the visitor verbatim");
+    logFail("echo", turn.say);
     return isFarewell(message)
       ? NextResponse.json({ closed: true, say: "", show: [], chips: [] })
       : NextResponse.json(
@@ -367,25 +391,29 @@ export async function POST(req: Request) {
   // and letting it into history would record a blank Lorem turn.
   if (!turn.say.trim()) {
     console.error("[lorem] say was emptied by the guardrail", rejected);
+    logFail("scrubbed");
     return NextResponse.json(
       { error: "scrubbed", say: "I got that one wrong. Ask me again?" },
       { status: 502 },
     );
   }
 
-  // The one place a real visitor's turn becomes trainable data. After the
-  // response is fully assembled, fire-and-forget — see logTurn.ts for the
-  // design (and for the reversal of the old "server keeps nothing" promise).
-  logTurn({
-    sessionId: session,
-    mode: inputMode,
-    message: message.slice(0, MAX_MESSAGE_CHARS),
-    say: turn.say,
-    show: turn.show,
-    chips: turn.chips,
-    model: LOREM_MODEL,
-    ms: Date.now() - started,
-  });
+  // Where a successful turn becomes trainable data. after() rather than
+  // fire-and-forget: Vercel freezes the function on response, and a real voice
+  // conversation (Clarity, 2026-08-24) was lost exactly that way — see
+  // logTurn.ts for the design and the reversal of "server keeps nothing".
+  after(
+    logTurn({
+      sessionId: session,
+      mode: inputMode,
+      message: message.slice(0, MAX_MESSAGE_CHARS),
+      say: turn.say,
+      show: turn.show,
+      chips: turn.chips,
+      model: LOREM_MODEL,
+      ms: Date.now() - started,
+    }),
+  );
 
   return NextResponse.json({ ...turn, ...resolve(turn.show) });
 }

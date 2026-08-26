@@ -17,8 +17,13 @@ create table if not exists lorem_turns (
   chips      jsonb,                          -- the follow-ups offered
   model      text,                           -- which brain answered
   ms         integer,                        -- whole-turn latency
+  error      text,                           -- set only on failure turns: 'upstream' | 'no_tool' | 'echo' | 'scrubbed' | 'self_repeat'
   created_at timestamptz default now()
 );
+
+-- Migration for tables created before the error column existed (2026-08-25).
+-- Safe to re-run; a no-op once applied.
+alter table lorem_turns add column if not exists error text;
 
 create index if not exists lorem_turns_session on lorem_turns (session_id, created_at);
 create index if not exists lorem_turns_created on lorem_turns (created_at);
