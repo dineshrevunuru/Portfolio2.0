@@ -5,6 +5,7 @@ import "./components/lorem/lorem.css";
 import SeqReveal from "./components/SeqReveal";
 import ScrollProgressPill from "./components/case-study/ScrollProgressPill";
 import Clarity from "./components/Clarity";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 import { SITE_URL } from "./site";
 
 const poppins = Poppins({
@@ -76,6 +77,9 @@ export default function RootLayout({
         {/* Also self-scoping: renders null off the real domain or with no
             project id, so previews and localhost stay out of the heatmaps. */}
         <Clarity />
+        {/* Same self-scoping gate as Clarity: renders null off the real domain,
+            so previews and localhost never report to the GA property. */}
+        <GoogleAnalytics />
       </body>
     </html>
   );
