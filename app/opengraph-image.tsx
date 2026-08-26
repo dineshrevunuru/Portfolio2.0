@@ -29,7 +29,7 @@ import { ImageResponse } from "next/og";
  * so the intent is legible when someone wires the font properly.
  */
 
-export const alt = "Dinesh Revunuru, AI Product Designer";
+export const alt = "Dinesh Revunuru, Senior Product Designer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -77,7 +77,7 @@ export default function OpengraphImage() {
               color: "#5b5b5b",
             }}
           >
-            AI Product Designer
+            Senior Product Designer
           </div>
           {/* The claim, not a tagline. This is the one line the whole portfolio
               argues, so it is the one line worth putting on the card. */}

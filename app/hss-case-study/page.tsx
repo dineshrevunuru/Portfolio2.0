@@ -269,7 +269,7 @@ export default function HssCaseStudy() {
           <div className="max-w-[30rem] lg:max-w-none">
             <h3 className="cs-overview-head">My role</h3>
             <p className="mt-4 cs-overview-body">
-              <strong>Senior AI Product Designer</strong>
+              <strong>Senior Product Designer</strong>
             </p>
             <p className="mt-3 cs-overview-body">
             Talk, talk & TALK to stake holders and users, Find problems, research, design and write production code, test & deploy solutions.
