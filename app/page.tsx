@@ -367,7 +367,7 @@ export default function Home() {
           data-seq-group
         >
           {visibleProjects.map((p) => (
-            <article key={p.slug} className={`project-card card-${p.slug} group`}>
+            <article key={p.slug} className={`project-card card-${p.slug} group relative`}>
               {p.logo && (
                 <div className="mb-6 flex h-[40px] items-center">
                   <Image
@@ -384,7 +384,19 @@ export default function Home() {
 
               <h4 className="t-serif-title whitespace-pre-line">{p.title}</h4>
               <p className="mt-5 t-body">{p.description}</p>
-              <Link href={p.href} className="group mt-5 inline-flex items-center t-cta">
+              <Link
+                href={p.href}
+                aria-label={
+                  p.cta === "case-study"
+                    ? `View ${p.title.replace(/\n/g, " ")} case study`
+                    : undefined
+                }
+                className={`group mt-5 inline-flex items-center t-cta${
+                  p.cta === "case-study"
+                    ? " after:absolute after:inset-0 after:z-[1] after:content-['']"
+                    : ""
+                }`}
+              >
                 {p.cta === "password"
                   ? "Updating (Required Password)"
                   : "View case study"}
