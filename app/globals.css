@@ -982,6 +982,29 @@ body {
     --cs-accent-ink: var(--color-card-b2b-ink);
     --cs-brand-dark: #4A69D6;
   }
+  .cs-theme-mate {
+    /* Mate's signature surface is the deep navy plate from its marketing hero
+       (#141824); white sits on it at ~17:1. Accent is Mate's product blue,
+       darkened to #16699f so it clears AA on the pale tint and on white. */
+    --cs-accent-bg: #E8F1F8;
+    --cs-accent-ink: #16699f;
+    --cs-brand-dark: #141824;
+  }
+  /* Per Dinesh's Figma this one case study reads in Open Sans — but ONLY its
+     body content. The shared SiteNav (nav.top) and SiteFooter must stay on the
+     portfolio's Poppins so the site chrome is byte-identical on every page;
+     overriding --font-sans on main leaked Open Sans into both. Scope it to the
+     case-study content classes instead. The Playfair hero (cs-hero-title, via
+     --font-serif) is untouched, so hero font + weight match every case study. */
+  .cs-theme-mate .cs-section-head,
+  .cs-theme-mate .cs-overview-head,
+  .cs-theme-mate .cs-overview-body,
+  .cs-theme-mate .cs-meta-label,
+  .cs-theme-mate .cs-prose,
+  .cs-theme-mate .cs-prose *,
+  .cs-theme-mate [class*="mate-case-study"] {
+    font-family: var(--font-opensans), "Open Sans", system-ui, sans-serif;
+  }
   .cs-theme-hss {
     --cs-accent-bg: var(--color-card-hss-bg);
     --cs-accent-ink: var(--color-card-hss-ink);
