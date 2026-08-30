@@ -1,225 +1,745 @@
-/* Bespoke elements only. Everything structural (hero, overview, sections,
-   images, widths, footer) uses the portfolio's case-study primitives, so this
-   page inherits the same 800px text rail and 1100/1600px media rails as every
-   other case study. These classes are wrapped in `.cs-container` in the JSX,
-   so they align to that same rail. Fonts inherit var(--font-sans), which
-   `.cs-theme-mate` overrides to Open Sans for this page only. */
+.page {
+  --mate-ink: #191918;
+  --mate-muted: #6f706c;
+  --mate-border: #e8e6e2;
+  --mate-stage: #fbfaf8;
+  --mate-blue: #1877b5;
+  --mate-blue-soft: #eef8fe;
+  --mate-green: #15803d;
+  --mate-green-soft: #eff9f2;
+  width: 100%;
+  overflow: clip;
+  background: #fff;
+  color: var(--mate-ink);
+}
 
-/* The problem statement — larger, calmer, with the key clause marked in
-   Mate blue (white on #1977b5 clears AA at this size with room). */
-.statement {
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(calc(100% - 48px), 1292px);
+  height: 84px;
+  margin: 0 auto;
+}
+
+.brand {
+  color: var(--mate-ink);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.brand span { color: #f08aa5; }
+
+.nav > div {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+}
+
+.nav > div a {
+  color: var(--mate-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hero {
+  width: min(calc(100% - 48px), 1168px);
+  margin: 0 auto;
+  padding: 92px 0 62px;
+}
+
+.hero h1 {
+  max-width: 650px;
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(48px, 3.65vw, 54px);
+  font-weight: 600;
+  line-height: 0.99;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 72px;
+  max-width: 900px;
+  margin: 52px 0 0;
+}
+
+.meta div { min-width: 0; }
+
+.meta dt {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.meta dd {
+  margin: 0;
+  color: var(--mate-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.meta a,
+.story a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.heroMedia {
+  width: min(calc(100% - 48px), 1464px);
+  max-height: 690px;
+  margin: 0 auto 84px;
+  overflow: hidden;
+  border: 1px solid var(--mate-border);
+  border-radius: 18px;
+  background: var(--mate-stage);
+  box-shadow: 0 16px 44px rgba(25, 25, 24, 0.045);
+}
+
+.heroMedia img,
+.prototypeSection img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.story {
+  width: min(calc(100% - 40px), 720px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Spacing model, measured off the Figma (node 8115-6849): a GROUP is one
+   heading + its paragraphs, tight inside (h2→p 16px, p→p 20px). Every
+   group-to-group jump breathes 120px — between sections, and from the last
+   section of a story to the next block. Bigger type needs this air; the old
+   24px rhythm read as one clump. */
+.section { margin: 0; }
+.section + .section { margin-top: 120px; }
+.story { margin: 0 auto 120px; }
+
+/* A lead graf after body copy is its own moment (Figma: ~120px below the
+   body, 60px between consecutive leads, footnotes hug their lead). */
+.section p + .lead { margin-top: 80px; }
+.section .lead + .lead { margin-top: 60px; }
+.section .lead + .smallPrint { margin-top: 16px; }
+
+/* First group of the page needs its own breathing room below the hero image. */
+.story:first-of-type { margin-top: 80px; }
+
+/* "What I would test first" starts the group right after the prototype
+   embed, which carries no bottom margin of its own. */
+:global(#prototype) + .story { margin-top: 80px; }
+
+/* Type scale from the Figma (node 8115-6849):
+   headings   Open Sans 28/600, lh 112.958%, #202020
+   body       Open Sans 24/400, lh normal, tracking 0.48px, #202020
+   lead       Open Sans 28/600, lh normal, tracking 0.56px (the emphasis grafs)
+   statement  Open Sans 36/400, lh 1.5, tracking 0.36px + solid #1977b5 bars */
+.section h2,
+.prototypeHeading h2 {
+  margin: 0 0 16px;
+  color: #202020;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 112.958%;
+}
+
+.section p {
+  margin: 0;
+  color: #202020;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.48px;
+}
+
+.section p + p { margin-top: 20px; }
+
+.section .statement {
+  margin-bottom: 28px;
   color: #000;
-  font-size: clamp(27px, 2.4vw, 36px);
+  font-size: clamp(30px, 2.4vw, 36px);
   font-weight: 400;
   line-height: 1.5;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.36px;
 }
+
 .statement mark {
-  background: #1877b5;
+  padding: 2px 8px;
+  background: #1977b5;
   color: #fff;
-  padding: 3px 10px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
 
-/* Evidence-boundary callout — a quiet blue left rule, never a warning box. */
-.note {
-  margin-top: 28px;
-  padding-left: 20px;
-  border-left: 3px solid #1877b5;
-  color: #3f403d;
-  font-size: clamp(15px, 1.4vw, 17px);
-  line-height: 1.55;
-  letter-spacing: 0.01em;
+.section .lead {
+  color: #202020;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 0.56px;
 }
+
+.note {
+  /* The note is its own quiet block — same group-to-group breathing room. */
+  margin: 120px 0 0;
+  padding-left: 18px;
+  border-left: 2px solid #bde1f6;
+  color: var(--mate-muted);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
 .note span {
   display: block;
-  margin-bottom: 6px;
-  color: #1877b5;
-  font-size: 12px;
+  margin-bottom: 7px;
+  color: var(--mate-blue);
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mediaBlock {
+  width: min(calc(100% - 40px), 840px);
+  margin: 0 auto 120px;
+}
+
+/* Grouping: a story that introduces a media block (persona cards, the math
+   card, a flow chart, a design shot, the prototype) belongs WITH it — 40px,
+   not the 120px group gap. The media block then closes the group at 120px. */
+.story:has(+ .mediaBlock),
+.story:has(+ .flowStage),
+.story:has(+ .designMedia),
+.story:has(+ :global(#prototype)) {
+  margin-bottom: 40px;
+}
+
+.personaCard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--mate-border);
+  border-radius: 18px;
+  background: var(--mate-border);
+}
+
+.personaCard > div {
+  min-height: 198px;
+  padding: 30px 32px;
+  background: var(--mate-stage);
+}
+
+.cardLabel {
+  margin: 0 0 30px;
+  color: var(--mate-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.personaCard h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.personaCard div > p:last-child {
+  margin: 12px 0 0;
+  color: var(--mate-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* The equation reads as one centered line: label over number per term,
+   operators anchored to the digits' midline — nothing floats. */
+.mathCard {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(24px, 4.5vw, 64px);
+  padding: 44px 32px 40px;
+  border: 1px solid var(--mate-border);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.mathCard > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.mathCard span {
+  color: var(--mate-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-/* Two-up user card. */
-.personaGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  margin-top: 8px;
-}
-@media (min-width: 640px) {
-  .personaGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.personaGrid > div {
-  padding: 24px;
-  border: 1px solid #e5e3df;
-  border-radius: 14px;
-  background: #fbfaf8;
-}
-.personaGrid h3 {
-  margin: 6px 0 8px;
-  color: #202020;
-  font-size: clamp(18px, 1.6vw, 22px);
-  font-weight: 600;
-  line-height: 1.2;
-}
-.personaGrid p {
-  margin: 0;
-  color: #3f403d;
-  font-size: clamp(15px, 1.4vw, 17px);
-  line-height: 1.5;
-}
-.cardLabel {
-  color: #1877b5;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-/* Illustrative audience equation. */
-.mathCard {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px 28px;
-  margin-top: 8px;
-  padding: 28px;
-  border: 1px solid #e5e3df;
-  border-radius: 16px;
-  background: #fbfaf8;
-}
-.mathCard > div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.mathCard span {
-  color: #6f706c;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
 .mathCard strong {
-  color: #202020;
-  font-size: clamp(30px, 3vw, 40px);
+  display: block;
+  color: var(--mate-blue);
+  font-size: 40px;
   font-weight: 600;
   line-height: 1;
-  letter-spacing: -0.01em;
 }
-.mathCard > div:last-child strong {
-  color: #15803d;
-}
+
+.mathCard div:nth-of-type(2) strong,
+.mathCard div:nth-of-type(4) strong { color: var(--mate-green); }
+
 .mathCard b {
-  color: #a7a8a3;
+  margin-bottom: 9px;
+  color: #b6b7b2;
   font-size: 22px;
   font-weight: 400;
-}
-.mediaCaption {
-  margin-top: 12px;
-  color: #6f706c;
-  font-size: 14px;
-  letter-spacing: 0.01em;
+  line-height: 1;
 }
 
-/* Numbered journey flow — horizontal band of steps. */
-.flow {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: none;
-}
-@media (min-width: 720px) {
-  .flow {
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-  }
-}
-.flow li {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid #e5e3df;
-  border-radius: 12px;
-  background: #fff;
-  color: #3f403d;
+.mediaCaption {
+  margin: 16px 0 0;
+  color: var(--mate-muted);
   font-size: 14px;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
+  line-height: 1.5;
+  text-align: center;
 }
-.flow li span {
-  color: #a7a8a3;
+
+.flowStage {
+  width: min(calc(100% - 48px), 1464px);
+  margin: 0 auto 120px;
+  padding: 28px 32px 26px;
+  border: 1px solid var(--mate-border);
+  border-radius: 18px;
+  background: var(--mate-stage);
+}
+
+.flowStageBlue {
+  border-color: #d9edf9;
+  background: #f7fbfe;
+}
+
+.flowEyebrow {
+  margin: 0 0 12px;
+  color: var(--mate-muted);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-}
-.flowStepHighlight {
-  border-color: #1877b5 !important;
-  background: #e8f5fe !important;
-  color: #145c8b !important;
-}
-.flowStepHighlight span {
-  color: #1877b5 !important;
-}
-
-/* Closing CTA. */
-.close {
-  margin-top: 24px;
-  padding: 40px 0 8px;
-  border-top: 1px solid #e5e3df;
-}
-.close p {
-  margin: 0 0 10px;
-  color: #6f706c;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.close h3 {
-  margin: 0 0 12px;
-  color: #202020;
-  font-size: clamp(26px, 2.6vw, 40px);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-}
-.close > span {
-  display: block;
-  max-width: 560px;
-  color: #3f403d;
-  font-size: clamp(16px, 1.5vw, 20px);
-  line-height: 1.5;
-}
-.close a {
-  display: inline-block;
-  margin-top: 20px;
-  color: #1877b5;
-  font-size: 16px;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+
+.chartViewport {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
-/* Interactive prototype embed — a bounded browser-chrome frame so the live
-   Mate-language app reads as an embedded surface, not part of the portfolio
-   chrome (the containment rule: foreign design language stays inside a frame). */
+/* No forced min-width at desktop: the SVG scales to its rail (capped at its
+   natural size, centered) so nothing clips and no scrollbar track shows. */
+.chart {
+  display: block;
+  width: 100%;
+  max-width: 1300px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.chartConnector,
+.chartLoop {
+  fill: none;
+  stroke: #b9bab5;
+  stroke-width: 1.5;
+}
+
+.chartLoop {
+  stroke: var(--mate-blue);
+  stroke-width: 1.4;
+  stroke-dasharray: 6 6;
+  opacity: 0.65;
+}
+
+.chartArrow { fill: #b9bab5; }
+
+.chartNode rect {
+  fill: #fff;
+  stroke: #e3e1dd;
+  stroke-width: 1.3;
+}
+
+.chartNode text,
+.chartDecision text {
+  fill: var(--mate-ink);
+  font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.chartNodeBlue rect {
+  fill: var(--mate-blue-soft);
+  stroke: #cde7f7;
+}
+
+.chartNodeBlue text { fill: #135f91; }
+
+.chartNodeGreen rect {
+  fill: var(--mate-green-soft);
+  stroke: #d3ecd9;
+}
+
+.chartNodeGreen text { fill: var(--mate-green); }
+
+.chartDecision path {
+  fill: #fff;
+  stroke: var(--mate-blue);
+  stroke-width: 1.5;
+}
+
+.chartBranchLabel {
+  fill: var(--mate-muted);
+  font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.mobileFlow { display: none; }
+
+.designMedia {
+  width: min(calc(100% - 40px), 840px);
+  margin: 0 auto 120px;
+}
+
+.designMedia img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* These exports carry their own baked-in blue frame + rounded corners on a
+     white ground, so no CSS border/radius/shadow — that would double the frame
+     and a shadow would leak past the rounded corners over the white margins. */
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.designMedia figcaption {
+  margin-top: 12px;
+  color: var(--mate-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.prototypeSection {
+  width: min(calc(100% - 48px), 1464px);
+  margin: -16px auto 90px;
+  scroll-margin-top: 90px;
+}
+
+.prototypeHeading {
+  width: min(100%, 680px);
+  margin: 0 auto 24px max(0px, calc((100vw - 1168px) / 2 + 96px));
+}
+
+.prototypeHeading h2 { margin-bottom: 7px; }
+
+.prototypeHeading p {
+  margin: 0;
+  color: var(--mate-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.prototypeSection figure {
+  max-height: 860px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--mate-border);
+  border-radius: 18px;
+  background: var(--mate-stage);
+  box-shadow: 0 16px 44px rgba(25, 25, 24, 0.045);
+}
+
+.prototypeLink {
+  display: table;
+  margin: 16px 0 0 auto;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--mate-ink);
+  color: var(--mate-ink);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.smallPrint {
+  color: var(--mate-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+.close { margin: 98px 0 110px; }
+
+.close > p {
+  margin: 0 0 12px;
+  color: var(--mate-muted);
+  font-size: 13px;
+}
+
+.close h2 {
+  max-width: 570px;
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(42px, 4vw, 58px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.close span {
+  display: block;
+  max-width: 560px;
+  margin-top: 24px;
+  color: #3f403d;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.close a {
+  display: inline-flex;
+  margin-top: 30px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--mate-ink);
+  color: var(--mate-ink);
+  font-size: 15px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .hero { padding-top: 76px; }
+  .meta { gap: 32px; }
+  .chart { min-width: 900px; }
+}
+
+@media (max-width: 640px) {
+  .nav {
+    width: calc(100% - 32px);
+    height: 74px;
+  }
+
+  .brand { font-size: 26px; }
+  .nav > div { gap: 28px; }
+
+  .hero {
+    width: min(calc(100% - 32px), 1168px);
+    padding: 62px 0 44px;
+  }
+
+  .hero h1 {
+    font-size: 41px;
+    line-height: 1;
+  }
+
+  .meta {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    margin-top: 42px;
+  }
+
+  .heroMedia {
+    width: calc(100% - 16px);
+    max-height: none;
+    margin-bottom: 68px;
+    border-radius: 12px;
+  }
+
+  .story {
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .story { margin-bottom: 80px; }
+  .section + .section { margin-top: 80px; }
+  .section h2 { font-size: 24px; }
+  .section p { font-size: 20px; letter-spacing: 0.4px; }
+  .section p + .lead { margin-top: 56px; }
+  .section .statement { font-size: 30px; }
+  .section .lead { font-size: 24px; letter-spacing: 0.48px; }
+  .note { margin-top: 80px; }
+
+  .mediaBlock,
+  .designMedia {
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 80px;
+  }
+
+  .personaCard { grid-template-columns: 1fr; }
+
+  .personaCard > div {
+    min-height: auto;
+    padding: 26px;
+  }
+
+  .cardLabel { margin-bottom: 20px; }
+
+  .mathCard {
+    flex-wrap: wrap;
+    gap: 32px 0;
+    padding: 32px 16px;
+  }
+
+  .mathCard b { display: none; }
+  .mathCard > div { flex: 1 1 50%; }
+  .mathCard strong { font-size: 34px; }
+
+  .flowStage {
+    width: calc(100% - 16px);
+    margin-top: 0;
+    margin-bottom: 80px;
+    padding: 22px 16px;
+    border-radius: 12px;
+  }
+
+  .story:has(+ .mediaBlock),
+  .story:has(+ .flowStage),
+  .story:has(+ .designMedia),
+  .story:has(+ :global(#prototype)) {
+    margin-bottom: 32px;
+  }
+
+  .flowEyebrow {
+    margin-bottom: 22px;
+    text-align: center;
+  }
+
+  .chart { display: none; }
+
+  .mobileFlow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mobileFlow > div:not(.mobileBranches) {
+    width: min(100%, 280px);
+    padding: 15px 16px;
+    border: 1px solid var(--mate-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--mate-ink);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .mobileFlow > i {
+    width: 1px;
+    height: 22px;
+    background: #aaa9a4;
+  }
+
+  .mobileFlow .mobileDecision {
+    width: 190px;
+    margin: 8px 0 20px;
+    border-color: var(--mate-blue);
+    transform: rotate(3deg);
+  }
+
+  .mobileBranches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .mobileBranches > div {
+    padding: 15px 12px;
+    border: 1px solid #c9e5f6;
+    border-radius: 12px;
+    background: var(--mate-blue-soft);
+    color: #135f91;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .mobileBranches span {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--mate-muted);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .mobileBranches .mobileGreen {
+    border-color: #cdebd6;
+    background: var(--mate-green-soft);
+    color: var(--mate-green);
+  }
+
+  .mobileFlow .mobileBlue {
+    border-color: #c9e5f6;
+    background: var(--mate-blue-soft);
+    color: #135f91;
+  }
+
+  .prototypeSection {
+    width: calc(100% - 16px);
+    margin-bottom: 72px;
+  }
+
+  .prototypeHeading {
+    width: calc(100% - 16px);
+    margin-left: 8px;
+  }
+
+  .prototypeSection figure {
+    max-height: none;
+    border-radius: 12px;
+  }
+
+  .prototypeLink { margin-right: 8px; }
+
+  .close { margin: 80px 0 92px; }
+  .close span { font-size: 17px; }
+}
+
+
+/* Interactive prototype embed — bounded browser-chrome frame (from v1). Keeps
+   the live Mate-language app reading as an embedded surface, centered on the
+   full media rail. */
 .prototypeFrame {
   width: 100%;
-  border: 1px solid #e5e3df;
+  border: 1px solid var(--mate-border);
   border-radius: 16px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 16px 44px rgba(25, 25, 24, 0.045);
 }
 .prototypeBar {
   display: flex;
@@ -251,12 +771,13 @@
 }
 .prototypeCaption {
   margin-top: 14px;
-  color: #6f706c;
+  color: var(--mate-muted);
   font-size: 14px;
   letter-spacing: 0.01em;
+  text-align: center;
 }
 .prototypeCaption a {
-  color: #1877b5;
+  color: var(--mate-blue);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
