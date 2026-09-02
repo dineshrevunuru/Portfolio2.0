@@ -35,6 +35,7 @@ function Shot({
   caption,
   flush = false,
   wide = false,
+  priority = false,
 }: {
   src: string;
   width: number;
@@ -43,11 +44,12 @@ function Shot({
   caption?: string;
   flush?: boolean;
   wide?: boolean;
+  priority?: boolean;
 }) {
   return (
-    <figure className={`${styles.shotFigure} ${wide ? "cs-container-wide" : "cs-container"} mt-8`}>
+    <figure className={`${styles.shotFigure} ${wide ? "cs-container-wide mt-8 sm:mt-12" : "cs-container mt-8"}`}>
       <div className={`${styles.shotStage} ${flush ? styles["shotStage--flush"] : ""}`}>
-        <Image src={`${IMG}/${src}`} alt={alt} width={width} height={height} sizes={wide ? "(max-width: 1100px) 100vw, 1100px" : "(max-width: 900px) 100vw, 840px"} />
+        <Image src={`${IMG}/${src}`} alt={alt} width={width} height={height} sizes={wide ? "(max-width: 1100px) 100vw, 1100px" : "(max-width: 900px) 100vw, 840px"} priority={priority} />
       </div>
       {caption && <figcaption className="cs-caption mt-3">{caption}</figcaption>}
     </figure>
@@ -163,18 +165,16 @@ export default function IndeedMatchCheckCaseStudy() {
           </p>
         </section>
 
-        {/* Full-bleed hero: the moment the concept exists for. */}
-        <figure className="w-full mt-8 sm:mt-12">
-          <Image
-            src={`${IMG}/hero-full.png`}
-            alt="Indeed's Edit Job page. The Experience qualification has been raised to 5 years and marked Required. Beneath it, a red callout reads: This requirement contradicts your job description. 41 people already in your Reviewed list answered 2–4 years and will be moved to Rejected. The job description's own sentence is quoted underneath, with the options Make this Preferred instead and Keep as Required."
-            width={2880}
-            height={1560}
-            priority
-            sizes="100vw"
-            style={{ width: "100%", height: "auto", display: "block" }}
-          />
-        </figure>
+        {/* Hero: the moment the concept exists for, on the same grey stage as every
+            other screen so the white page never touches the white app canvas. */}
+        <Shot
+          src="hero-full.png"
+          width={2880}
+          height={1560}
+          alt="Indeed's Edit Job page. The Experience qualification has been raised to 5 years and marked Required. Beneath it, a red callout reads: This requirement contradicts your job description. 41 people already in your Reviewed list answered 2–4 years and will be moved to Rejected. The job description's own sentence is quoted underneath, with the options Make this Preferred instead and Keep as Required."
+          wide
+          priority
+        />
 
         <Section title="The problem">
           <p>
