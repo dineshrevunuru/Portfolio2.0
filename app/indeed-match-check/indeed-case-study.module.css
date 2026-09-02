@@ -1,323 +1,411 @@
-/* Match Check case study — page-local styles only.
-   Everything structural comes from the shared cs-* pattern layer; this file
-   carries the two things that are specific to this case: the flow diagram and
-   the prototype stage. */
+/* Match Check case study.
+   Type scale and spacing model are the Mate case's, measured off its Figma
+   (see mate-case-study.module.css): a GROUP is one heading + its paragraphs,
+   tight inside (h2→p 16px, p→p 20px); every group-to-group jump breathes
+   120px. Body is 24/400 with 0.48px tracking. Only the colour tokens and the
+   prototype-specific stages are this page's own. */
 
-.flowFigure {
+.page {
+  --ink: #191918;
+  --muted: #6f706c;
+  --border: #e8e6e2;
+  --stage: #fbfaf8;
+  --blue: #004fcb;        /* Indeed action blue, from their production tokens */
+  --blue-soft: #ecf2ff;
+  --red-soft: #feeeef;
+  --red-line: #f0c3c5;
+  width: 100%;
+  overflow: clip;
+  background: #fff;
+  color: var(--ink);
+}
+
+.page a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* ── Hero image: full-bleed, square corners, same as Mate ── */
+.heroMedia {
+  width: 100%;
   margin: 0;
 }
-
-/* The diagram scrolls inside its own box rather than shrinking to illegibility
-   on a phone. The prose above it carries the same content in words, so a reader
-   who never scrolls it still gets the argument. */
-.chartViewport {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--color-hairline, #e4e2e0);
-  border-radius: 12px;
-  background: #fff;
-  padding: 24px 20px;
+.heroMedia img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.heroCaption {
+  margin: 12px auto 0;
+  width: min(calc(100% - 40px), 720px);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
 }
 
+/* ── Story column ── */
+.story {
+  width: min(calc(100% - 40px), 720px);
+  margin: 0 auto 120px;
+}
+.story:first-of-type { margin-top: 80px; }
+.section { margin: 0; }
+.section + .section { margin-top: 120px; }
+
+.section h2 {
+  margin: 0 0 16px;
+  color: #202020;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 112.958%;
+}
+.section p {
+  margin: 0;
+  color: #202020;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.48px;
+}
+.section p + p { margin-top: 20px; }
+.section p em { font-style: italic; }
+.section ul {
+  margin: 20px 0 0;
+  padding-left: 28px;
+  list-style: disc;
+}
+.section li {
+  color: #202020;
+  font-size: 24px;
+  line-height: normal;
+  letter-spacing: 0.48px;
+}
+.section li + li { margin-top: 12px; }
+.section ul + p { margin-top: 20px; }
+.section p + .lead { margin-top: 80px; }
+.section .lead {
+  color: #202020;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 0.56px;
+}
+
+/* The two sentences that stop the scroll. Mate's device; the colour is a
+   cloned box-shadow rather than side padding so marked lines keep the text's
+   left edge. */
+.section .statement {
+  margin-bottom: 28px;
+  color: #000;
+  font-size: clamp(30px, 2.4vw, 36px);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.36px;
+}
+.statement mark {
+  padding: 2px 0;
+  background: var(--blue);
+  box-shadow: 8px 0 0 var(--blue), -8px 0 0 var(--blue);
+  color: #fff;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.smallPrint {
+  color: var(--muted) !important;
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0.2px !important;
+}
+.section ul.smallPrintList { padding-left: 22px; }
+.section ul.smallPrintList li {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+}
+.section ul.smallPrintList li + li { margin-top: 8px; }
+
+.section .note {
+  margin: 40px 0 0;
+  padding-left: 18px;
+  border-left: 2px solid #c3d5f7;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.58;
+}
+.note span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* A story that introduces a media block belongs WITH it: 40px, not 120. */
+.story:has(+ .mediaBlock),
+.story:has(+ .flowStage),
+.story:has(+ .designMedia),
+.story:has(+ :global(#prototype)) {
+  margin-bottom: 40px;
+}
+
+/* ── Persona card (Mate's), plus a "sees" chip row ── */
+.mediaBlock {
+  width: min(calc(100% - 40px), 840px);
+  margin: 0 auto 120px;
+}
+.personaCard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--border);
+}
+.personaCard > div {
+  min-height: 198px;
+  padding: 30px 32px;
+  background: var(--stage);
+}
+.cardLabel {
+  margin: 0 0 30px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.personaCard h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+.personaCard h2 + p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sees {
+  margin: 22px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.seesLabel {
+  margin-right: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.chipNo {
+  color: #9a9b96;
+  background: transparent;
+  text-decoration: line-through;
+  text-decoration-color: #c5c4bf;
+}
+
+/* ── Flow diagram on the wide rail ── */
+.flowStage {
+  width: min(calc(100% - 48px), 1464px);
+  margin: 0 auto 120px;
+  padding: 28px 32px 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
+}
+.flowEyebrow {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.chartViewport {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
 .chart {
   display: block;
   width: 100%;
-  min-width: 620px;
+  max-width: 1300px;
   height: auto;
+  margin: 0 auto;
 }
-
-.chartBox {
-  fill: #fff;
-  stroke: #d9d5d0;
-  stroke-width: 1.5;
-}
-.chartBoxMuted { fill: #f7f6f5; stroke: #d9d5d0; stroke-width: 1.5; }
-.chartBoxAlert { fill: #feeeef; stroke: #f0c3c5; stroke-width: 1.5; }
-.chartBoxGood  { fill: #eef4ff; stroke: #c3d5f7; stroke-width: 1.5; }
-
+.chartBox      { fill: #fff;            stroke: #e3e1dd; stroke-width: 1.3; }
+.chartBoxMuted { fill: #f3f2ee;         stroke: #e3e1dd; stroke-width: 1.3; }
+.chartBoxAlert { fill: var(--red-soft); stroke: var(--red-line); stroke-width: 1.3; }
 .chartLabel {
-  font-size: 14px;
+  fill: var(--ink);
+  font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
   font-weight: 600;
-  fill: #2d2d2d;
-}
-.chartSub {
-  font-size: 12.5px;
-  fill: #6b6560;
-}
-.chartConnector {
-  fill: none;
-  stroke: #b8b2ac;
-  stroke-width: 1.5;
-}
-.chartArrow { fill: #b8b2ac; }
-
-.chartGapLabel {
-  font-size: 12.5px;
-  font-weight: 700;
-  fill: #a9252b;
   letter-spacing: 0.01em;
 }
-
-/* Prototype stage — the one place Indeed's design language appears, and it is
-   deliberately inside a frame that is obviously not this site. */
-.protoStage {
-  border: 1px solid var(--color-hairline, #e4e2e0);
-  border-radius: 14px;
-  overflow: hidden;
-  background: #f3f2f1;
+.chartSub {
+  fill: var(--muted);
+  font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13.5px;
 }
-
-.protoFrame {
-  display: block;
-  width: 100%;
-  height: 760px;
-  border: 0;
-  background: #fff;
-}
-
-.protoPoster {
-  display: block;
-  width: 100%;
-  border: 0;
-  padding: 56px 32px;
-  background: #f3f2f1;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-}
-.protoPoster:hover { background: #eceae8; }
-
-.posterEyebrow {
-  display: block;
+.chartConnector { fill: none; stroke: #b9bab5; stroke-width: 1.5; }
+.chartArrow { fill: #b9bab5; }
+.chartGapLabel {
+  fill: #a9252b;
+  font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #004fcb;
 }
-.posterTitle {
-  display: block;
-  margin-top: 10px;
-  font-size: 26px;
-  line-height: 1.2;
-  font-weight: 700;
-  color: #2d2d2d;
-}
-.posterBody {
-  display: block;
-  margin-top: 12px;
-  max-width: 46ch;
-  font-size: 16px;
-  line-height: 1.55;
-  color: #595959;
-}
-.posterCta {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 11px 18px;
-  border-radius: 12px;
-  background: #004fcb;
-  color: #fff;
-  font-weight: 700;
-  font-size: 15px;
+.mediaCaption {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
 }
 
-.protoBar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  align-items: baseline;
-  padding: 12px 16px;
-  border-top: 1px solid #e4e2e0;
-  background: #fff;
-  font-size: 13px;
-  color: #595959;
+/* ── Screens from the prototype ── */
+.designMedia {
+  width: min(calc(100% - 40px), 840px);
+  margin: 0 auto 120px;
 }
-.protoBar a { color: #004fcb; font-weight: 600; }
-
-@media (max-width: 640px) {
-  .protoFrame { height: 620px; }
-  .protoPoster { padding: 36px 20px; }
-  .posterTitle { font-size: 22px; }
-}
-
-/* Screens from the prototype. Every crop sits on the same soft grey stage the
-   prototype poster uses, so a white callout card never floats on white. */
+/* A run of screens reads as one group: 40px between, 120 after the last. */
+.designMedia:has(+ .designMedia) { margin-bottom: 40px; }
 .shotStage {
-  background: #f3f2f1;
-  border: 1px solid var(--color-hairline, #e4e2e0);
-  border-radius: 14px;
   padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
 }
 .shotStage img {
   display: block;
   width: 100%;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(45, 45, 45, 0.08), 0 0 0 1px rgba(45, 45, 45, 0.06);
+  box-shadow: 0 1px 2px rgba(25, 25, 24, 0.08), 0 0 0 1px rgba(25, 25, 24, 0.06);
 }
-.shotStage--flush {
-  padding: 0;
-  overflow: hidden;
-}
-.shotStage--flush img {
-  border-radius: 0;
-  box-shadow: none;
-}
-@media (max-width: 640px) {
-  .shotStage { padding: 16px; border-radius: 10px; }
-}
-
-/* Hero: full width like the Mate case, but the image carries its own corner
-   radius, so the figure is inset just enough for the corners to read. */
-.heroFigure {
-  width: min(100% - 32px, 1600px);
-  margin: 0 auto;
-}
-.heroFigure img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 16px;
-  border: 1px solid var(--color-hairline, #e4e2e0);
-}
-.heroFigure figcaption {
-  margin-top: 14px;
+.shotFlush { padding: 0; overflow: hidden; }
+.shotFlush img { border-radius: 0; box-shadow: none; }
+.designMedia figcaption {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
   text-align: center;
 }
-@media (max-width: 640px) {
-  .heroFigure { width: min(100% - 16px, 1600px); }
-  .heroFigure img { border-radius: 10px; }
-}
 
-/* The two sentences that have to stop the scroll: the problem and the
-   hypothesis. Same device as the Mate case — large, plain, one clause marked. */
-.statement {
-  margin: 20px 0 10px;
-  max-width: 100%;
-  color: #111;
-  font-size: clamp(28px, 2.6vw, 38px);
-  font-weight: 400;
-  line-height: 1.4;
-  letter-spacing: -0.005em;
-}
-/* The colour is a box-shadow, not padding, so the marked text stays on the
-   same left edge as the lines above it. Cloned per line fragment. */
-.statement mark {
-  padding: 3px 0;
-  background: var(--cs-accent-ink, #004fcb);
-  box-shadow: 8px 0 0 var(--cs-accent-ink, #004fcb), -8px 0 0 var(--cs-accent-ink, #004fcb);
-  color: #fff;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-.statementLabel {
-  display: block;
-  margin-top: 28px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--cs-accent-ink, #004fcb);
-}
-
-/* Personas. Two cards, no names, no faces: the rule in the problem doc is
-   "personas only where evidence supports them, no invented demographics". */
-.personaGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  margin-top: 28px;
-}
-@media (min-width: 760px) {
-  .personaGrid { grid-template-columns: 1fr 1fr; }
-}
-.persona {
-  border: 1px solid var(--color-hairline, #e4e2e0);
-  border-radius: 14px;
-  padding: 28px;
+/* ── Prototype on the wide rail, in a browser-chrome frame (Mate's) ── */
+.prototypeFrame {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
   background: #fff;
+  box-shadow: 0 16px 44px rgba(25, 25, 24, 0.045);
 }
-.persona--primary {
-  background: var(--cs-accent-bg, #ecf2ff);
-  border-color: transparent;
-}
-.personaIcon {
-  display: block;
-  width: 40px;
-  height: 40px;
-  color: var(--cs-accent-ink, #004fcb);
-}
-.personaKicker {
-  display: block;
-  margin-top: 18px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--cs-accent-ink, #004fcb);
-}
-.personaTitle {
-  margin: 8px 0 0;
-  font-size: 22px;
-  line-height: 1.3;
-  font-weight: 600;
-  color: #111;
-}
-.personaLine {
-  margin: 14px 0 0;
-  font-size: 15.5px;
-  line-height: 1.5;
-  color: #2d2d2d;
-}
-.personaSees {
-  margin: 20px 0 0;
+.prototypeBar {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid #eceae6;
+  background: #faf9f7;
 }
-.personaSeesLabel {
+.prototypeBar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d8d6d1;
+}
+.prototypeBar p {
+  margin: 0 0 0 12px;
+  color: #9a9b96;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #6b6560;
-  margin-right: 4px;
+  letter-spacing: 0.02em;
 }
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 13.5px;
-  font-weight: 600;
+.prototypeIframe {
+  display: block;
+  width: 100%;
+  height: min(85vh, 900px);
+  border: 0;
   background: #fff;
-  border: 1px solid var(--color-hairline, #e4e2e0);
-  color: #2d2d2d;
 }
-.chip--no {
-  color: #8a8480;
-  text-decoration: line-through;
-  text-decoration-color: #b8b2ac;
-  background: #f7f6f5;
+.prototypeCaption {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-align: center;
 }
-.personaNote {
-  margin: 20px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #6b6560;
+.prototypeCaption a {
+  color: var(--blue);
+  font-weight: 600;
+}
+:global(#prototype) + .story { margin-top: 80px; }
+
+@media (max-width: 900px) {
+  .chart { min-width: 900px; }
 }
 
-/* Live prototype breaks out of the reading column to the wide rail. */
-.protoLive {
-  position: relative;
-  left: 50%;
-  width: min(100vw - 48px, 1600px);
-  transform: translateX(-50%);
-}
-.protoLive .protoFrame {
-  height: min(88vh, 1000px);
+@media (max-width: 640px) {
+  .story {
+    width: calc(100% - 32px);
+    margin-bottom: 80px;
+  }
+  .section + .section { margin-top: 80px; }
+  .section h2 { font-size: 24px; }
+  .section p, .section li { font-size: 20px; letter-spacing: 0.4px; }
+  .section p + .lead { margin-top: 56px; }
+  .section .statement { font-size: 30px; }
+  .section .lead { font-size: 24px; letter-spacing: 0.48px; }
+  .mediaBlock,
+  .designMedia {
+    width: calc(100% - 32px);
+    margin-bottom: 80px;
+  }
+  .designMedia:has(+ .designMedia) { margin-bottom: 32px; }
+  .shotStage { padding: 16px; border-radius: 12px; }
+  .personaCard { grid-template-columns: 1fr; }
+  .personaCard > div { min-height: auto; padding: 26px; }
+  .cardLabel { margin-bottom: 20px; }
+  .flowStage {
+    width: calc(100% - 16px);
+    margin-bottom: 80px;
+    padding: 22px 16px;
+    border-radius: 12px;
+  }
+  .story:has(+ .mediaBlock),
+  .story:has(+ .flowStage),
+  .story:has(+ .designMedia),
+  .story:has(+ :global(#prototype)) {
+    margin-bottom: 32px;
+  }
+  .prototypeIframe { height: 620px; }
 }
