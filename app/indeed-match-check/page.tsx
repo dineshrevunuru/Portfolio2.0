@@ -238,34 +238,53 @@ export default function IndeedMatchCheckCaseStudy() {
       </article>
 
       <section className={styles.mediaBlock} aria-label="Primary and secondary persona">
-        <div className={styles.personaCard}>
-          <div>
-            <p className={styles.cardLabel}>Primary</p>
+        <div className={styles.personaGrid}>
+          <article className={`${styles.persona} ${styles.personaPrimary}`}>
+            <svg className={styles.personaIcon} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <rect x="6" y="11" width="28" height="20" rx="3" stroke="currentColor" strokeWidth="2" />
+              <path d="M14 11V8.5A2.5 2.5 0 0 1 16.5 6h7A2.5 2.5 0 0 1 26 8.5V11" stroke="currentColor" strokeWidth="2" />
+              <path d="M6 19h28" stroke="currentColor" strokeWidth="2" />
+              <path d="M17 19v4h6v-4" stroke="currentColor" strokeWidth="2" />
+            </svg>
+            <span className={styles.personaKicker}>Primary</span>
             <h2>In-house recruiter, 50-to-500-person company</h2>
-            <p>Hiring one specialised role, with more applicants than screening time.</p>
+            <p className={styles.personaLine}>
+              Hiring one specialised role, with more applicants than screening time.
+            </p>
             <div className={styles.sees}>
               <span className={styles.seesLabel}>Sees</span>
               <span className={styles.chip}>Job post</span>
               <span className={styles.chip}>Qualifications</span>
               <span className={`${styles.chip} ${styles.chipNo}`}>Who a rule removes</span>
             </div>
-          </div>
-          <div>
-            <p className={styles.cardLabel}>Secondary</p>
+            <p className={styles.personaNote}>
+              Approved working persona, not interviewed. Volume evidence is from 500+-employee
+              firms, a different segment.
+            </p>
+          </article>
+          <article className={styles.persona}>
+            <svg className={styles.personaIcon} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <path d="M10 6h14l7 7v21H10z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              <path d="M24 6v7h7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              <path d="M15 20h11M15 25h11M15 30h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span className={styles.personaKicker}>Secondary</span>
             <h2>The job seeker reading that post</h2>
-            <p>Deciding whether to apply on a promise they expect to be honoured.</p>
+            <p className={styles.personaLine}>
+              Deciding whether to apply on a promise they expect to be honoured.
+            </p>
             <div className={styles.sees}>
               <span className={styles.seesLabel}>Sees</span>
               <span className={styles.chip}>Job post</span>
               <span className={`${styles.chip} ${styles.chipNo}`}>Qualifications</span>
               <span className={`${styles.chip} ${styles.chipNo}`}>Who a rule removes</span>
             </div>
-          </div>
+            <p className={styles.personaNote}>
+              Grounded in dated 2026 reports of mismatched filtering and Indeed&rsquo;s own
+              Required-answer guidance.
+            </p>
+          </article>
         </div>
-        <p className={styles.mediaCaption}>
-          Working personas, not interviewed. The volume evidence behind the recruiter comes from
-          500+-employee firms, a different segment.
-        </p>
       </section>
 
       <article className={styles.story}>
