@@ -951,6 +951,13 @@ body {
     --cs-accent-bg: var(--color-card-adani-bg);
     --cs-accent-ink: var(--color-card-adani-ink);
   }
+  .cs-theme-indeed {
+    /* Indeed's action blue, verified from their production token payload
+       (--ifl-colors-background-action-primary). Carries white at 8.6:1. */
+    --cs-accent-bg: #ecf2ff;
+    --cs-accent-ink: #004fcb;
+    --cs-brand-dark: #003a9b;
+  }
   .cs-theme-microsoft {
     --cs-accent-bg: var(--color-card-microsoft-bg);
     --cs-accent-ink: var(--color-card-microsoft-ink);
