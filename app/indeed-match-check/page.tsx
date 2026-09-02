@@ -189,7 +189,8 @@ export default function IndeedMatchCheckCaseStudy() {
           lede={
             <p className={styles.statement}>
               When a recruiter tightens a Required qualification on a live job, they can&rsquo;t
-              see who it removes &mdash;{" "}
+              see who it removes &mdash;
+              <br />
               <mark>or that their own job post still promises the opposite.</mark>
             </p>
           }
@@ -205,66 +206,52 @@ export default function IndeedMatchCheckCaseStudy() {
         </Section>
 
         <Section title="Who this is for">
-          <p>
-            Two people on opposite sides of the same sentence. Neither has been interviewed for
-            this; both are grounded in a documented mechanism rather than invented detail.
-          </p>
+          <p>Two people on opposite sides of the same sentence, and only one can see the rule.</p>
           <div className={styles.personaGrid}>
             <article className={`${styles.persona} ${styles["persona--primary"]}`}>
+              <svg className={styles.personaIcon} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <rect x="6" y="11" width="28" height="20" rx="3" stroke="currentColor" strokeWidth="2" />
+                <path d="M14 11V8.5A2.5 2.5 0 0 1 16.5 6h7A2.5 2.5 0 0 1 26 8.5V11" stroke="currentColor" strokeWidth="2" />
+                <path d="M6 19h28" stroke="currentColor" strokeWidth="2" />
+                <path d="M17 19v4h6v-4" stroke="currentColor" strokeWidth="2" />
+              </svg>
               <span className={styles.personaKicker}>Primary</span>
-              <h3 className={styles.personaTitle}>
-                In-house recruiter at a 50-to-500-person company, hiring one specialised role
-              </h3>
-              <dl className={styles.personaRows}>
-                <div>
-                  <dt>Needs</dt>
-                  <dd>
-                    Publish the role once, correctly, and trust that the people it attracts are
-                    the people their own rules will admit.
-                  </dd>
-                </div>
-                <div>
-                  <dt>Friction today</dt>
-                  <dd>
-                    Writes the post, then separately sets qualifications and screener questions.
-                    Nothing shows how they interact until applicants &mdash; or their absence
-                    &mdash; arrive. More applicants than screening time.
-                  </dd>
-                </div>
-                <div>
-                  <dt>Grounded in</dt>
-                  <dd>
-                    An approved working persona. Adjacent evidence only: in an Indeed/Harris Poll
-                    of 500+-employee firms, 71% of hiring managers said higher volume makes
-                    finding qualified people harder &mdash; a different segment from this one.
-                  </dd>
-                </div>
-              </dl>
+              <h3 className={styles.personaTitle}>In-house recruiter, 50-to-500-person company</h3>
+              <p className={styles.personaLine}>
+                Hiring one specialised role, with more applicants than screening time.
+              </p>
+              <div className={styles.personaSees}>
+                <span className={styles.personaSeesLabel}>Sees</span>
+                <span className={styles.chip}>Job post</span>
+                <span className={styles.chip}>Qualifications</span>
+                <span className={`${styles.chip} ${styles["chip--no"]}`}>Who a rule removes</span>
+              </div>
+              <p className={styles.personaNote}>
+                Approved working persona, not interviewed. Volume evidence is from 500+-employee
+                firms, a different segment.
+              </p>
             </article>
             <article className={styles.persona}>
+              <svg className={styles.personaIcon} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <path d="M10 6h14l7 7v21H10z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M24 6v7h7" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M15 20h11M15 25h11M15 30h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
               <span className={styles.personaKicker}>Secondary</span>
               <h3 className={styles.personaTitle}>The job seeker reading that post</h3>
-              <dl className={styles.personaRows}>
-                <div>
-                  <dt>Needs</dt>
-                  <dd>To decide whether to apply based on a promise that will be honoured.</dd>
-                </div>
-                <div>
-                  <dt>Friction today</dt>
-                  <dd>
-                    Self-assesses against the public post while being filtered by rules they
-                    never see.
-                  </dd>
-                </div>
-                <div>
-                  <dt>Grounded in</dt>
-                  <dd>
-                    Recurring 2026 reports of applying to roles whose stated requirements
-                    don&rsquo;t match how they are filtered, and Indeed&rsquo;s own guidance that
-                    a missed Required answer moves an applicant to Rejected.
-                  </dd>
-                </div>
-              </dl>
+              <p className={styles.personaLine}>
+                Deciding whether to apply on a promise they expect to be honoured.
+              </p>
+              <div className={styles.personaSees}>
+                <span className={styles.personaSeesLabel}>Sees</span>
+                <span className={styles.chip}>Job post</span>
+                <span className={`${styles.chip} ${styles["chip--no"]}`}>Qualifications</span>
+                <span className={`${styles.chip} ${styles["chip--no"]}`}>Who a rule removes</span>
+              </div>
+              <p className={styles.personaNote}>
+                Grounded in dated 2026 reports of mismatched filtering and Indeed&rsquo;s own
+                Required-answer guidance.
+              </p>
             </article>
           </div>
         </Section>
@@ -275,7 +262,8 @@ export default function IndeedMatchCheckCaseStudy() {
             <p className={styles.statement}>
               If Indeed checks Required qualifications against the live post while a recruiter
               edits them, more harmful mismatches get resolved before applicants are affected
-              &mdash;{" "}
+              &mdash;
+              <br />
               <mark>without relaxing legitimate must-haves just to clear a warning.</mark>
             </p>
           }
