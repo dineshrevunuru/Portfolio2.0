@@ -176,7 +176,7 @@ export default function IndeedMatchCheckCaseStudy() {
           src={`${IMG}/hero-full.png`}
           alt="Indeed's Edit Job page. The Experience qualification has been raised to 5 years and marked Required. Beneath it, a red callout reads: This requirement contradicts your job description. 41 people already in your Reviewed list answered 2–4 years and will be moved to Rejected. The job description's own sentence is quoted underneath, with the options Make this Preferred instead and Keep as Required."
           width={2880}
-          height={1560}
+          height={1334}
           priority
           sizes="100vw"
           style={{ width: "100%", height: "auto", display: "block" }}
