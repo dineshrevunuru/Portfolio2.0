@@ -155,16 +155,11 @@ export default function IndeedMatchCheckCaseStudy() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-16 lg:gap-24">
           <div>
             <h3 className="cs-overview-head">What I did</h3>
-            <p className="mt-4 cs-overview-body">
-              Product direction, interaction design, and the working build
-            </p>
+            <p className="mt-4 cs-overview-body">Product design + front-end build</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">How it was made</h3>
-            <p className="mt-4 cs-overview-body">
-              Four-hour build in Indeed&rsquo;s employer design language, directing AI agents for
-              research, implementation and adversarial review. The decisions are mine.
-            </p>
+            <h3 className="cs-overview-head">Built with</h3>
+            <p className="mt-4 cs-overview-body">React, Next.js, TypeScript</p>
           </div>
           <div>
             <h3 className="cs-overview-head">Quick link</h3>
@@ -187,8 +182,10 @@ export default function IndeedMatchCheckCaseStudy() {
           style={{ width: "100%", height: "auto", display: "block" }}
         />
         <figcaption className={styles.heroCaption}>
-          Independent concept. Not affiliated with Indeed; based on public product references. The
-          employer, applicants and every number shown are fictional.
+          Independent concept, built in four hours in Indeed&rsquo;s employer design language,
+          directing AI agents for research, implementation and adversarial review; the decisions
+          are mine. Not affiliated with Indeed. The employer, applicants and every number shown are
+          fictional.
         </figcaption>
       </figure>
 

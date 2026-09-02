@@ -173,9 +173,9 @@
   border-radius: 18px;
   background: #fff;
 }
-.personaPrimary {
-  background: var(--blue-soft);
-  border-color: transparent;
+.persona.personaPrimary {
+  background: #ecf2ff;
+  border-color: #ecf2ff;
 }
 .personaIcon {
   display: block;
