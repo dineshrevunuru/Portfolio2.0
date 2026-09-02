@@ -20,7 +20,14 @@
   color: var(--ink);
 }
 
-.page a {
+/* Underline only body-copy links. The site nav and footer keep the portfolio's
+   own header styling (no underline) — a blanket .page a rule was underlining
+   Rd. / Work / Resume, which the original header never does. */
+.story a,
+.section a,
+.heroCaption a,
+.mediaCaption a,
+:global(.cs-overview-body) a {
   color: inherit;
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
@@ -30,7 +37,7 @@
 /* ── Hero image: full-bleed, square corners, same as Mate ── */
 .heroMedia {
   width: 100%;
-  margin: 0;
+  margin: 40px 0 0;
 }
 .heroMedia img {
   display: block;

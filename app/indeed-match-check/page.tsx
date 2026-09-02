@@ -171,7 +171,7 @@ export default function IndeedMatchCheckCaseStudy() {
       </section>
 
       {/* Full-bleed hero: edge to edge, square corners, same as the Mate case. */}
-      <figure className={`${styles.heroMedia} mt-8 sm:mt-12`}>
+      <figure className={styles.heroMedia}>
         <Image
           src={`${IMG}/hero-full.png`}
           alt="Indeed's Edit Job page. The Experience qualification has been raised to 5 years and marked Required. Beneath it, a red callout reads: This requirement contradicts your job description. 41 people already in your Reviewed list answered 2–4 years and will be moved to Rejected. The job description's own sentence is quoted underneath, with the options Make this Preferred instead and Keep as Required."
