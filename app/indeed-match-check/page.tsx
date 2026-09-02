@@ -15,11 +15,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  lede,
+  children,
+}: {
+  title: string;
+  lede?: ReactNode;
+  children?: ReactNode;
+}) {
   return (
     <section className="cs-container mt-16 sm:mt-24">
       <h2 className="cs-section-head">{title}</h2>
-      <div className="cs-prose mt-5">{children}</div>
+      {lede}
+      {children && <div className="cs-prose mt-5">{children}</div>}
     </section>
   );
 }
@@ -126,7 +135,6 @@ export default function IndeedMatchCheckCaseStudy() {
       <SiteNav />
       <main className="cs-theme-indeed">
         <CaseStudyHero
-          eyebrow="Independent concept · Indeed"
           title={
             <>
               Before a hiring rule removes someone,{" "}
@@ -134,7 +142,6 @@ export default function IndeedMatchCheckCaseStudy() {
               show who it removes.
             </>
           }
-          subtitle="A recruiter tightens one Required qualification on a live job. Match Check shows them who that removes, and what their own job post still promises."
         />
 
         <section className="cs-container-wide">
@@ -159,24 +166,34 @@ export default function IndeedMatchCheckCaseStudy() {
               </p>
             </div>
           </div>
-          <p className="cs-caption mt-10">
-            Not affiliated with Indeed. Based on public product references. The employer,
-            applicants and every number shown are fictional.
-          </p>
         </section>
 
-        {/* Hero: the moment the concept exists for, on the same grey stage as every
-            other screen so the white page never touches the white app canvas. */}
-        <Shot
-          src="hero-full.png"
-          width={2880}
-          height={1560}
-          alt="Indeed's Edit Job page. The Experience qualification has been raised to 5 years and marked Required. Beneath it, a red callout reads: This requirement contradicts your job description. 41 people already in your Reviewed list answered 2–4 years and will be moved to Rejected. The job description's own sentence is quoted underneath, with the options Make this Preferred instead and Keep as Required."
-          wide
-          priority
-        />
+        {/* Full-width hero, same placement as the Mate case; the image carries the radius. */}
+        <figure className={`${styles.heroFigure} mt-8 sm:mt-12`}>
+          <Image
+            src={`${IMG}/hero-full.png`}
+            alt="Indeed's Edit Job page. The Experience qualification has been raised to 5 years and marked Required. Beneath it, a red callout reads: This requirement contradicts your job description. 41 people already in your Reviewed list answered 2–4 years and will be moved to Rejected. The job description's own sentence is quoted underneath, with the options Make this Preferred instead and Keep as Required."
+            width={2880}
+            height={1560}
+            priority
+            sizes="100vw"
+          />
+          <figcaption className="cs-caption">
+            Independent concept. Not affiliated with Indeed; based on public product references.
+            The employer, applicants and every number shown are fictional.
+          </figcaption>
+        </figure>
 
-        <Section title="The problem">
+        <Section
+          title="The problem"
+          lede={
+            <p className={styles.statement}>
+              When a recruiter tightens a Required qualification on a live job, they can&rsquo;t
+              see who it removes &mdash;{" "}
+              <mark>or that their own job post still promises the opposite.</mark>
+            </p>
+          }
+        >
           <p>
             The job description candidates read and the qualifications that filter them are
             separate fields in the same Edit Job form. Editing one does nothing to the other, and
@@ -184,20 +201,85 @@ export default function IndeedMatchCheckCaseStudy() {
             don&rsquo;t meet a required screener question are automatically moved to your
             Rejected list.&rdquo;</em>
           </p>
-          <blockquote className="cs-insight-quote">
-            How might Indeed show a recruiter who a Required qualification removes, and whether
-            it still matches the job description, before they save it?
-          </blockquote>
           <DriftDiagram />
         </Section>
 
-        <Section title="The hypothesis">
-          <blockquote className="cs-insight-quote">
-            If Indeed compares Required qualifications against the live job description while a
-            recruiter edits them, more harmful mismatches get resolved before applicants are
-            affected &mdash; without recruiters relaxing legitimate must-haves just to clear a
-            warning.
-          </blockquote>
+        <Section title="Who this is for">
+          <p>
+            Two people on opposite sides of the same sentence. Neither has been interviewed for
+            this; both are grounded in a documented mechanism rather than invented detail.
+          </p>
+          <div className={styles.personaGrid}>
+            <article className={`${styles.persona} ${styles["persona--primary"]}`}>
+              <span className={styles.personaKicker}>Primary</span>
+              <h3 className={styles.personaTitle}>
+                In-house recruiter at a 50-to-500-person company, hiring one specialised role
+              </h3>
+              <dl className={styles.personaRows}>
+                <div>
+                  <dt>Needs</dt>
+                  <dd>
+                    Publish the role once, correctly, and trust that the people it attracts are
+                    the people their own rules will admit.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Friction today</dt>
+                  <dd>
+                    Writes the post, then separately sets qualifications and screener questions.
+                    Nothing shows how they interact until applicants &mdash; or their absence
+                    &mdash; arrive. More applicants than screening time.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Grounded in</dt>
+                  <dd>
+                    An approved working persona. Adjacent evidence only: in an Indeed/Harris Poll
+                    of 500+-employee firms, 71% of hiring managers said higher volume makes
+                    finding qualified people harder &mdash; a different segment from this one.
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <article className={styles.persona}>
+              <span className={styles.personaKicker}>Secondary</span>
+              <h3 className={styles.personaTitle}>The job seeker reading that post</h3>
+              <dl className={styles.personaRows}>
+                <div>
+                  <dt>Needs</dt>
+                  <dd>To decide whether to apply based on a promise that will be honoured.</dd>
+                </div>
+                <div>
+                  <dt>Friction today</dt>
+                  <dd>
+                    Self-assesses against the public post while being filtered by rules they
+                    never see.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Grounded in</dt>
+                  <dd>
+                    Recurring 2026 reports of applying to roles whose stated requirements
+                    don&rsquo;t match how they are filtered, and Indeed&rsquo;s own guidance that
+                    a missed Required answer moves an applicant to Rejected.
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          </div>
+        </Section>
+
+        <Section
+          title="The hypothesis"
+          lede={
+            <p className={styles.statement}>
+              If Indeed checks Required qualifications against the live post while a recruiter
+              edits them, more harmful mismatches get resolved before applicants are affected
+              &mdash;{" "}
+              <mark>without relaxing legitimate must-haves just to clear a warning.</mark>
+            </p>
+          }
+        >
           <p>
             The second half is the guardrail: a screen that goes green because every Required
             became Preferred has made screening worse. And the edit moment, because a review

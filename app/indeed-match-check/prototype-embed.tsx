@@ -11,6 +11,10 @@ const PROTOTYPE_URL = "/indeed-match-check-prototype/index.html";
  * Click-to-load rather than auto-load: the frame is a whole second Next app,
  * and a visitor who is here for the writing should not pay for it on scroll.
  *
+ * Once live it breaks out of the reading column to the wide rail: the
+ * employer product is a 1440-wide layout and a 840px frame crops its own
+ * section navigation.
+ *
  * An iframe on purpose. The prototype speaks Indeed's design language, and this
  * page speaks mine — the frame is the boundary that keeps those two from
  * blurring into each other.
@@ -19,7 +23,7 @@ export function PrototypeEmbed() {
   const [live, setLive] = useState(false);
 
   return (
-    <div className={styles.protoStage}>
+    <div className={`${styles.protoStage} ${live ? styles.protoLive : ""}`}>
       {live ? (
         <iframe
           src={PROTOTYPE_URL}
