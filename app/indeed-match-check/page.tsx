@@ -4,7 +4,6 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
-import CaseStudyHero from "../components/case-study/CaseStudyHero";
 import styles from "./indeed-case-study.module.css";
 
 export const metadata: Metadata = {
@@ -140,15 +139,17 @@ export default function IndeedMatchCheckCaseStudy() {
     <main className={`${styles.page} cs-theme-indeed ${openSans.variable}`}>
       <SiteNav />
 
-      <CaseStudyHero
-        title={
-          <>
-            Before a hiring rule removes someone,{" "}
-            <br />
-            show who it removes.
-          </>
-        }
-      />
+      <section className="cs-container-wide pt-12 sm:pt-20 pb-8 sm:pb-12">
+        {/* Indeed's official wordmark as an editorial reference mark. The page
+            declares itself an independent concept; this is not affiliation. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`${IMG}/indeed-logo.svg`} alt="Indeed" className={styles.heroLogo} />
+        <h1 className="mt-6 cs-hero-title text-[color:var(--color-ink)]">
+          Before a hiring rule removes someone,{" "}
+          <br />
+          show who it removes.
+        </h1>
+      </section>
 
       {/* Overview — the house pattern: three fields on the wide rail. */}
       <section className="cs-container-wide">
@@ -445,8 +446,9 @@ export default function IndeedMatchCheckCaseStudy() {
             element by element against live computed styles.
           </p>
           <p className={styles.smallPrint}>
-            Indeed Sans and the logo are not licensed, so it ships Noto Sans and a typeset wordmark:
-            token-matched, not pixel-identical.
+            Inside the prototype, Indeed Sans and the product wordmark aren&rsquo;t licensed to
+            reproduce, so it ships Noto Sans and a typeset wordmark: token-matched, not
+            pixel-identical.
           </p>
         </StorySection>
 

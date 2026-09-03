@@ -34,6 +34,16 @@
   text-underline-offset: 4px;
 }
 
+/* Indeed wordmark in the hero eyebrow slot — editorial reference mark. */
+.heroLogo {
+  display: block;
+  height: 34px;
+  width: auto;
+}
+@media (max-width: 640px) {
+  .heroLogo { height: 28px; }
+}
+
 /* ── Hero image: full-bleed, square corners, same as Mate ── */
 .heroMedia {
   width: 100%;
