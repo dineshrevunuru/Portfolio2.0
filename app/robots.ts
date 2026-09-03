@@ -39,7 +39,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/hss-demo", "/hss-band-lab"],
+        disallow: ["/api/", "/hss-demo", "/hss-band-lab", "/mate-prototype", "/indeed-match-check-prototype"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
