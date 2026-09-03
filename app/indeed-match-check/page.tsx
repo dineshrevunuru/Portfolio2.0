@@ -136,7 +136,7 @@ function DriftDiagram() {
 
 export default function IndeedMatchCheckCaseStudy() {
   return (
-    <main className={`${styles.page} cs-theme-indeed ${openSans.variable}`}>
+    <main className={`${styles.page} cs-theme-indeed ${openSans.variable}`} data-seq-group>
       <SiteNav />
 
       <section className="cs-container-wide pt-12 sm:pt-20 pb-8 sm:pb-12">
