@@ -1019,6 +1019,28 @@ body {
   .cs-theme-mate [class*="mate-case-study"] {
     font-family: var(--font-opensans), "Open Sans", system-ui, sans-serif;
   }
+  .cs-theme-publix {
+    /* Publix's signature is its brand green #004C2A (white sits on it at
+       ~11:1) with the product's action green #2D810E as the accent. The tint
+       is the app's own --tint-1, sampled from its shopping-list surfaces;
+       #1f6a08 is that action green darkened enough to clear AA on both the
+       tint and white, which is what the eyebrow and links use. */
+    --cs-accent-bg: #EAF3E7;
+    --cs-accent-ink: #1f6a08;
+    --cs-brand-dark: #004C2A;
+  }
+  /* Same Open Sans scoping as the Mate case, and for the same reason: body
+     content only, so nav.top and footer.site stay on the portfolio's Poppins
+     and the site chrome is byte-identical on every page. */
+  .cs-theme-publix .cs-section-head,
+  .cs-theme-publix .cs-overview-head,
+  .cs-theme-publix .cs-overview-body,
+  .cs-theme-publix .cs-meta-label,
+  .cs-theme-publix .cs-prose,
+  .cs-theme-publix .cs-prose *,
+  .cs-theme-publix [class*="publix-case-study"] {
+    font-family: var(--font-opensans), "Open Sans", system-ui, sans-serif;
+  }
   .cs-theme-hss {
     --cs-accent-bg: var(--color-card-hss-bg);
     --cs-accent-ink: var(--color-card-hss-ink);

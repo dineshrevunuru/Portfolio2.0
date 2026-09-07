@@ -1,0 +1,1253 @@
+.page {
+  font-family: var(--font-opensans), "Open Sans", sans-serif;
+  /* Cloned from mate-case-study.module.css (the v3 skeleton). Only the
+     accent differs, and it is read from the cs-theme-publix tokens in
+     globals.css so the page has one colour system, not two. */
+  --ink: #191918;
+  --muted: #6f706c;
+  --border: #e8e6e2;
+  --stage: #fbfaf8;
+  --accent: var(--cs-accent-ink, #1f6a08);
+  --accent-soft: var(--cs-accent-bg, #eaf3e7);
+  --accent-line: #cfe3c6;
+  width: 100%;
+  overflow: clip;
+  background: #fff;
+  color: var(--ink);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(calc(100% - 48px), 1292px);
+  height: 84px;
+  margin: 0 auto;
+}
+
+.brand {
+  color: var(--ink);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.brand span { color: #f08aa5; }
+
+.nav > div {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+}
+
+.nav > div a {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hero {
+  width: min(calc(100% - 48px), 1168px);
+  margin: 0 auto;
+  padding: 92px 0 62px;
+}
+
+.hero h1 {
+  max-width: 650px;
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(48px, 3.65vw, 54px);
+  font-weight: 600;
+  line-height: 0.99;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 72px;
+  max-width: 900px;
+  margin: 52px 0 0;
+}
+
+.meta div { min-width: 0; }
+
+.meta dt {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.meta dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.meta a,
+.story a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.heroMedia {
+  width: min(calc(100% - 48px), 1464px);
+  max-height: 690px;
+  margin: 0 auto 84px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
+  box-shadow: 0 16px 44px rgba(25, 25, 24, 0.045);
+}
+
+.heroMedia img,
+.prototypeSection img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.story {
+  width: min(calc(100% - 40px), 720px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Spacing model, measured off the Figma (node 8115-6849): a GROUP is one
+   heading + its paragraphs, tight inside (h2→p 16px, p→p 20px). Every
+   group-to-group jump breathes 120px — between sections, and from the last
+   section of a story to the next block. Bigger type needs this air; the old
+   24px rhythm read as one clump. */
+.section { margin: 0; }
+.section + .section { margin-top: 120px; }
+.story { margin: 0 auto 120px; }
+
+/* A lead graf after body copy is its own moment (Figma: ~120px below the
+   body, 60px between consecutive leads, footnotes hug their lead). */
+.section p + .lead { margin-top: 80px; }
+.section .lead + .lead { margin-top: 60px; }
+.section .lead + .smallPrint { margin-top: 16px; }
+
+/* First group of the page needs its own breathing room below the hero image. */
+.story:first-of-type { margin-top: 80px; }
+
+/* "What I would test first" starts the group right after the prototype
+   embed, which carries no bottom margin of its own. */
+:global(#prototype) + .story { margin-top: 80px; }
+
+/* Type scale from the Figma (node 8115-6849):
+   headings   Open Sans 28/600, lh 112.958%, #202020
+   body       Open Sans 24/400, lh normal, tracking 0.48px, #202020
+   lead       Open Sans 28/600, lh normal, tracking 0.56px (the emphasis grafs)
+   statement  Open Sans 36/400, lh 1.5, tracking 0.36px + solid #1977b5 bars */
+.section h2,
+.prototypeHeading h2 {
+  margin: 0 0 16px;
+  color: #202020;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 112.958%;
+}
+
+.section p {
+  margin: 0;
+  color: #202020;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.48px;
+}
+
+.section p + p { margin-top: 20px; }
+
+.section .statement {
+  margin-bottom: 28px;
+  color: #000;
+  font-size: clamp(30px, 2.4vw, 36px);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.36px;
+}
+
+.statement mark {
+  padding: 2px 8px;
+  background: var(--accent);
+  color: #fff;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.section .lead {
+  color: #202020;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 0.56px;
+}
+
+.note {
+  /* The note is its own quiet block — same group-to-group breathing room. */
+  margin: 120px 0 0;
+  padding-left: 18px;
+  border-left: 2px solid var(--accent-line);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.note span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mediaBlock {
+  width: min(calc(100% - 40px), 840px);
+  margin: 0 auto 120px;
+}
+
+/* Grouping: a story that introduces a media block (persona cards, the math
+   card, a flow chart, a design shot, the prototype) belongs WITH it — 40px,
+   not the 120px group gap. The media block then closes the group at 120px. */
+.story:has(+ .mediaBlock),
+.story:has(+ .flowStage),
+.story:has(+ .designMedia),
+.story:has(+ :global(#prototype)) {
+  margin-bottom: 40px;
+}
+
+.personaCard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--border);
+}
+
+.personaCard > div {
+  min-height: 198px;
+  padding: 30px 32px;
+  background: var(--stage);
+}
+
+.cardLabel {
+  margin: 0 0 30px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.personaCard h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.personaCard div > p:last-child {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* The equation reads as one centered line: label over number per term,
+   operators anchored to the digits' midline — nothing floats. */
+.mathCard {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(24px, 4.5vw, 64px);
+  padding: 44px 32px 40px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.mathCard > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.mathCard span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mathCard strong {
+  display: block;
+  color: var(--accent);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.mathCard div:nth-of-type(2) strong,
+.mathCard div:nth-of-type(4) strong { color: var(--accent); }
+
+.mathCard b {
+  margin-bottom: 9px;
+  color: #b6b7b2;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.mediaCaption {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.flowStage {
+  width: min(calc(100% - 48px), 1464px);
+  margin: 0 auto 120px;
+  padding: 28px 32px 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
+}
+
+.flowStageBlue {
+  border-color: var(--accent-line);
+  background: #f6faf4;
+}
+
+.flowEyebrow {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.chartViewport {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+/* No forced min-width at desktop: the SVG scales to its rail (capped at its
+   natural size, centered) so nothing clips and no scrollbar track shows. */
+.chart {
+  display: block;
+  width: 100%;
+  max-width: 1300px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.chartConnector,
+.chartLoop {
+  fill: none;
+  stroke: #b9bab5;
+  stroke-width: 1.5;
+}
+
+.chartLoop {
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  stroke-dasharray: 6 6;
+  opacity: 0.65;
+}
+
+.chartArrow { fill: #b9bab5; }
+
+.chartNode rect {
+  fill: #fff;
+  stroke: #e3e1dd;
+  stroke-width: 1.3;
+}
+
+.chartNode text,
+.chartDecision text {
+  fill: var(--ink);
+  font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.chartNodeBlue rect {
+  fill: var(--accent-soft);
+  stroke: var(--accent-line);
+}
+
+.chartNodeBlue text { fill: var(--accent); }
+
+.chartNodeGreen rect {
+  fill: var(--accent-soft);
+  stroke: var(--accent-line);
+}
+
+.chartNodeGreen text { fill: var(--accent); }
+
+.chartDecision path {
+  fill: #fff;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.chartBranchLabel {
+  fill: var(--muted);
+  font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.mobileFlow { display: none; }
+
+.designMedia {
+  width: min(calc(100% - 40px), 840px);
+  margin: 0 auto 120px;
+}
+
+.designMedia img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* These exports carry their own baked-in blue frame + rounded corners on a
+     white ground, so no CSS border/radius/shadow — that would double the frame
+     and a shadow would leak past the rounded corners over the white margins. */
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.designMedia figcaption {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.prototypeSection {
+  width: min(calc(100% - 48px), 1464px);
+  margin: -16px auto 90px;
+  scroll-margin-top: 90px;
+}
+
+.prototypeHeading {
+  width: min(100%, 680px);
+  margin: 0 auto 24px max(0px, calc((100vw - 1168px) / 2 + 96px));
+}
+
+.prototypeHeading h2 { margin-bottom: 7px; }
+
+.prototypeHeading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.prototypeSection figure {
+  max-height: 860px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
+  box-shadow: 0 16px 44px rgba(25, 25, 24, 0.045);
+}
+
+.prototypeLink {
+  display: table;
+  margin: 16px 0 0 auto;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--ink);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.smallPrint {
+  color: var(--muted) !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+.close { margin: 98px 0 110px; }
+
+.close > p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.close h2 {
+  max-width: 570px;
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(42px, 4vw, 58px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.close span {
+  display: block;
+  max-width: 560px;
+  margin-top: 24px;
+  color: #3f403d;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.close a {
+  display: inline-flex;
+  margin-top: 30px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ink);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .hero { padding-top: 76px; }
+  .meta { gap: 32px; }
+  .chart { min-width: 900px; }
+}
+
+@media (max-width: 640px) {
+  .nav {
+    width: calc(100% - 32px);
+    height: 74px;
+  }
+
+  .brand { font-size: 26px; }
+  .nav > div { gap: 28px; }
+
+  .hero {
+    width: min(calc(100% - 32px), 1168px);
+    padding: 62px 0 44px;
+  }
+
+  .hero h1 {
+    font-size: 41px;
+    line-height: 1;
+  }
+
+  .meta {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    margin-top: 42px;
+  }
+
+  .heroMedia {
+    width: calc(100% - 16px);
+    max-height: none;
+    margin-bottom: 68px;
+    border-radius: 12px;
+  }
+
+  .story {
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .story { margin-bottom: 80px; }
+  .section + .section { margin-top: 80px; }
+  .section h2 { font-size: 24px; }
+  .section p { font-size: 20px; letter-spacing: 0.4px; }
+  .section p + .lead { margin-top: 56px; }
+  .section .statement { font-size: 30px; }
+  .section .lead { font-size: 24px; letter-spacing: 0.48px; }
+  .note { margin-top: 80px; }
+
+  .mediaBlock,
+  .designMedia {
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 80px;
+  }
+
+  .personaCard { grid-template-columns: 1fr; }
+
+  .personaCard > div {
+    min-height: auto;
+    padding: 26px;
+  }
+
+  .cardLabel { margin-bottom: 20px; }
+
+  .mathCard {
+    flex-wrap: wrap;
+    gap: 32px 0;
+    padding: 32px 16px;
+  }
+
+  .mathCard b { display: none; }
+  .mathCard > div { flex: 1 1 50%; }
+  .mathCard strong { font-size: 34px; }
+
+  .flowStage {
+    width: calc(100% - 16px);
+    margin-top: 0;
+    margin-bottom: 80px;
+    padding: 22px 16px;
+    border-radius: 12px;
+  }
+
+  .story:has(+ .mediaBlock),
+  .story:has(+ .flowStage),
+  .story:has(+ .designMedia),
+  .story:has(+ :global(#prototype)) {
+    margin-bottom: 32px;
+  }
+
+  .flowEyebrow {
+    margin-bottom: 22px;
+    text-align: center;
+  }
+
+  .chart { display: none; }
+
+  .mobileFlow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mobileFlow > div:not(.mobileBranches) {
+    width: min(100%, 280px);
+    padding: 15px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .mobileFlow > i {
+    width: 1px;
+    height: 22px;
+    background: #aaa9a4;
+  }
+
+  .mobileFlow .mobileDecision {
+    width: 190px;
+    margin: 8px 0 20px;
+    border-color: var(--accent);
+    transform: rotate(3deg);
+  }
+
+  .mobileBranches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .mobileBranches > div {
+    padding: 15px 12px;
+    border: 1px solid var(--accent-line);
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .mobileBranches span {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .mobileBranches .mobileGreen {
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .mobileFlow .mobileBlue {
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .prototypeSection {
+    width: calc(100% - 16px);
+    margin-bottom: 72px;
+  }
+
+  .prototypeHeading {
+    width: calc(100% - 16px);
+    margin-left: 8px;
+  }
+
+  .prototypeSection figure {
+    max-height: none;
+    border-radius: 12px;
+  }
+
+  .prototypeLink { margin-right: 8px; }
+
+  .close { margin: 80px 0 92px; }
+  .close span { font-size: 17px; }
+}
+
+
+/* Interactive prototype embed — bounded browser-chrome frame (from v1). Keeps
+   the live Mate-language app reading as an embedded surface, centered on the
+   full media rail. */
+.prototypeFrame {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 16px 44px rgba(25, 25, 24, 0.045);
+}
+.prototypeBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid #eceae6;
+  background: #faf9f7;
+}
+.prototypeBar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d8d6d1;
+}
+.prototypeBar p {
+  margin: 0 0 0 12px;
+  color: #9a9b96;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.prototypeIframe {
+  display: block;
+  width: 100%;
+  height: min(80vh, 760px);
+  border: 0;
+  background: #fff;
+}
+.prototypeCaption {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+.prototypeCaption a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Publix-only blocks. Everything above is the v3 skeleton; everything below
+   is the swap list: mobile screens instead of dashboard exports, an HTML flow
+   row instead of the hand-drawn SVG chart, evidence cards, and the notes
+   accordion that holds the research tables.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Statement mark keeps the text's left edge (Indeed's variant of Mate's device). */
+.statement mark {
+  padding: 2px 0;
+  box-shadow: 8px 0 0 var(--accent), -8px 0 0 var(--accent);
+}
+
+/* Mobile screens on a stage: flat exports, no device chrome (house rule —
+   design media carries no CSS frame). 2-up for before/after, 3-up for the
+   current-app flow. */
+.screenStage {
+  display: grid;
+  gap: 32px;
+  padding: 44px 40px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
+}
+.screenStage2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.screenStage3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.screenStage figure { margin: 0; text-align: center; }
+.screenStage img,
+.screenStage video {
+  display: block;
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px var(--border);
+  background: #fff;
+}
+.screenStage figcaption,
+.screenLabel {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.screenLabel {
+  display: block;
+  margin: 0 0 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Flow row: the house flow-chart look (rounded nodes, thin connectors,
+   eyebrow) as HTML so it scales without a hand-authored SVG. */
+.flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.flow li {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px;
+  border: 1.3px solid #e3e1dd;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  text-wrap: balance;
+}
+.flow li + li { margin-left: 34px; }
+.flow li + li::before {
+  content: "";
+  position: absolute;
+  left: -34px;
+  top: 50%;
+  width: 34px;
+  height: 1.5px;
+  background: #b9bab5;
+}
+.flow li + li::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: calc(50% - 4px);
+  border: 4px solid transparent;
+  border-left: 7px solid #b9bab5;
+  border-right: 0;
+}
+.flowAccent { border-color: var(--accent-line) !important; background: var(--accent-soft) !important; color: var(--accent) !important; }
+.flowMuted { color: var(--muted) !important; font-weight: 500 !important; }
+.flowNote {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Evidence cards: three short quotes, one takeaway each. */
+.evidence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--border);
+}
+.evidence > figure {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 30px 28px;
+  background: var(--stage);
+}
+.evidence blockquote {
+  margin: 0 0 18px;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.evidence figcaption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.evidence figcaption a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.evidence .takeaway {
+  margin: auto 0 0;
+  padding-top: 18px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.evidence .takeaway strong { display: block; color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+
+/* Quiet lists inside a section (exception states, test plan). */
+.section ul.quiet {
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.section ul.quiet li {
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  color: #202020;
+  font-size: 18px;
+  line-height: 1.45;
+}
+.section ul.quiet li strong { font-weight: 600; }
+.section ul.quiet li span { color: var(--muted); }
+
+/* Notes accordion: the research tables and sources live here, out of the
+   story's way but one click from the claim they support. */
+.notes { margin-top: 24px; border-top: 1px solid var(--border); }
+.notes details { border-bottom: 1px solid var(--border); }
+.notes summary {
+  padding: 16px 0;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notes summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.notes p, .notes li { color: var(--muted); font-size: 14px; line-height: 1.55; }
+.notes p { margin: 0 0 12px; }
+.notes ol { margin: 0 0 20px; padding-left: 22px; }
+.notes li { margin: 8px 0; scroll-margin-top: 110px; }
+.notes a { color: var(--accent); text-underline-offset: 3px; }
+.tableWrap { width: 100%; overflow-x: auto; margin: 4px 0 20px; border: 1px solid var(--border); border-radius: 12px; }
+.tableWrap table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; line-height: 1.5; text-align: left; }
+.tableWrap caption { padding: 12px 16px; text-align: left; color: var(--muted); font-size: 12px; background: var(--stage); }
+.tableWrap th, .tableWrap td { padding: 12px 16px; border-top: 1px solid var(--border); vertical-align: top; }
+.tableWrap thead th { background: #fff; color: var(--ink); font-weight: 600; }
+.tableWrap tbody th { color: var(--ink); font-weight: 600; }
+.tableWrap td { color: var(--muted); }
+.sourceRef { padding: 0 2px; color: var(--accent); font-size: 0.7em; font-weight: 600; text-decoration: none; vertical-align: super; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .flow { flex-direction: column; }
+  .flow li + li { margin: 26px 0 0; }
+  .flow li + li::before { left: 50%; top: -26px; width: 1.5px; height: 26px; }
+  .flow li + li::after { left: calc(50% - 4px); top: -8px; border: 4px solid transparent; border-top: 7px solid #b9bab5; border-bottom: 0; }
+}
+@media (max-width: 640px) {
+  .screenStage { gap: 20px; padding: 24px 16px; border-radius: 12px; }
+  .screenStage3 { grid-template-columns: 1fr; }
+  .screenStage2 { grid-template-columns: 1fr; }
+  .screenStage img, .screenStage video { max-width: 240px; }
+  .evidence { grid-template-columns: 1fr; }
+  .evidence > figure { padding: 24px; }
+  .evidence blockquote { font-size: 20px; }
+  .section ul.quiet li { font-size: 17px; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Case-specific artifacts (2026-09-06). The skeleton is fixed; what fills it
+   is whatever this problem produced. These are v1's research and design
+   artifacts rebuilt on the house tokens: one accent, the stage surface, the
+   18px card radius, Open Sans at the house sizes.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Pull quote: one customer sentence at statement scale. */
+.pullQuote {
+  margin: 0;
+  padding: 4px 0 4px 24px;
+  border-left: 3px solid var(--accent);
+}
+.pullQuote blockquote {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(26px, 2.4vw, 32px);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.pullQuote blockquote em { font-style: normal; color: var(--accent); }
+.pullQuote figcaption { margin-top: 14px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.pullQuote figcaption a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Four-cell variant of the persona card (2×2). */
+.personaCard4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.personaCard4 > div { min-height: 0; }
+.personaCard4 h2 { font-size: 20px; }
+
+/* Journey map: a baked-frame export, so no CSS chrome (house rule). */
+.journey { width: min(calc(100% - 40px), 1000px); margin: 0 auto 120px; }
+.journey img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.journey figcaption { margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.5; text-align: center; }
+
+/* Exploration: four concepts on the wide stage, the chosen one in accent. */
+.concepts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.concept {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+}
+.conceptChosen { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.concept .cardLabel { margin-bottom: 16px; }
+.conceptChosen .cardLabel { color: var(--accent); }
+.wire {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 168px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--stage);
+}
+.wire span {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+.wire span:last-child { border-bottom: 0; }
+.wireFocus span:first-child { padding: 16px 10px; border: 1px solid var(--accent-line); border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.wireChapters span::after { content: " ›"; float: right; }
+.wireSteps span:nth-child(2) { padding: 16px 8px; font-size: 18px; color: var(--ink); text-align: center; }
+.wireSteps span:last-child { border-radius: 6px; background: var(--accent-soft); color: var(--accent); text-align: center; }
+.concept h3 { margin: 18px 0 8px; color: var(--ink); font-size: 18px; font-weight: 600; line-height: 1.3; }
+.concept p { margin: 0; color: var(--ink); font-size: 14px; line-height: 1.5; }
+.concept p + p { margin-top: 8px; color: var(--muted); }
+
+/* Product row: a phone beside its annotations. A 250px screen alone on an
+   840px stage wastes the rail; pairing it with the decision notes uses it. */
+.productRow {
+  width: min(calc(100% - 40px), 1100px);
+  margin: 0 auto 120px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 56px;
+  align-items: center;
+}
+.productRow > figure { margin: 0; padding: 40px 32px; border: 1px solid var(--border); border-radius: 18px; background: var(--stage); }
+.productRow video, .productRow img { display: block; width: 100%; max-width: 250px; height: auto; margin: 0 auto; border-radius: 22px; box-shadow: 0 0 0 1px var(--border); background: #fff; }
+.productRow figcaption { margin-top: 16px; color: var(--muted); font-size: 12px; line-height: 1.5; text-align: center; }
+.notes3 { display: flex; flex-direction: column; }
+.note3 { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; padding: 18px 0; border-top: 1px solid var(--border); }
+.note3:last-child { border-bottom: 1px solid var(--border); }
+.note3 > span { padding-top: 2px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.note3 h3 { margin: 0 0 6px; color: var(--ink); font-size: 18px; font-weight: 600; line-height: 1.3; }
+.note3 p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+.callout { margin: 24px 0 0; padding-left: 18px; border-left: 2px solid var(--accent-line); }
+.callout h3 { margin: 0 0 6px; color: var(--ink); font-size: 16px; font-weight: 600; }
+.callout p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+.story:has(+ .productRow),
+.story:has(+ .journey) { margin-bottom: 40px; }
+
+/* State model: three cells, one per item state, transitions listed. */
+.states {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--border);
+}
+.states > div { padding: 28px; background: var(--stage); }
+.stateSymbol { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 16px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 18px; }
+.states h3 { margin: 0 0 12px; color: var(--ink); font-size: 18px; font-weight: 600; line-height: 1.3; }
+.states h3 span { display: block; margin-bottom: 6px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.states p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.8; }
+
+/* Craft: colour, type, controls from the public reference. */
+.craft { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--border); }
+.craft > div { padding: 28px; background: var(--stage); }
+.craft h3 { margin: 18px 0 6px; color: var(--ink); font-size: 16px; font-weight: 600; }
+.craft p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.sample { display: flex; align-items: center; gap: 10px; height: 52px; }
+.swatch { width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.typeSample { font-size: 30px; font-weight: 600; color: var(--ink); }
+.typeSample span { margin-left: 10px; font-size: 14px; font-weight: 400; color: var(--muted); }
+.segment { display: flex; width: 100%; max-width: 220px; padding: 4px; border-radius: 10px; background: #efefef; font-size: 13px; color: var(--ink); }
+.segment span { flex: 1; padding: 7px; text-align: center; }
+.segment span:first-child { border-radius: 7px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); font-weight: 600; }
+
+@media (max-width: 900px) {
+  .concepts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .productRow { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 640px) {
+  .personaCard4 { grid-template-columns: 1fr; }
+  .journey { width: calc(100% - 32px); margin-bottom: 80px; }
+  .concepts { grid-template-columns: 1fr; }
+  .productRow { width: calc(100% - 32px); margin-bottom: 80px; }
+  .productRow > figure { padding: 24px 16px; border-radius: 12px; }
+  .states, .craft { grid-template-columns: 1fr; }
+  .pullQuote blockquote { font-size: 24px; }
+  .story:has(+ .productRow) { margin-bottom: 32px; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Product-forward pass (2026-09-06): the prototype's screens and recordings
+   carry more of the page. Larger media, a three-column before/after, and a
+   full-rail gallery of prototype states.
+   ───────────────────────────────────────────────────────────────────────── */
+.productRow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+.productRow > figure { padding: 32px 24px; }
+.productRow video, .productRow img { max-width: 320px; }
+.screenStage img, .screenStage video { max-width: 300px; }
+
+/* Before → after with the reason in the middle (v1's device, house tokens). */
+.compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  padding: 44px 40px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
+}
+.compare figure { margin: 0; text-align: center; }
+.compare img { display: block; width: 100%; max-width: 300px; height: auto; margin: 0 auto; border-radius: 22px; box-shadow: 0 0 0 1px var(--border); background: #fff; }
+.compare figcaption { margin-top: 16px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.compareMid { text-align: center; }
+.compareMid > span { display: block; color: var(--accent); font-size: 36px; line-height: 1; }
+.compareMid h3 { margin: 18px 0 10px; color: var(--ink); font-size: 22px; font-weight: 600; line-height: 1.3; }
+.compareMid p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+
+/* Gallery of prototype states on the full rail; scrolls sideways when the
+   rail is narrower than seven screens. */
+.gallery {
+  width: min(calc(100% - 32px), 1600px);
+  margin: 0 auto 120px;
+  padding: 36px 32px 28px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--stage);
+}
+.galleryTrack {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 20px;
+}
+.galleryTrack figure { margin: 0; text-align: center; }
+.galleryTrack img { display: block; width: 100%; height: auto; border-radius: 18px; box-shadow: 0 0 0 1px var(--border); background: #fff; }
+.galleryTrack figcaption { margin-top: 14px; color: var(--ink); font-size: 14px; font-weight: 600; line-height: 1.4; }
+.galleryTrack figcaption span { display: block; margin-top: 2px; color: var(--muted); font-weight: 400; font-size: 13px; }
+.galleryTrack figcaption b { display: block; margin-bottom: 6px; color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.galleryNote { margin: 22px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; text-align: center; }
+.story:has(+ .gallery) { margin-bottom: 40px; }
+
+@media (max-width: 1200px) {
+  .galleryTrack { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: 8px; }
+  .galleryTrack figure { flex: 0 0 210px; scroll-snap-align: start; }
+}
+@media (max-width: 900px) {
+  .compare { grid-template-columns: 1fr; gap: 28px; }
+  .compareMid > span { display: none; }
+}
+@media (max-width: 640px) {
+  .compare { padding: 24px 16px; border-radius: 12px; }
+  .compare img { max-width: 240px; }
+  .gallery { width: calc(100% - 16px); margin-bottom: 80px; padding: 20px 12px 16px; border-radius: 12px; }
+  .galleryTrack figure { flex-basis: 190px; }
+  .story:has(+ .gallery) { margin-bottom: 32px; }
+}
+
+/* V3: the house reading rail, with wider space only for comparative artifacts. */
+.heroScreens{margin:48px 0 100px;padding:64px 24px 28px;background:#F3F6F2}
+.heroScreens>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px;max-width:920px;margin:auto}
+.heroScreens figure{margin:0;text-align:center}
+.heroScreens img{display:block;width:100%;height:auto;border-radius:26px;box-shadow:0 12px 36px #18332215}
+.heroScreens figcaption{font-size:14px;color:var(--muted);margin:20px 0 0;text-align:center}
+.heroScreens>figcaption{margin-top:36px}
+.synthesis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
+.synthesis>div{border-top:2px solid var(--accent-line);padding-top:20px}
+.synthesis span{font-size:14px;color:var(--accent)}
+.synthesis h3{font-size:22px;line-height:1.35;margin:16px 0}
+.synthesis p{font-size:16px;line-height:1.7;color:var(--muted)}
+.focusArtifact{max-width:1040px;width:calc(100% - 40px);margin:0 auto 120px}
+.completionExample{padding:28px 0;display:flex;justify-content:space-between;gap:32px;align-items:center;border-bottom:1px solid var(--border);margin-bottom:28px}
+.completionExample h3{font-size:22px;margin:12px 0}
+.completionExample p{font-size:16px;color:var(--muted)}
+.tally{display:flex;gap:5px;flex-wrap:wrap}
+.tally span{display:grid;place-items:center;width:28px;height:36px;border-radius:4px;background:#004C2A;color:white}
+.tally span:last-child{background:#FBF7EC;border:1px dashed #987528;color:#987528}
+.prototypeFrame{width:min(390px,100%);margin:0 auto;border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px var(--border),0 20px 60px #0000000D}
+.prototypeBar{display:none}
+.prototypeIframe{width:100%;height:844px}
+.prototypeCaption{max-width:600px;margin:24px auto 0;line-height:1.7}
+.cardLabel,.flowEyebrow,.screenLabel,.galleryTrack figcaption b,.evidence .takeaway strong,.note3>span,.states h3 span{text-transform:none;letter-spacing:0}
+.galleryTrack{grid-template-columns:repeat(8,minmax(0,1fr))}
+.gallery{box-sizing:border-box}
+@media(max-width:700px){
+ .heroScreens{padding:36px 20px 24px;margin-bottom:80px}
+ .heroScreens>div{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:24px;padding-bottom:20px}
+ .heroScreens figure{flex:0 0 230px;scroll-snap-align:center}
+ .synthesis{grid-template-columns:1fr;gap:24px}
+ .completionExample{flex-direction:column;align-items:flex-start}
+ .productRow{grid-template-columns:1fr;gap:32px}
+ .focusArtifact{margin-bottom:80px}
+}
+@media(max-width:430px){.prototypeIframe{height:844px}.prototypeFrame{border-radius:0}}
+
+/* Keyboard-scrollable prototype strips (WCAG 2.1.1): the tracks become horizontal
+   scrollers below their breakpoints; give them a tab stop + visible focus. */
+.heroScreens > div:focus-visible,
+.galleryTrack:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }

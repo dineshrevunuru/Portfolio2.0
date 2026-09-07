@@ -1,0 +1,32 @@
+/* Preserve the mobile viewport; scale the whole interaction, not its layout. */
+.viewport {
+  width: 292.5px;
+  height: 633px;
+  margin: 0 auto;
+}
+
+.iframe {
+  display: block;
+  width: 390px;
+  height: 844px;
+  border: 0;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 0 0 1px #d5ded8;
+  transform: scale(.75);
+  transform-origin: top left;
+}
+
+.caption {
+  margin: 14px auto 0;
+  color: #747670;
+  font-size: 14px;
+  letter-spacing: .01em;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.caption a {
+  color: #237b08;
+  font-weight: 600;
+}
