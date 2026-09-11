@@ -772,7 +772,9 @@ export default function AmazonQuickDelegation() {
         </StorySection>
       </article>
 
-      <SiteFooter tagline="Independent concept · not affiliated with Amazon" />
+      {/* No footer tagline: the non-affiliation statement lives in the closing
+          note above, where it reads as part of the story rather than chrome. */}
+      <SiteFooter />
     </main>
   );
 }
