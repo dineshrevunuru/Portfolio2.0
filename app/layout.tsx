@@ -61,6 +61,10 @@ export const metadata: Metadata = {
      page inherited, so /resume and every case study told Google it was a
      duplicate of the home page. Each page now declares its own (see seo.ts). */
   robots: { index: true, follow: true },
+  /* Google Search Console ownership check. It must stay for as long as the
+     property is verified: Google re-checks periodically, and removing the tag
+     un-verifies the site. */
+  verification: { google: "oF-A2R02aDd9ASprf-USRJLdFi3dfPPa-d4SouBmPrI" },
 };
 
 export default function RootLayout({
