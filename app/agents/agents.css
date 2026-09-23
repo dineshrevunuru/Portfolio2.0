@@ -61,6 +61,7 @@
   line-height: 1.75;
 }
 .agents-body .boot { color: #8b93a1; }
+.agents-body .identity { font: inherit; margin: 0; }
 .agents-body .id { color: #ee5d99; font-weight: 600; }
 .agents-body .id-rest { color: #c6cad4; }
 .agents-body .cmd { color: #7ee787; }
@@ -101,4 +102,53 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .agents-term.closing { animation: none; }
+}
+
+/* ---- Pop-up mode (AgentsModal): the same window over the current page ---- */
+.agents-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  /* Same spacing as the /agents page, so the pop-up opens as that page does. */
+  padding: clamp(16px, 4vw, 56px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Full screen, on the /agents page's own background: the pop-up is that page. */
+  background: #f6f4f1;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  animation: agents-backdrop-in 0.3s cubic-bezier(0, 0, 0.2, 1) both;
+}
+.agents-modal-window {
+  width: min(1040px, 100%);
+  outline: none;
+}
+.agents-modal-window .agents-term {
+  width: 100%;
+  animation: agents-open 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Closing: the whole screen fades out together, revealing the page beneath. */
+.agents-modal.is-closing {
+  animation: agents-backdrop-out 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+/* The close control is a <button> here, an <a> on the page. */
+button.close {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+@keyframes agents-open {
+  from { transform: scale(0.96) translateY(10px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes agents-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes agents-backdrop-out { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .agents-modal,
+  .agents-modal-window .agents-term,
+  .agents-modal.is-closing { animation: none; }
 }

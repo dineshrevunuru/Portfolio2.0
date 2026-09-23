@@ -1,3 +1,5 @@
+import { pageMetadata } from "../seo";
+import CaseStudyJsonLd from "../components/CaseStudyJsonLd";
 import Image from "next/image";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
@@ -9,6 +11,16 @@ import CaseStudyGallery from "../components/case-study/CaseStudyGallery";
 import CaseStudyList from "../components/case-study/CaseStudyList";
 import CaseStudyVideo from "../components/case-study/CaseStudyVideo";
 import { uniquefitImages as img } from "./images";
+
+const SEO = {
+  path: "/uniquefit-case-study",
+  title: "UniqueFit: custom clothing made easy — Dinesh Revunuru",
+  description:
+    "Case study: designing an online custom clothing platform for UniqueFit, a Hyderabad startup, so men can customise shirts and find a fit that works.",
+};
+
+export const metadata = pageMetadata(SEO);
+
 
 const VIDEO_BASE = "/case-studies/uniquefit/videos";
 
@@ -62,7 +74,7 @@ export default function UniquefitCaseStudy() {
       <section className="cs-container-wide pt-6 sm:pt-10 pb-12 sm:pb-16">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-20 lg:gap-32">
           <div>
-            <h3 className="cs-overview-head">Project overview</h3>
+            <p className="cs-overview-head">Project overview</p>
             <p className="mt-4 cs-overview-body">
               UniqueFit is a Hyderabad-based startup working in the field of{" "}
               <strong>clothing and fashion accessories for men.</strong>{" "}
@@ -71,7 +83,7 @@ export default function UniquefitCaseStudy() {
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">My role</h3>
+            <p className="cs-overview-head">My role</p>
             <p className="mt-4 cs-overview-body">
               <strong>Lead UX UI Designer | Maxc studio</strong>
             </p>
@@ -81,13 +93,13 @@ export default function UniquefitCaseStudy() {
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Duration</h3>
-            <p className="mt-4 cs-overview-body">Jun – Oct 2021, (9 months)</p>
+            <p className="cs-overview-head">Duration</p>
+            <p className="mt-4 cs-overview-body">Jun 2021 – Feb 2022, (9 months)</p>
           </div>
         </div>
 
         <div className="mt-12">
-          <h3 className="cs-overview-head">Client</h3>
+          <p className="cs-overview-head">Client</p>
           <div className="mt-4">
             <Image
               src={img.clientLogo.src}
@@ -317,7 +329,6 @@ export default function UniquefitCaseStudy() {
       <CaseStudyImage
         {...img.interviewData}
         alt="UniqueFit initial user interview data"
-        caption="What individual categories think they are facing the biggest problems in journalism today?"
       />
 
       <CaseStudySection heading="Stakeholder interview">
@@ -591,23 +602,7 @@ export default function UniquefitCaseStudy() {
       <CaseStudyPhase label="Design" />
 
       <CaseStudySection heading="High-Fidelity wireframes">
-        <p>
-          Secondary research gave us a valuable starting point, however I
-          wanted to conduct primary user research to really delve into the
-          daily work life of a freelancer.
-        </p>
-        <p>
-          For a deeper understanding of freelance needs and challenges, we
-          recruited and conducted a user interview in order to learn about
-          freelance attitudes towards, and management of, non-billable tasks.
-          Because this interview presented a small, non-representative sample,
-          I also conducted a user survey to collect additional data.
-        </p>
-        <p>
-          The goal of my research was to better understand the experience and
-          feelings of freelancers when completing non-billable tasks. Key
-          insights from my discovery research include:
-        </p>
+        <></>
       </CaseStudySection>
       <div className="w-full py-10 sm:py-14 flex flex-col gap-2 sm:gap-4 [&>figure]:mt-0" style={{ background: "#54595F" }}>
         <CaseStudyImage {...img.hifiMobile} alt="High-fidelity mobile wireframes" wide />
@@ -822,7 +817,7 @@ export default function UniquefitCaseStudy() {
             color: "rgba(0, 0, 0, 0.45)",
           }}
         >
-          cannot put the insights and metrics we have obtained ih the
+          cannot put the insights and metrics we have obtained in the
           usability study.
         </p>
       </div>
@@ -962,6 +957,7 @@ export default function UniquefitCaseStudy() {
       <div className="pb-16 sm:pb-24" />
 
       <SiteFooter />
+      <CaseStudyJsonLd path={SEO.path} name="UniqueFit: custom clothing made easy" description={SEO.description} client="UniqueFit" />
     </main>
   );
 }

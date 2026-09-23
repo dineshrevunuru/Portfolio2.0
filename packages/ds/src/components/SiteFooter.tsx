@@ -8,11 +8,11 @@ export default function SiteFooter({ tagline }: SiteFooterProps) {
     <footer className="site">
       <div className="inner">
         <div>
-          <h2>Dinesh Revunuru</h2>
+          <p className="name">Dinesh Revunuru</p>
           <div className="role">Senior Product Designer</div>
           <div className="role sub">Chicago, IL USA</div>
           <p className="intro">
-            If you are thinking about hiring me or would like to
+            If you are thinking about hiring me or would like to{" "}
             <br />
             discuss a project, get in touch with me at,
           </p>
@@ -26,6 +26,11 @@ export default function SiteFooter({ tagline }: SiteFooterProps) {
             <a href="https://www.instagram.com/dinesh_revunuru/">Instagram</a>
             <span aria-hidden="true">|</span>
             <a href="https://twitter.com/dinesh_revunuru/">Twitter</a>
+            {/* The agent dossier: structured, verified facts for AI assistants
+                that read this site on someone's behalf. */}
+            <a className="agents" href="/agents">
+              For Agents?
+            </a>
           </div>
         </div>
       </div>

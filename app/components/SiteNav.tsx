@@ -11,7 +11,7 @@ export default function SiteNav({ active }: SiteNavProps) {
         Rd<b>.</b>
       </Link>
       <div className="links">
-        <Link href="/#work" className={active === "work" ? "on" : undefined}>
+        <Link href="/work" className={active === "work" ? "on" : undefined}>
           Work
         </Link>
         <Link href="/resume" className={active === "resume" ? "on" : undefined}>

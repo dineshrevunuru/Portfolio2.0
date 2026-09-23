@@ -46,11 +46,11 @@ export default function CaseStudyTemplate() {
       <section className="cs-container-wide pt-6 sm:pt-10 pb-12 sm:pb-16">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-20 lg:gap-32">
           <div>
-            <h3 className="cs-overview-head">Project overview</h3>
+            <p className="cs-overview-head">Project overview</p>
             <p className="mt-4 cs-overview-body">One-paragraph intro.</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">My role</h3>
+            <p className="cs-overview-head">My role</p>
             <p className="mt-4 cs-overview-body">
               <strong>Role title | Company</strong>
             </p>
@@ -59,13 +59,13 @@ export default function CaseStudyTemplate() {
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Duration</h3>
+            <p className="cs-overview-head">Duration</p>
             <p className="mt-4 cs-overview-body">Mon YYYY – Mon YYYY</p>
           </div>
         </div>
 
         <div className="mt-12">
-          <h3 className="cs-overview-head">Client</h3>
+          <p className="cs-overview-head">Client</p>
           {/*
           <Image
             src={img.clientLogo.src}

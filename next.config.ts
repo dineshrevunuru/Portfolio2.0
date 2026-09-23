@@ -60,7 +60,46 @@ const nextConfig: NextConfig = {
       },
       { source: "/neuron-7-ai", destination: "/#enterprise", permanent: true },
       { source: "/employee-onboarding", destination: "/#enterprise", permanent: true },
+
+      /* WordPress's sitemap addresses. Search Console may still hold one of
+         these as the submitted sitemap; pointing them at the real one means it
+         finds the current list instead of a 404. */
+      { source: "/sitemap_index.xml", destination: "/sitemap.xml", permanent: true },
+      { source: "/wp-sitemap.xml", destination: "/sitemap.xml", permanent: true },
+
+      /* One host. Under WordPress, www 301'd to the apex; on Vercel both hosts
+         served the full site (verified 2026-09-23), a duplicate of every page.
+         The canonical tags already name the apex; this makes it true for
+         visitors and crawlers too. Safe only while the apex is the primary
+         domain in Vercel: if the project is ever switched to redirect apex →
+         www, this rule would loop and must go. */
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.dineshrevunuru.com" }],
+        destination: "https://dineshrevunuru.com/:path*",
+        permanent: true,
+      },
     ];
+  },
+
+  /**
+   * Prototype bundles and demo surfaces: reachable, never indexed.
+   *
+   * These used to be blocked in robots.txt instead, which does the opposite of
+   * what it looks like: a disallowed URL is never fetched, so Google never
+   * sees a noindex, and any page that links to it can still put the bare URL
+   * in results. A header works for the static HTML bundles in public/ without
+   * editing their build output, and robots.txt now lets crawlers read it.
+   */
+  async headers() {
+    const noindex = [{ key: "X-Robots-Tag", value: "noindex" }];
+    return [
+      "/mate-prototype/:path*",
+      "/indeed-match-check-prototype/:path*",
+      "/publix-prototype/:path*",
+      "/hss-demo/:path*",
+      "/hss-band-lab/:path*",
+    ].map((source) => ({ source, headers: noindex }));
   },
 };
 

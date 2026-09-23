@@ -1,14 +1,25 @@
+import { pageMetadata } from "../seo";
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
 
+const SEO = {
+  path: "/resume",
+  title: "Resume — Dinesh Revunuru, Senior Product Designer",
+  description:
+    "Resume of Dinesh Revunuru, a Chicago product designer who designs and builds AI products. Hair System Salons, Neudesic (an IBM company); MS in HCI, DePaul.",
+};
+
+export const metadata = pageMetadata(SEO);
+
+
 type Experience = {
-  slug: "hss" | "neudesic" | "maxcreepers" | "b2b";
+  slug: "hss" | "neudesic" | "maxcreepers" | "freelance";
   company: string;
   role: string;
   dates: string;
-  description: string;
+  description?: string;
 };
 
 type Certification = {
@@ -90,37 +101,40 @@ const experiences: Experience[] = [
     /* Both figures are the audited ones from the case study, measured in Google
        Ads and the client's own booking data and reviewed with the owners. Do
        not add the conversion rate here — it is the one number whose denominator
-       was never settled. */
+       was never settled. The return rate always travels with its 80% target.
+       The assistant does not book on its own: its tools are read-only and a
+       structured form confirms the booking (locked wording, 2026-09-11). */
     description:
-      "I own digital UX and growth for a hair-replacement business. I designed and built an AI assistant that answers questions and books appointments on its own, the booking platform underneath it, and the email and SMS follow-up that earns the second visit. Cost per new customer fell from $105 to $40, and the share of new customers who came back moved from 40% to 72%. Built in Next.js, React, TypeScript and Supabase, with every line reviewed before it ships.",
+      "I own digital UX and growth for a hair-replacement business. I designed and built an AI assistant that answers questions and guides customers to a booking, the booking platform underneath it, and the email and SMS follow-up that earns the second visit. I kept the assistant's tools read-only and routed booking confirmation through a structured form. Cost per new customer fell from $105 to $40, and the share of new customers who came back moved from 40% to 72%, against the owners' 80% target. Built in Next.js, React, TypeScript and Supabase.",
   },
   {
     slug: "neudesic",
     company: "Neudesic (an IBM Company)",
-    role: "UI UX Designer",
+    role: "UX/UI Designer",
     /* Corrected from "PRESENT" on 2026-08-11. The role ended Jul 2024 (P1
        capability intake, confirmed). Left as-is it claimed a current job at an
        IBM company, and adding the entry above would have put two current roles
        on one resume. */
     dates: "MAY 2022 — JUL 2024",
     description:
-      "Designing and creating digital products on a contract basis to help them build better products for their users. And collaborating with developer teams to improve product UX. Working on user-centered design, building rapid prototypes, User research, and business development for startups.",
+      "I designed enterprise web and mobile experiences for Microsoft, Adani, Neuron7 and Learning Care Group in a consulting delivery model: knowledge portals, manufacturing dashboards and internal admin tools. That included the Microsoft Surface knowledge portal, one place for 10,000+ employees to raise and track service requests, and the UX for 3 Stripes, a generative-AI product, and its Jira extension, which I designed and prototyped. I worked day to day with developers, ran usability tests and heuristic evaluations, and turned the findings into prioritized design changes.",
   },
   {
     slug: "maxcreepers",
-    company: "Maxcreepers design studio",
-    role: "Lead UI UX Designer",
-    dates: "FEB 2020 — APR 2022",
+    company: "Maxc Design Studio",
+    role: "Founder & Lead UX Designer",
+    /* Name, title and dates from the resume library (the verified record).
+       B2B Dock was a project inside the studio, not a separate role, so it has
+       no entry of its own. */
+    dates: "NOV 2019 — APR 2022",
     description:
-      "I worked closely with design teams & managed a wide variety of cross media projects involving UI UX design, Interaction design, design systems, branding, Sprint processes, product management, working with the development teams, UX development for startups, social media management, SEO, accounting and corporate legalities. Working for a startup company gave me an opportunity to explore different fields and gain experience.",
+      "I founded and ran a design studio serving 15+ clients, owning design delivery, client relationships and the business. We designed consumer web and mobile products across e-commerce, fintech and content platforms, including UniqueFit, 101 Reporters and B2B Dock. I led user research, information architecture, interaction and visual design, and usability testing, and mentored junior designers.",
   },
   {
-    slug: "b2b",
-    company: "B2B Dock",
-    role: "UI UX Designer",
-    dates: "SEP 2019 — JAN 2020",
-    description:
-      "I have worked for b2b dock along with the other designers on the team. This company is a B2B platform for brands and sellers. I have designed sitemaps, Information architecture interfaces, and prototypes for the enterprise software which includes billing, Dashboards for sellers, retailers, and brands. Involved in different research methods such as user research & interviews, competitor research, and stakeholder interviews.",
+    slug: "freelance",
+    company: "Freelance",
+    role: "UX/UI Designer",
+    dates: "AUG 2017 — OCT 2019",
   },
 ];
 
@@ -221,13 +235,13 @@ export default function Resume() {
       >
         <div className="rhead-main">
           <h1>
-            Dinesh
+            Dinesh{" "}
             <br />
             Revunuru
           </h1>
           <h2>Senior Product Designer</h2>
           <div className="c">
-            <a href="mailto:dineshrevunuru@gmail.com">dineshrevunuru@gmail.com</a>
+            <a href="mailto:dineshrevunuru@gmail.com">dineshrevunuru@gmail.com</a>{" "}
             <br />
             +1 (312) 838-4876
           </div>
@@ -290,7 +304,7 @@ export default function Resume() {
               <p className="exp-meta">
                 {exp.role} &middot; {exp.dates}
               </p>
-              <p className="b">{exp.description}</p>
+              {exp.description && <p className="b">{exp.description}</p>}
             </article>
           </div>
         ))}

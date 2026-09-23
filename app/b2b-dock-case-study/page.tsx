@@ -1,3 +1,5 @@
+import { pageMetadata } from "../seo";
+import CaseStudyJsonLd from "../components/CaseStudyJsonLd";
 import Image from "next/image";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
@@ -7,6 +9,16 @@ import CaseStudyImage from "../components/case-study/CaseStudyImage";
 import CaseStudyList from "../components/case-study/CaseStudyList";
 import CaseStudyVideo from "../components/case-study/CaseStudyVideo";
 import { b2bDockImages as img, b2bDockVideos as vid } from "./images";
+
+const SEO = {
+  path: "/b2b-dock-case-study",
+  title: "B2B Dock: a B2B trading platform — Dinesh Revunuru",
+  description:
+    "Case study: designing B2B Dock, a Bangalore SaaS platform where brands, resellers and retailers trade goods directly, without middlemen.",
+};
+
+export const metadata = pageMetadata(SEO);
+
 
 const prototypePlaceholder =
   "We tried to keep the platform as minimal as possible so that users feel easy to explore and reach their desired page or fulfill their task.";
@@ -66,7 +78,7 @@ export default function B2BDockCaseStudy() {
       <section className="cs-container-wide pt-6 sm:pt-10 pb-12 sm:pb-16">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-20 lg:gap-32">
           <div>
-            <h3 className="cs-overview-head">Project overview</h3>
+            <p className="cs-overview-head">Project overview</p>
             <p className="mt-4 cs-overview-body">
               B2B dock is a Bangalore-based startup working on a SaaS
               application providing Brands, resellers, and retailers a platform
@@ -76,7 +88,7 @@ export default function B2BDockCaseStudy() {
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">My role</h3>
+            <p className="cs-overview-head">My role</p>
             <p className="mt-4 cs-overview-body">
               <strong>Product Designer</strong>
             </p>
@@ -86,13 +98,13 @@ export default function B2BDockCaseStudy() {
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Duration</h3>
+            <p className="cs-overview-head">Duration</p>
             <p className="mt-4 cs-overview-body">Jun – Oct 2019, (5 months)</p>
           </div>
         </div>
 
         <div className="mt-12">
-          <h3 className="cs-overview-head">Client</h3>
+          <p className="cs-overview-head">Client</p>
           <div className="mt-4">
             <Image
               src={img.clientLogo.src}
@@ -221,34 +233,12 @@ export default function B2BDockCaseStudy() {
       </CaseStudySection>
 
       <CaseStudySection heading="High-Fidelity wireframes">
-        <p>
-          Secondary research gave us a valuable starting point, however I
-          wanted to conduct primary user research to really delve into the
-          daily work life of a freelancer.
-        </p>
-        <p>
-          For a deeper understanding of freelance needs and challenges, we
-          recruited and conducted a user interview in order to learn about
-          freelance attitudes towards, and management of, non-billable tasks.
-          Because this interview presented a small, non-representative sample,
-          I also conducted a user survey to collect additional data.
-        </p>
-        <p>
-          The goal of my research was to better understand the experience and
-          feelings of freelancers when completing non-billable tasks. Key
-          insights from my discovery research include:
-        </p>
+        <></>
       </CaseStudySection>
       <CaseStudyImage {...img.hifi} alt="High-fidelity wireframes — B2B Dock" wide />
 
       <CaseStudySection heading="Visual design">
-        <p>
-          We have a design plan to reduce cognitive load by showing the
-          selections that users have selected between the style variations. We
-          aren&rsquo;t practically sure which customization layout would allow
-          users to the maximum and best usable way. So, we decided to test out
-          all three possible layouts by testing prototypes with the users.
-        </p>
+        <></>
       </CaseStudySection>
       <CaseStudyImage
         {...img.visualDesign}
@@ -288,6 +278,7 @@ export default function B2BDockCaseStudy() {
 
       <div className="pb-16 sm:pb-24" />
       <SiteFooter />
+      <CaseStudyJsonLd path={SEO.path} name="B2B Dock: a B2B trading platform" description={SEO.description} client="B2B Dock" />
     </main>
   );
 }

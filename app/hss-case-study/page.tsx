@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "../seo";
+import CaseStudyJsonLd from "../components/CaseStudyJsonLd";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
 import CaseStudyHero from "../components/case-study/CaseStudyHero";
@@ -9,13 +10,16 @@ import CaseStudyImage from "../components/case-study/CaseStudyImage";
 import CaseStudyVideo from "../components/case-study/CaseStudyVideo";
 import CaseStudyList from "../components/case-study/CaseStudyList";
 import CaseStudyCallout from "../components/case-study/CaseStudyCallout";
-import CaseStudyGallery from "../components/case-study/CaseStudyGallery";
+import ScreenshotStrip, { type Shot } from "../components/case-study/ScreenshotStrip";
 
-export const metadata: Metadata = {
-  title: "An AI assistant that books customers on its own — Dinesh Revunuru",
+const SEO = {
+  path: "/hss-case-study",
+  title: "AI Booking Assistant for Hair System Salons — Dinesh Revunuru",
   description:
-    "An AI assistant for a hair-replacement studio that answers questions and books real appointments on its own. I designed and built it, along with the booking platform underneath it and the automation that brings customers back.",
+    "Case study: the AI booking assistant and booking platform I designed and built for Hair System Salons. Cost per new customer fell from $105 to $40.",
 };
+
+export const metadata = pageMetadata(SEO);
 
 /* ------------------------------------------------------------------ *
  * Built entirely on the portfolio design system: cs-* classes, the
@@ -182,29 +186,36 @@ function Benefit({ bold, plain }: { bold: string; plain: string }) {
 const SHOW_ACTS = false;
 
 /**
- * The two closing screenshots — the admin calendar and the marketing screen.
+ * What came after the chatbot, shown rather than told: the booking app as it
+ * appears on the App Store, and the admin app the salon runs on.
  *
- * ⚠ Both frames carry real production data. The calendar shows several real
- * customer names legible at the source file's full 715px, a staff email address
- * and the live admin subdomain; the marketing frame adds real booking and
- * audience counts. The gallery renders them at ~388px, where the names are too
- * small to read, but the source file would ship intact and this repository is
- * public, so anyone could open the asset directly.
+ * The app captures are the App Store set (docs/screenshots in the app repo,
+ * iPhone 17 Pro Max, 2026-08-20), signed in as the review account "App Tester".
+ * No customer appears in them.
  *
- * This case study's own copy says these customers "are private about why they
- * are there." Publishing their names contradicts the thing the case study is
- * about, and they never agreed to it.
- *
- * So the flag is false and the two PNGs are deliberately NOT committed. Both
- * conditions matter: the flag stops them rendering, and leaving them untracked
- * is what keeps them out of git history, which a later deletion would not undo.
- * To ship them, re-capture with anonymised names, add the files, flip this.
- *
- * (This note previously quoted two of the names as evidence, which republished
- * exactly what it was arguing against. Describe the risk; never restate the
- * data.)
+ * ⚠ The admin captures (Dinesh, 2026-09-23) come from the live system, so
+ * every customer name and phone number, the staff email and the business
+ * totals are blurred INTO the files before they enter public/: this repository
+ * is public and an original would publish them. Never commit an unblurred
+ * admin capture. These customers are private about why they come in; the case
+ * study says so. The Insights screen is left out on purpose: it ranks named
+ * customers by spend, and its chat-conversion figure is measured differently
+ * from the one on the record.
  */
-const SHOW_CLOSING_IMAGES = false;
+const APP_SHOTS: Shot[] = [
+  { src: "/case-studies/hss/app/01-home.png", width: 880, height: 1912, alt: "Home screen: the next opening, a Book Appointment button, drive time and a call button" },
+  { src: "/case-studies/hss/app/02-services.png", width: 880, height: 1912, alt: "Service list with durations and prices, from a free consultation to a full new hair system" },
+  { src: "/case-studies/hss/app/03-stylist.png", width: 880, height: 1912, alt: "Step two of five: choosing a stylist for the selected service" },
+  { src: "/case-studies/hss/app/04-datetime.png", width: 880, height: 1912, alt: "Step three of five: a week of dates and the open times for the chosen day" },
+  { src: "/case-studies/hss/app/05-notifications-onboarding.png", width: 880, height: 1912, alt: "A prompt asking to turn on reminders before each visit, with a Not now option" },
+  { src: "/case-studies/hss/app/06-account.png", width: 880, height: 1912, alt: "Account screen with appointments, haircut reminders, salon details and legal links" },
+];
+const ADMIN_SHOTS: Shot[] = [
+  { src: "/case-studies/hss/admin/dashboard.png", width: 1600, height: 906, alt: "Admin dashboard: today's appointments, the next one up and tomorrow's bookings, customer details blurred" },
+  { src: "/case-studies/hss/admin/calendar.png", width: 1600, height: 910, alt: "Admin calendar, one week of appointments colour-coded by status, with the bookings blurred" },
+  { src: "/case-studies/hss/admin/notifications.png", width: 1600, height: 911, alt: "Notifications: new bookings, reschedules and cancellations from every channel in one list, names blurred" },
+  { src: "/case-studies/hss/admin/marketing.png", width: 1600, height: 908, alt: "Marketing screen: the Klaviyo connection, booking events, suggested flows and an app announcement, totals blurred" },
+];
 
 export default function HssCaseStudy() {
   return (
@@ -219,9 +230,9 @@ export default function HssCaseStudy() {
             {/* The {" "} is load-bearing: JSX drops the whitespace around a
                 <br />, so when the mobile rule hides the break the two halves
                 would otherwise render as one mashed word. */}
-            Booking got easier. Cost per{" "}
+            Booking got easier. Cost per new{" "}
             <br />
-            conversion fell by more than 60%
+            customer fell by more than 60%
           </>
         }
         /* No subtitle, and now it costs nothing. The old note here recorded a
@@ -259,7 +270,7 @@ export default function HssCaseStudy() {
               other two. Restoring the baseline would mean dropping both other
               leads, which is a larger change than was asked for. */}
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Company overview</h3>
+            <p className="cs-overview-head">Company overview</p>
             <p className="mt-4 cs-overview-body">
               Hair System Salons sells hair systems and related products online, with in-person
               services offered through its studios. After the first location proved the model, the
@@ -267,9 +278,9 @@ export default function HssCaseStudy() {
             </p>
           </div>
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">My role</h3>
+            <p className="cs-overview-head">My role</p>
             <p className="mt-4 cs-overview-body">
-              <strong>Senior Product Designer</strong>
+              <strong>AI Product Designer</strong>
             </p>
             <p className="mt-3 cs-overview-body">
             Talk, talk & TALK to stake holders and users, Find problems, research, design and write production code, test & deploy solutions.
@@ -278,7 +289,7 @@ export default function HssCaseStudy() {
           {/* Tools are a list of tools. Where each one was used belongs to the
               sections that use them, not here. */}
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Tools</h3>
+            <p className="cs-overview-head">Tools</p>
             <p className="mt-4 cs-overview-body">
               <strong>Cursor and Claude Code</strong>
             </p>
@@ -292,7 +303,7 @@ export default function HssCaseStudy() {
               hanging below the rail. It has no bold lead — the date IS the
               value, and inventing one would only pad the column to match. */}
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Duration</h3>
+            <p className="cs-overview-head">Duration</p>
             <p className="mt-4 cs-overview-body">Apr &ndash; late Jun 2026, (11 weeks)</p>
           </div>
           {/* Team fills the cell that row two left empty, and it is the first
@@ -309,7 +320,7 @@ export default function HssCaseStudy() {
               no division of labour invites the reading that the model did the
               thinking, which is the opposite of the claim. */}
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Team</h3>
+            <p className="cs-overview-head">Team</p>
             {/* Stacked, not spaced. Both avatars are supplied square and
                 pre-cropped to a circle, so there is no object-fit or offset
                 maths here — the earlier version needed it because
@@ -540,8 +551,8 @@ export default function HssCaseStudy() {
                    "The assistant.Answers". Explicit is the only stable form. */
                 <>
                   <strong>The assistant.</strong>{" "}
-                  Answers in the brand&rsquo;s voice, guides the service pick, and books before the
-                  visitor leaves the page.
+                  Answers in the brand&rsquo;s voice, guides the service pick, and hands over a
+                  booking form before the visitor leaves the page.
                 </>,
                 <>
                   <strong>The booking platform.</strong>{" "}
@@ -1146,7 +1157,7 @@ export default function HssCaseStudy() {
       <section className="cs-container pt-12 sm:pt-16">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
           <Benefit
-            bold="She answers at midnight and books before you close the tab."
+            bold="She answers at midnight, and you’re booked before you close the tab."
             plain="Guided service pick, real slots, and a confirmation with a date and time on it."
           />
           <Benefit
@@ -1742,43 +1753,57 @@ export default function HssCaseStudy() {
         </div>
       </section>
 
-      {/* The two admin surfaces, answering the sentence above rather than
-          decorating it: the paragraph claims the work grew to include booking
-          and retention, and these are those two systems.
+      {/* What "only the beginning" turned into: the two products that grew out
+          of the chatbot. A heading, two or three lines and the real screens,
+          sideways, so the page does not grow a new act. */}
+      <div>
+        <CaseStudySection heading="The booking app, now on the App Store">
+          <p>
+            Customers can book from their phone now. I designed and built the booking app in
+            React Native and Expo: pick a service and a stylist, see the times that are really
+            open, and get a reminder before each visit. It has been on the App Store since
+            August 2026.
+          </p>
+          <a
+            className="group mt-4 inline-flex items-center t-cta"
+            href="https://apps.apple.com/us/app/hair-system-salons/id6803756152"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View on the App Store<span className="warrow" aria-hidden="true">→</span>
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+        </CaseStudySection>
+        <ScreenshotStrip shots={APP_SHOTS} label="Booking app screens" />
+      </div>
 
-          Captions are one line each and describe what the screen does, not what
-          it contains — a caption that lists widgets makes the reader audit the
-          image instead of reading the claim. */}
-      {SHOW_CLOSING_IMAGES && (
-        <CaseStudyGallery
-          cols={2}
-          items={[
-            {
-              src: "/case-studies/hss/admin-calendar.png",
-              width: 715,
-              height: 446,
-              alt: "The admin calendar, one week of appointments, colour-coded by status",
-              caption:
-                "The calendar that replaced the owner’s phone. Colour carries status, and each card is badged with where the booking came from — web chat, app, Instagram or the front desk.",
-            },
-            {
-              src: "/case-studies/hss/admin-marketing.png",
-              width: 715,
-              height: 446,
-              alt: "The marketing screen, where booking events are wired to email and SMS flows",
-              caption:
-                "The retention side. Every booking event syncs to the email and SMS platform on its own, so the follow-up that earns a second visit runs without anyone remembering to send it.",
-            },
-          ]}
-        />
+      {ADMIN_SHOTS.length > 0 && (
+        <div>
+          <CaseStudySection heading="The admin app the salon runs on">
+            <p>
+              The owner&rsquo;s phone used to be the calendar. I designed and built the admin
+              app the staff use to run the salon: the calendar, customer records with their notes
+              and photos, services and staff, and the marketing screen for email and SMS.
+            </p>
+          </CaseStudySection>
+          <ScreenshotStrip
+            shots={ADMIN_SHOTS}
+            label="Admin app screens"
+            variant="desktop"
+            caption="Customer names, phone numbers and totals are blurred."
+          />
+        </div>
       )}
 
+      <div className="h-16 sm:h-24" />
+
       {/* 13 · Next rail — removed 2026-08-11. The page now ends on the closing
-          statement and its two screenshots, and a Home/Next rail underneath was
+          statement and the product screens after it, and a Home/Next rail underneath was
           reaching for the reader before the last sentence had landed. The
           footer already carries the way out. */}
 
       <SiteFooter />
+      <CaseStudyJsonLd path={SEO.path} name="AI Booking Assistant for Hair System Salons" description={SEO.description} client="Hair System Salons" />
     </main>
   );
 }

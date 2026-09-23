@@ -128,7 +128,7 @@ export function ReturnNeeds() {
       <div className={styles.personaIntro}>
         <span>Scenario-based user · Not a validated persona</span>
         <h2>
-          Delegates preparation.
+          Delegates preparation.{" "}
           <br />
           Keeps responsibility.
         </h2>
