@@ -5,8 +5,9 @@ import { IS_CANONICAL_HOST, SITE_URL } from "./site";
  * robots.txt, generated rather than static so it points at the same origin the
  * sitemap does.
  *
- * Everything is crawlable except the API routes and the two surfaces that are
- * not pages. /api/ matters most: every request to /api/lorem and /api/voice
+ * Everything is crawlable except the API routes. Pages that must stay out of
+ * search say so with noindex, which a crawler has to fetch to see. /api/ is
+ * blocked because every request to /api/lorem and /api/voice
  * spends real money on a model call and a TTS render, and a crawler walking
  * them would do that repeatedly for nothing. They are POST-only so a crawler
  * would fail anyway, but stating it is free.
@@ -39,7 +40,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/hss-demo", "/hss-band-lab", "/mate-prototype", "/indeed-match-check-prototype", "/publix-prototype"],
+        /* Only the API. The prototype and demo routes send an X-Robots-Tag
+           noindex header instead (next.config.ts), which crawlers can only
+           read if they are allowed to fetch the page. */
+        disallow: ["/api/"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

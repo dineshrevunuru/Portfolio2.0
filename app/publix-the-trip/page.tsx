@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, NOINDEX } from "../seo";
 import { Open_Sans } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,11 +15,16 @@ import Source from "./Source";
 
 // The Trip — the canonical Publix case: V2 reading rhythm + V1 decision artifacts,
 // with captured prototype states and an interactive store map.
-export const metadata: Metadata = {
-  title: "The Trip — a flexible Publix shopping trip | Dinesh Revunuru",
+const SEO = {
+  path: "/publix-the-trip",
+  title: "The Trip: an independent Publix concept — Dinesh Revunuru",
   description:
-    "An independent Publix design study: public customer evidence, one interaction idea, and a working shopping-trip prototype.",
-  robots: { index: false, follow: false },
+    "An independent Publix concept: public review research, a customer journey map, and a working prototype that turns a shopping list into an in-store trip.",
+};
+
+export const metadata = {
+  ...pageMetadata(SEO),
+  ...NOINDEX,
 };
 
 const externalLinkProps = { target: "_blank", rel: "noreferrer" } as const;
@@ -77,6 +82,10 @@ export default function PublixTheTrip() {
       <SiteNav active="case-study" />
 
       <CaseStudyHero
+        logo={
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="/logos/publix-wordmark.svg" alt="Publix" />
+        }
         title={
           <>
             {/* {" "} is load-bearing: globals hides this <br /> below 1025px and
@@ -92,15 +101,15 @@ export default function PublixTheTrip() {
       <section className="cs-container-wide">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-16 lg:gap-24">
           <div>
-            <h3 className="cs-overview-head">What I did</h3>
+            <p className="cs-overview-head">What I did</p>
             <p className="mt-4 cs-overview-body">Public research, product framing, interaction design, coded prototype</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Built with</h3>
+            <p className="cs-overview-head">Built with</p>
             <p className="mt-4 cs-overview-body">HTML, CSS, JavaScript · AI-assisted exploration and build, directed by me</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Quick link</h3>
+            <p className="cs-overview-head">Quick link</p>
             <p className="mt-4 cs-overview-body">
               <Link href="#prototype">Interactive prototype</Link>
             </p>

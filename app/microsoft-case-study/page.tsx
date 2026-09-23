@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, NOINDEX } from "../seo";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
 import CaseStudyHero from "../components/case-study/CaseStudyHero";
@@ -9,10 +9,18 @@ import CaseStudyGallery from "../components/case-study/CaseStudyGallery";
 import CaseStudyList from "../components/case-study/CaseStudyList";
 import CaseStudyCallout from "../components/case-study/CaseStudyCallout";
 
-export const metadata: Metadata = {
-  title: "A knowledge portal for the Surface field team — Dinesh Revunuru",
+const SEO = {
+  path: "/microsoft-case-study",
+  title: "Microsoft Surface knowledge portal case study — Dinesh Revunuru",
   description:
-    "Project Apollo 3.0: a redesign of Microsoft's Surface Knowledge Portal, with an assistant that answers before a request gets raised. Research across four countries, a new information hierarchy, and a measurement layer for the people running it.",
+    "Case study: redesigning Microsoft Surface's knowledge portal. Six interviews in four countries, a new information hierarchy and a ticket-aware assistant.",
+};
+
+export const metadata = {
+  ...pageMetadata(SEO),
+  // Indexable once the 15 image slots are filled and the draft notes are gone;
+  // then add it to sitemap.ts. Until then a shared link still previews properly.
+  ...NOINDEX,
 };
 
 /* ------------------------------------------------------------------ *
@@ -115,7 +123,7 @@ export default function MicrosoftCaseStudy() {
       <section className="cs-container-wide pt-6 sm:pt-10 pb-12 sm:pb-16">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 xl:gap-24">
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Client overview</h3>
+            <p className="cs-overview-head">Client overview</p>
             <p className="mt-4 cs-overview-body">
               <strong>Microsoft Surface</strong>
             </p>
@@ -127,7 +135,7 @@ export default function MicrosoftCaseStudy() {
             </p>
           </div>
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">My role</h3>
+            <p className="cs-overview-head">My role</p>
             <p className="mt-4 cs-overview-body">
               <strong>Product Designer</strong>
             </p>
@@ -137,7 +145,7 @@ export default function MicrosoftCaseStudy() {
             </p>
           </div>
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Tools</h3>
+            <p className="cs-overview-head">Tools</p>
             <p className="mt-4 cs-overview-body">
               <strong>Figma</strong>
             </p>
@@ -153,14 +161,14 @@ export default function MicrosoftCaseStudy() {
               chrome that was copied, not the work. The exact months are the one
               thing here I could not source from the file. */}
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Duration</h3>
+            <p className="cs-overview-head">Duration</p>
             <p className="mt-4 cs-overview-body">2022 &ndash; 2023</p>
           </div>
           {/* Deliberately unnamed. The file carries at least one colleague's
               name on a section header, and crediting a former teammate on a
               public page without asking them is not mine to do. */}
           <div className="max-w-[30rem] lg:max-w-none">
-            <h3 className="cs-overview-head">Team</h3>
+            <p className="cs-overview-head">Team</p>
             <p className="mt-4 cs-overview-body">
               A Neudesic design team, working with Microsoft Surface
               stakeholders across regions.

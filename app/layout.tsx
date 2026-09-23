@@ -3,10 +3,12 @@ import { Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./components/lorem/lorem.css";
 import SeqReveal from "./components/SeqReveal";
+import AgentsModal from "./components/AgentsModal";
 import ScrollProgressPill from "./components/case-study/ScrollProgressPill";
 import Clarity from "./components/Clarity";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import { SITE_URL } from "./site";
+import { SITE_DESCRIPTION, SITE_TITLE } from "./seo";
 
 const poppins = Poppins({
   variable: "--font-sans",
@@ -20,9 +22,8 @@ const playfair = Playfair_Display({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const TITLE = "Dinesh Revunuru — Senior Product Designer";
-const DESCRIPTION =
-  "Portfolio of Dinesh Revunuru, Senior Product Designer. HCI grad student at DePaul; earlier Generative A.I at Neudesic (an IBM Company).";
+const TITLE = SITE_TITLE;
+const DESCRIPTION = SITE_DESCRIPTION;
 
 export const metadata: Metadata = {
   /* metadataBase is what makes a relative og:image resolve to an absolute URL.
@@ -40,7 +41,9 @@ export const metadata: Metadata = {
     siteName: "Dinesh Revunuru",
     title: TITLE,
     description: DESCRIPTION,
-    url: SITE_URL,
+    /* No `url` here: set site-wide it told every scraper that every page was the
+       home page. Pages built with pageMetadata() (app/seo.ts) set their own; the
+       rest omit og:url, and scrapers fall back to the URL they fetched. */
     locale: "en_US",
     /* No `images` key here on purpose. app/opengraph-image.tsx is a Next file
        convention: it is discovered automatically, injected into both the OG and
@@ -54,7 +57,9 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
   },
-  alternates: { canonical: "/" },
+  /* No site-wide canonical. This used to be `{ canonical: "/" }`, which every
+     page inherited, so /resume and every case study told Google it was a
+     duplicate of the home page. Each page now declares its own (see seo.ts). */
   robots: { index: true, follow: true },
 };
 
@@ -68,9 +73,24 @@ export default function RootLayout({
       lang="en"
       className={`${poppins.variable} ${playfair.variable} h-full antialiased`}
     >
+      <head>
+        {/* Runs before first paint. On a back/forward load the reader is
+            returning, not arriving: skip the entrance reveal so the page is
+            simply there, at the scroll position the browser restores, instead
+            of starting blank and fading in piece by piece. SeqReveal clears
+            the flag once everything is marked revealed. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var n=performance.getEntriesByType('navigation')[0];if(n&&n.type==='back_forward')document.documentElement.classList.add('seq-restore')}catch(e){}",
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-white text-neutral-900">
         {children}
         <SeqReveal />
+        {/* The footer's "For Agents?" opens the dossier over the current page. */}
+        <AgentsModal />
         {/* Self-scoping: renders null unless the page has a cs-theme-* wrapper,
             so all four case studies get it without each page mounting it. */}
         <ScrollProgressPill />

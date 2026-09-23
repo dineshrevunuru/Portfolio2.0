@@ -1,3 +1,5 @@
+import { pageMetadata } from "../seo";
+import CaseStudyJsonLd from "../components/CaseStudyJsonLd";
 import Image from "next/image";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
@@ -8,6 +10,16 @@ import CaseStudyImage from "../components/case-study/CaseStudyImage";
 import CaseStudyList from "../components/case-study/CaseStudyList";
 import CaseStudyVideo from "../components/case-study/CaseStudyVideo";
 import { reportersImages as img } from "./images";
+
+const SEO = {
+  path: "/101-reporters-case-study",
+  title: "101 Reporters: freelance journalism platform — Dinesh Revunuru",
+  description:
+    "Case study: designing a platform for 101 Reporters, a network that refines freelance journalists' story ideas and pitches them to media houses.",
+};
+
+export const metadata = pageMetadata(SEO);
+
 
 const stakeholders = [
   {
@@ -52,7 +64,7 @@ export default function ReportersCaseStudy() {
       <section className="cs-container-wide pt-6 sm:pt-10 pb-12 sm:pb-16">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-20 lg:gap-32">
           <div>
-            <h3 className="cs-overview-head">Project overview</h3>
+            <p className="cs-overview-head">Project overview</p>
             <p className="mt-4 cs-overview-body">
               101 Reporters is a network of freelance journalists and acts as
               a bridge between freelancers and media houses. They accept story
@@ -61,7 +73,7 @@ export default function ReportersCaseStudy() {
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">My role</h3>
+            <p className="cs-overview-head">My role</p>
             <p className="mt-4 cs-overview-body">
               <strong>UX UI Designer | Maxc studio</strong>
             </p>
@@ -71,13 +83,13 @@ export default function ReportersCaseStudy() {
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Duration</h3>
+            <p className="cs-overview-head">Duration</p>
             <p className="mt-4 cs-overview-body">Mar – Dec 2019, (9 months)</p>
           </div>
         </div>
 
         <div className="mt-12">
-          <h3 className="cs-overview-head">Client</h3>
+          <p className="cs-overview-head">Client</p>
           <div className="mt-4">
             <Image
               src={img.clientLogo.src}
@@ -106,8 +118,8 @@ export default function ReportersCaseStudy() {
               to be categorised into news categories to make it easy for media
               houses to pick and buy articles from journalists where 101
               reporters will act as mediators between media houses and
-              journalists. The soul purpose of this project is to build a
-              platform which which connects freelance journalists and media
+              journalists. The sole purpose of this project is to build a
+              platform which connects freelance journalists and media
               houses.
             </p>
           </div>
@@ -166,7 +178,6 @@ export default function ReportersCaseStudy() {
           items={[
             "Online ethnography, forum analysis: Understand user habits, the tools they use, and their challenges.",
             "Analyzing freelancer demographics: Clearly define the target audience, and understand how freelancers work.",
-            "Analyzing freelancer interviews and daily routine accounts: Identify non-billable tasks they complete regularly.",
           ]}
         />
         <p>
@@ -181,32 +192,6 @@ export default function ReportersCaseStudy() {
         caption="A snippet of secondary user research"
       />
 
-      <CaseStudySection heading="Primary research">
-        <p>
-          Primary research gave us a valuable starting point, however I wanted
-          to conduct primary user research to really delve into the daily work
-          life of a freelancer.
-        </p>
-        <p>
-          For a deeper understanding of freelance needs and challenges, we
-          recruited and conducted a user interview in order to learn about
-          freelance attitudes towards, and management of, non-billable tasks.
-          Because this interview presented a small, non-representative sample,
-          I also conducted a user survey to collect additional data.
-        </p>
-        <p>
-          The goal of my research was to better understand the experience and
-          feelings of freelancers when completing non-billable tasks. Key
-          insights from my discovery research include:
-        </p>
-        <CaseStudyList
-          items={[
-            "Key tasks: To-do lists, emailing, logging time spent, finance tracking",
-            "Key pain points: Lack of holistic experience/single system, outdated UI, not visual enough",
-            "Key freelancer behavior: Use multiple apps, lack of work routine, many work part-time, spend 1-2 hours on non-billable tasks per day",
-          ]}
-        />
-      </CaseStudySection>
 
       <CaseStudySection heading="What do stake holders have to say?">
         <></>
@@ -240,7 +225,7 @@ export default function ReportersCaseStudy() {
         <p>
           From the research, business goals and stakeholder interviews we are
           able to identify the users and have divided them into three
-          categories namely primary users, secondary users and terfiary users.
+          categories namely primary users, secondary users and tertiary users.
           Users who fall into the primary sector are the one&rsquo;s who will
           be highly beneficial cause we are trying to solve the problems of
           freelance journalists with 101 reporters as a platform. The
@@ -419,23 +404,7 @@ export default function ReportersCaseStudy() {
       <CaseStudyPhase label="Prototype & Testing" />
 
       <CaseStudySection heading="High-Fidelity wireframes">
-        <p>
-          Secondary research gave us a valuable starting point, however I
-          wanted to conduct primary user research to really delve into the
-          daily work life of a freelancer.
-        </p>
-        <p>
-          For a deeper understanding of freelance needs and challenges, we
-          recruited and conducted a user interview in order to learn about
-          freelance attitudes towards, and management of, non-billable tasks.
-          Because this interview presented a small, non-representative sample,
-          I also conducted a user survey to collect additional data.
-        </p>
-        <p>
-          The goal of my research was to better understand the experience and
-          feelings of freelancers when completing non-billable tasks. Key
-          insights from my discovery research include:
-        </p>
+        <></>
       </CaseStudySection>
       <figure className="cs-figure mt-6 sm:mt-8 w-full">
         <Image
@@ -539,6 +508,7 @@ export default function ReportersCaseStudy() {
       <div className="pb-16 sm:pb-24" />
 
       <SiteFooter />
+      <CaseStudyJsonLd path={SEO.path} name="101 Reporters: freelance journalism platform" description={SEO.description} client="101 Reporters" />
     </main>
   );
 }

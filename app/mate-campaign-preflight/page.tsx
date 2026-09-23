@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, NOINDEX } from "../seo";
 import { Open_Sans } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,11 +8,16 @@ import SiteFooter from "../components/SiteFooter";
 import CaseStudyHero from "../components/case-study/CaseStudyHero";
 import styles from "./mate-case-study.module.css";
 
-export const metadata: Metadata = {
-  title: "The moment before Approve — an independent Mate concept | Dinesh Revunuru",
+const SEO = {
+  path: "/mate-campaign-preflight",
+  title: "Campaign preflight: an independent Mate concept — Dinesh Revunuru",
   description:
-    "I traced one cross-channel campaign decision, then designed and built a preflight to make it easier to understand.",
-  robots: { index: false, follow: false },
+    "An independent Mate concept: one preflight inside the approval moment that shows what is protected, what is unclear, and who owns the next step. Built in React.",
+};
+
+export const metadata = {
+  ...pageMetadata(SEO),
+  ...NOINDEX,
 };
 
 const externalLinkProps = { target: "_blank", rel: "noreferrer" } as const;
@@ -237,6 +242,10 @@ export default function MateCampaignPreflight() {
       <SiteNav active="case-study" />
 
       <CaseStudyHero
+        logo={
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="/logos/mate-wordmark.svg" alt="Mate" />
+        }
         title={
           <>
             {/* {" "} is load-bearing: the mobile rule hides the <br />, and JSX
@@ -253,15 +262,15 @@ export default function MateCampaignPreflight() {
       <section className="cs-container-wide">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-16 lg:gap-24">
           <div>
-            <h3 className="cs-overview-head">What I did</h3>
+            <p className="cs-overview-head">What I did</p>
             <p className="mt-4 cs-overview-body">Product design + front-end build</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Built with</h3>
+            <p className="cs-overview-head">Built with</p>
             <p className="mt-4 cs-overview-body">Figma, React, Next.js, TypeScript</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Quick link</h3>
+            <p className="cs-overview-head">Quick link</p>
             <p className="mt-4 cs-overview-body">
               <Link href="#prototype">Interactive prototype</Link>
             </p>
@@ -491,7 +500,7 @@ export default function MateCampaignPreflight() {
           </p>
           <p>
             Recently, I shipped a live AI booking assistant and admin app. A native booking app is
-            now in beta.
+            now on the App Store.
           </p>
           <p>
             This Mate concept came from the same habit. I followed one question until it became a
@@ -516,7 +525,7 @@ export default function MateCampaignPreflight() {
         </StorySection>
       </article>
 
-      <SiteFooter />
+      <SiteFooter tagline="Independent concept · not affiliated with Mate" />
     </main>
   );
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, NOINDEX } from "../seo";
 import { Open_Sans } from "next/font/google";
 import Image from "next/image";
 import type { ReactNode } from "react";
@@ -6,12 +6,16 @@ import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
 import styles from "./indeed-case-study.module.css";
 
-export const metadata: Metadata = {
-  title: "Before a hiring rule removes someone — a Match Check concept | Dinesh Revunuru",
+const SEO = {
+  path: "/indeed-match-check",
+  title: "Match Check: an independent Indeed concept — Dinesh Revunuru",
   description:
-    "A recruiter tightens one Required qualification on a live job. I designed and built the moment that shows them who it removes, and what their own job post still promises.",
-  // Addressed to one company. Not for the index.
-  robots: { index: false, follow: false },
+    "An independent Indeed concept: when a recruiter tightens a Required qualification, Match Check shows who it removes and what the job post still promises.",
+};
+
+export const metadata = {
+  ...pageMetadata(SEO),
+  ...NOINDEX,
 };
 
 const externalLinkProps = { target: "_blank", rel: "noreferrer" } as const;
@@ -155,15 +159,15 @@ export default function IndeedMatchCheckCaseStudy() {
       <section className="cs-container-wide">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-16 lg:gap-24">
           <div>
-            <h3 className="cs-overview-head">What I did</h3>
+            <p className="cs-overview-head">What I did</p>
             <p className="mt-4 cs-overview-body">Product design + front-end build</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Built with</h3>
+            <p className="cs-overview-head">Built with</p>
             <p className="mt-4 cs-overview-body">React, Next.js, TypeScript</p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Quick link</h3>
+            <p className="cs-overview-head">Quick link</p>
             <p className="mt-4 cs-overview-body">
               <a href="#prototype">Interactive prototype</a>
             </p>
@@ -205,7 +209,7 @@ export default function IndeedMatchCheckCaseStudy() {
         <StorySection title="The problem">
           <p className={styles.statement}>
             When a recruiter tightens a Required qualification on a live job, they can&rsquo;t see
-            who it removes &mdash;
+            who it removes &mdash;{" "}
             <br />
             <mark>or that their own job post still promises the opposite.</mark>
           </p>
@@ -289,7 +293,7 @@ export default function IndeedMatchCheckCaseStudy() {
         <StorySection title="The hypothesis">
           <p className={styles.statement}>
             If Indeed checks Required qualifications against the live post while a recruiter edits
-            them, more harmful mismatches get resolved before applicants are affected &mdash;
+            them, more harmful mismatches get resolved before applicants are affected &mdash;{" "}
             <br />
             <mark>without relaxing legitimate must-haves just to clear a warning.</mark>
           </p>

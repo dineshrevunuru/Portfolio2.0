@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, NOINDEX } from "../seo";
 import { Open_Sans } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,12 +24,16 @@ import {
   QaBeforeAfter,
 } from "./artifacts";
 
-export const metadata: Metadata = {
-  title:
-    "Let Quick do the work. Keep the important decisions. — an independent Amazon Quick concept | Dinesh Revunuru",
+const SEO = {
+  path: "/amazon-quick-delegation",
+  title: "An independent Amazon Quick concept — Dinesh Revunuru",
   description:
-    "An independent Amazon Quick design exploration: delegate a bounded task, keep working, and come back to a result that names what was held — not only what finished.",
-  robots: { index: false, follow: false },
+    "An independent Amazon Quick concept for handing work to an AI assistant: a completion receipt that names what finished, what was held, and what was sent.",
+};
+
+export const metadata = {
+  ...pageMetadata(SEO),
+  ...NOINDEX,
 };
 
 const externalLinkProps = { target: "_blank", rel: "noreferrer" } as const;
@@ -144,6 +148,10 @@ export default function AmazonQuickDelegation() {
       <SiteNav active="case-study" />
 
       <CaseStudyHero
+        logo={
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="/logos/amazon-quick-logo.svg" alt="Amazon Quick" />
+        }
         title={
           <>
             {/* {" "} is load-bearing: the mobile rule hides the <br />, and JSX
@@ -157,20 +165,20 @@ export default function AmazonQuickDelegation() {
       <section className="cs-container-wide">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-16 lg:gap-24">
           <div>
-            <h3 className="cs-overview-head">What I did</h3>
+            <p className="cs-overview-head">What I did</p>
             <p className="mt-4 cs-overview-body">
               Discovery research, problem framing, conversational + interaction design, React
               prototype
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Built with</h3>
+            <p className="cs-overview-head">Built with</p>
             <p className="mt-4 cs-overview-body">
               React, Next.js, TypeScript · AI-assisted research and implementation
             </p>
           </div>
           <div>
-            <h3 className="cs-overview-head">Quick link</h3>
+            <p className="cs-overview-head">Quick link</p>
             <p className="mt-4 cs-overview-body">
               <Link href="#prototype">Interactive prototype</Link>
             </p>

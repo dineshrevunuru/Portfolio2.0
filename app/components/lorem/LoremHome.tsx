@@ -910,6 +910,10 @@ export default function LoremHome({
       data-screen-label="Lorem"
       data-theme={theme}
     >
+      {/* The page's name for screen readers and crawlers. The screen is the
+          voice stage and has no visible title by design; without this, the
+          page had no heading at all. */}
+      <h1 className="sr-only">Lorem, Dinesh Revunuru&apos;s AI best friend</h1>
       <div className="lorem-home-aurora">
         {/* grain={false}: smooth gradient waves. The DS default stays grainy —
             this surface is the exception, not a change to the component.
