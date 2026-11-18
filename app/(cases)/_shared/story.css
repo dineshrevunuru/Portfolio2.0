@@ -1,0 +1,179 @@
+/* A case study as a story (./hss/page.tsx and the ones to follow). The structure is his reference's,
+   measured: a rail of facts beside a quiet title; a 660px reading column; section headings set in the
+   rail as side labels; large pictures between sections, about 1,000px wide, each with one caption.
+   The type and colour are the landing page's. Nothing here is a tile to browse: it is a page to read. */
+.lv.st { --rail: 240px; min-height: 100vh; padding-bottom: 160px; background: var(--surface); color: var(--ink); }
+.st a { color: inherit; text-decoration: none; }
+.st a:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 8px; }
+.st dl, .st dd, .st figure { margin: 0; }
+.st-top { display: flex; align-items: center; justify-content: space-between; max-width: 1240px; margin-inline: auto; padding: 28px clamp(20px, 4vw, 56px); font-size: 16px; line-height: 22px; font-weight: 543; letter-spacing: 0.2px; }
+.st-top a { display: inline-flex; align-items: center; gap: 8px; }
+.st-top svg, .st-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The rail and the reading column. */
+.st-open, .st-sec { display: grid; grid-template-columns: var(--rail) minmax(0, 660px); gap: 40px; max-width: 1240px; margin-inline: auto; padding-inline: clamp(20px, 4vw, 56px); }
+.st-open { padding-top: 56px; }
+.st-rail { display: grid; align-content: start; gap: 20px; font-size: 14px; line-height: 22px; }
+.st-rail dt { color: var(--ink-3); font-size: 12px; line-height: 18px; font-weight: 543; letter-spacing: 0.9px; text-transform: uppercase; }
+.st-col h1 { margin: 0 0 28px; font-size: 32px; line-height: 40px; font-weight: 543; letter-spacing: -0.3px; text-wrap: balance; }
+.lv .st-col p { color: var(--ink-2); font-size: 18px; line-height: 29px; text-wrap: pretty; }
+.lv .st-col p + p { margin-top: 18px; }
+.st-col b { color: var(--ink); font-weight: 600; }
+.st-sec { margin-top: 128px; }
+.st-sec h2 { margin: 2px 0 0; font-size: 20px; line-height: 26px; font-weight: 543; text-wrap: balance; }
+
+/* The product, large, straight after the opening: the page's grey from edge to edge. */
+.st-hero { margin-top: 88px !important; }
+.st-band { display: flex; align-items: flex-end; justify-content: center; gap: 0; height: 600px; padding: 72px 40px 0; overflow: hidden; background: var(--canvas); }
+.st-window { display: block; width: min(880px, 62vw); height: auto; align-self: flex-end; border-radius: 14px 14px 0 0; box-shadow: 0 8px 24px rgb(0 0 0 / 0.05), 0 0 0 1px rgb(var(--ink-rgb) / 0.05); }
+.st-band .st-phone { margin: 0 0 56px -72px; box-shadow: 0 24px 48px -20px rgb(0 0 0 / 0.28), 0 0 0 1px rgb(var(--ink-rgb) / 0.06); }
+/* The page's white phone. */
+.st-phone { flex: none; display: block; width: 252px; height: 414px; overflow: hidden; border-radius: 28px; background: #fff; box-shadow: 0 8px 24px rgb(0 0 0 / 0.04), 0 0 0 1px rgb(var(--ink-rgb) / 0.05); }
+.st-phone :is(video, img) { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+
+/* A picture: 1,000px wide, centred, with one caption. */
+.st-fig { max-width: calc(1000px + 2 * clamp(20px, 4vw, 56px)); margin: 56px auto 0 !important; padding-inline: clamp(20px, 4vw, 56px); }
+.st-fig figcaption { margin-top: 16px; color: var(--ink-3); font-size: 14px; line-height: 20px; letter-spacing: 0.2px; text-align: center; }
+.st-fig + .st-fig { margin-top: 40px !important; }
+/* What a picture lies on: the page's grey, with the picture as a white sheet on it. */
+.st-desk { display: grid; place-items: center; padding: 56px; overflow: hidden; border-radius: 24px; background: var(--canvas); }
+.st-desk > img { display: block; width: 100%; max-width: 760px; height: auto; border-radius: 10px; background: #fff; box-shadow: 0 8px 24px rgb(0 0 0 / 0.05), 0 0 0 1px rgb(var(--ink-rgb) / 0.04); }
+.st-desk > img.st-shot { max-width: none; border-radius: 12px; }
+.st-desk--row { display: flex; align-items: flex-start; justify-content: center; gap: 28px; padding-block: 64px; }
+.st-desk--app { gap: 18px; }
+.st-desk--app > img { flex: 1 1 0; min-width: 0; max-width: 168px; border-radius: 20px; }
+/* A long screenshot: its top, with the rest running off the foot. */
+.st-desk--tall { place-items: start center; height: 640px; padding-bottom: 0; }
+.st-desk--tall > img { max-width: 420px; border-radius: 14px 14px 0 0; }
+
+.st-next { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 96px; }
+.st-btn { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; background: var(--ink); color: #fff !important; font-size: 16px; line-height: 22px; font-weight: 543; letter-spacing: 0.2px; }
+.st-btn--soft { background: rgb(var(--ink-rgb) / 0.06); color: var(--ink) !important; }
+
+@media (max-width: 900px) {
+  .st-open, .st-sec { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .st-open { padding-top: 24px; gap: 32px; }
+  .st-rail { order: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; }
+  .st-col h1 { font-size: 26px; line-height: 32px; margin-bottom: 20px; }
+  .lv .st-col p { font-size: 17px; line-height: 27px; }
+  .st-sec { margin-top: 80px; }
+  .st-hero { margin-top: 48px !important; }
+  /* On a phone the band shows the assistant alone: the admin window is too small to read there, and
+     comes later in the page at full width. */
+  .st-band { height: 420px; padding: 44px 20px 0; }
+  .st-window { display: none; }
+  .st-band .st-phone { margin: 0; width: 240px; height: 396px; border-radius: 26px 26px 0 0; }
+  .st-phone { width: 200px; height: 330px; border-radius: 24px; }
+  .st-fig { margin-top: 32px !important; }
+  .st-desk { padding: 20px; border-radius: 20px; }
+  .st-desk--row { justify-content: flex-start; gap: 16px; padding: 28px 20px; overflow-x: auto; }
+  .st-desk--app > img { flex: none; width: 150px; }
+  .st-desk--tall { height: 480px; padding-bottom: 0; }
+}
+
+/* ---------- colour and motion (second pass) ----------
+   A case study takes its colours from its product. --brand is the product's ground, --brand-2 its
+   lighter end, --gold its accent, --cream its paper. Pictures are drawn in them, and draw themselves
+   when they come on screen (Seen.tsx adds .is-seen; --i is a part's turn). */
+/* --sage is the product's green at about a tenth of its strength: the ground for product pictures.
+   His note on the first colour pass, with the four deep-green grounds selected: "These backgrounds
+   feels a bit of too much". Deep green is now kept for small parts and for the results alone. */
+.st--hss { --brand: #102e2c; --brand-2: #2f5a50; --gold: #e7c272; --cream: #f5efe2; --sage: #e6eeea; --sage-2: #d9e5df; --bad: #b4472f; }
+.st-band--brand, .st-desk--brand { background: linear-gradient(180deg, var(--sage), var(--sage-2)); }
+.st-desk--deep { background: linear-gradient(180deg, var(--brand), var(--brand-2)); color: #fff; }
+.st-desk--cream { background: var(--cream); }
+.st-band--brand .st-window { box-shadow: 0 30px 60px -28px rgb(16 46 44 / 0.35), 0 0 0 1px rgb(16 46 44 / 0.06); }
+.st-band--brand .st-phone, .st-films .st-phone { box-shadow: 0 30px 60px -26px rgb(16 46 44 / 0.45), 0 0 0 1px rgb(16 46 44 / 0.07); }
+.st-desk--brand > img { box-shadow: 0 30px 60px -28px rgb(16 46 44 / 0.35), 0 0 0 1px rgb(16 46 44 / 0.06); }
+.st-hero--mid { margin-top: 56px !important; }
+.st-hero figcaption { margin-top: 16px; padding-inline: 20px; color: var(--ink-3); font-size: 14px; line-height: 20px; letter-spacing: 0.2px; text-align: center; }
+.st [style*="--i"] { transition: opacity 0.6s var(--fade), transform 0.7s var(--settle), background-color 0.5s var(--fade), color 0.5s var(--fade), border-color 0.5s var(--fade); transition-delay: calc(var(--i) * 110ms); }
+.st :is(.st-desk, .st-band):not(.is-seen) > [style*="--i"], .st :is(.st-desk, .st-band):not(.is-seen) .st-heads i { opacity: 0; transform: translateY(14px); }
+
+/* What the owners said. */
+.st-quotes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; place-items: stretch; padding: 48px; }
+.st-quotes blockquote { display: grid; grid-template-rows: auto 1fr auto; gap: 10px; margin: 0; padding: 22px 24px 24px; border-radius: 18px; background: #fff; box-shadow: 0 8px 24px rgb(0 0 0 / 0.04); }
+.st-quotes blockquote i { height: 30px; color: var(--gold); font-style: normal; font-size: 64px; line-height: 64px; font-weight: 600; }
+.lv .st-quotes blockquote p { color: var(--ink); font-size: 18px; line-height: 26px; font-weight: 500; text-wrap: pretty; }
+.st-quotes cite { color: var(--ink-3); font-style: normal; font-size: 13px; line-height: 18px; letter-spacing: 0.2px; }
+.lv .st-verdict { grid-column: 1 / -1; justify-self: center; margin-top: 12px; padding: 14px 26px; border-radius: 999px; background: var(--brand); color: #fff; font-size: 18px; line-height: 24px; font-weight: 543; text-align: center; }
+
+/* Who he talked to. */
+.st-people { gap: 28px; padding: 56px 48px; }
+.st-heads { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+.st-heads i { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; background: var(--brand); color: #fff; transition: opacity 0.5s var(--fade), transform 0.6s var(--settle); transition-delay: calc(var(--i) * 70ms); }
+.st-heads i.is-new { background: var(--gold); color: var(--brand); }
+.st-heads svg { width: 40px; height: 40px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.st-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 40px; font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.st-legend span { display: inline-flex; align-items: baseline; gap: 10px; }
+.st-legend b { color: var(--brand); font-size: 32px; line-height: 36px; font-weight: 600; }
+.st-legend .is-new b { color: #a9812a; }
+
+/* A path of steps. */
+.st-paths { gap: 28px; place-items: stretch; padding: 48px; }
+.st-path { display: grid; gap: 12px; }
+.st-path > b { font-size: 16px; line-height: 22px; font-weight: 543; }
+.st-path ol { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.st-path li { position: relative; flex: 1 1 0; min-width: 0; padding: 14px 14px 16px; border-radius: 14px; background: #fff; font-size: 14px; line-height: 19px; font-weight: 500; box-shadow: 0 8px 24px rgb(0 0 0 / 0.04); }
+.st-path li + li::before { content: ""; position: absolute; left: -8px; top: 50%; width: 8px; height: 2px; background: currentColor; opacity: 0.25; }
+.st-path--bad .st-end { background: var(--bad); color: #fff; }
+.st-path--good .st-end { background: var(--brand); color: #fff; }
+
+/* The band of films, with the one path above them. */
+.st-band--films { display: grid; align-items: start; justify-content: center; grid-template-columns: minmax(0, 1000px); gap: 48px; height: auto; padding: 64px clamp(20px, 4vw, 56px) 0; }
+.st-films { display: flex; justify-content: center; gap: 36px; margin-bottom: -40px; }
+
+/* The model's tools. */
+.st-tools { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; place-items: stretch; padding: 48px 40px; }
+.st-tools > div { display: grid; align-content: space-between; gap: 28px; min-height: 148px; padding: 18px 18px 20px; border-radius: 18px; background: var(--brand); color: #fff; }
+.st-tools small { color: var(--gold); font-size: 12px; line-height: 16px; font-weight: 543; letter-spacing: 0.8px; text-transform: uppercase; }
+.st-tools b { font-size: 18px; line-height: 23px; font-weight: 543; text-wrap: balance; }
+.st-tools .st-never { background: none; color: var(--bad); border: 2px dashed rgb(180 71 47 / 0.55); }
+.st-tools .st-never small { color: var(--bad); }
+.st-tools .st-never b { text-decoration: line-through; text-decoration-thickness: 2px; }
+
+/* The App Store posters, passing. Twice as long as it needs to be, moved by half: no seam. */
+.st-reel { overflow: hidden; background: linear-gradient(180deg, var(--sage), var(--sage-2)); padding: 56px 0; }
+.st-reel-track { display: flex; gap: 20px; width: max-content; padding-left: 20px; animation: st-pass 70s linear infinite; }
+.st-reel-track img { display: block; flex: none; width: 250px; height: auto; border-radius: 22px; box-shadow: 0 30px 60px -30px rgb(16 46 44 / 0.5); }
+.st-reel:hover .st-reel-track { animation-play-state: paused; }
+@keyframes st-pass { to { transform: translateX(-50%); } }
+
+/* The results. */
+.st-results { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; place-items: stretch; padding: 56px 16px; }
+.st-results > div { display: grid; align-content: start; gap: 14px; padding: 0 32px; }
+.st-results > div + div { border-left: 1px solid rgb(255 255 255 / 0.14); }
+.st-results small { color: rgb(255 255 255 / 0.66); font-size: 14px; line-height: 20px; letter-spacing: 0.2px; }
+.st-results b { font-size: 44px; line-height: 48px; font-weight: 580; letter-spacing: -0.4px; white-space: nowrap; }
+.st-results b i { font-style: normal; font-weight: 400; opacity: 0.45; }
+.st-results b em { color: var(--gold); font-style: normal; }
+.st-note { color: rgb(255 255 255 / 0.66); font-size: 16px; line-height: 22px; }
+.st-bars { display: grid; gap: 8px; margin-top: 6px; }
+.st-bars i { display: block; height: 10px; border-radius: 999px; background: rgb(255 255 255 / 0.28); width: 100%; transform-origin: 0 50%; transition: transform 1.1s var(--settle) 0.3s; }
+.st-bars i + i { width: 38%; background: var(--gold); transition-delay: 0.55s; }
+.st-results:not(.is-seen) .st-bars i { transform: scaleX(0); }
+.st-meter { position: relative; display: block; height: 10px; margin-top: 6px; border-radius: 999px; background: rgb(255 255 255 / 0.16); }
+.st-meter i { position: absolute; inset: 0 auto 0 0; width: 72%; border-radius: 999px; background: var(--gold); transition: width 1.3s var(--settle) 0.4s; }
+.st-results:not(.is-seen) .st-meter i { width: 40%; }
+.st-meter u { position: absolute; left: 80%; top: -5px; height: 20px; padding-left: 8px; border-left: 2px solid #fff; color: rgb(255 255 255 / 0.8); font-size: 12px; line-height: 20px; text-decoration: none; white-space: nowrap; transform: translateY(22px); }
+.st-meter u { top: -5px; transform: none; padding-top: 22px; height: 42px; }
+
+@media (max-width: 900px) {
+  .st-quotes, .st-tools, .st-results { grid-template-columns: minmax(0, 1fr); }
+  .st-quotes, .st-paths, .st-tools { padding: 20px; }
+  .st-people { padding: 32px 20px; }
+  .st-heads i { width: 56px; height: 56px; } .st-heads svg { width: 28px; height: 28px; }
+  .st-path ol { flex-direction: column; }
+  .st-path li + li::before { left: 22px; top: -8px; width: 2px; height: 8px; }
+  .st-tools > div { min-height: 0; gap: 10px; }
+  .st-band--films { padding-top: 32px; gap: 28px; }
+  .st-films { justify-content: flex-start; gap: 16px; overflow-x: auto; margin-bottom: 0; padding-bottom: 28px; }
+  .st-reel { padding: 32px 0; } .st-reel-track img { width: 190px; }
+  .st-results { padding: 28px 4px; } .st-results > div { padding: 22px 24px; } .st-results > div + div { border-left: 0; border-top: 1px solid rgb(255 255 255 / 0.14); }
+  .st-results b { font-size: 36px; line-height: 40px; }
+  .lv .st-verdict { border-radius: 18px; font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .st [style*="--i"], .st-heads i, .st-bars i, .st-meter i { transition: none; }
+  .st-reel { overflow-x: auto; } .st-reel-track { animation: none; }
+}

@@ -1,0 +1,97 @@
+/* =========================================================
+   Hero sketch B (/sketches/b): the first screen is drawn and typed the way Figma does it.
+   Unlayered so Tailwind cannot win. Hiding is switched on by .is-armed (set by the effect only),
+   so no JS, reduced motion or a failure all show the finished page.
+   ========================================================= */
+
+.fh {
+  --ink: #0d0c0a;
+  --ink-2: #55524a;
+  --ink-3: #8a867c;
+  --paper: #fcf9f8;
+  --figma: #0d99ff; /* the selection blue Figma draws boxes in */
+  --agent: #2e71f1;
+  --snap: cubic-bezier(0, 0.94, 0.62, 1);
+  --settle: cubic-bezier(0.3, 0, 0.1, 1);
+  --g: clamp(20px, 5vw, 80px);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: clip;
+  background: var(--paper);
+  color: var(--ink);
+}
+.sk:has(.fh) { background: var(--paper); }
+.fh a { color: inherit; text-decoration: none; }
+.fh a:focus-visible { outline: 3px solid #2f6bff; outline-offset: 4px; border-radius: 4px; }
+
+/* ---------- the page ---------- */
+
+.fh-top { display: flex; justify-content: space-between; align-items: center; padding: 28px var(--g); }
+.fh-id { display: flex; align-items: center; gap: 14px; font-size: 15px; line-height: 1.3; }
+.fh-id b { display: block; font-weight: 600; }
+.fh-id i { display: block; color: var(--ink-3); font-style: normal; }
+.fh-mark { font-weight: 700; font-size: 20px; letter-spacing: -0.03em; }
+.fh-nav { display: flex; gap: 32px; font-size: 15px; font-weight: 500; }
+.fh-nav a { position: relative; }
+.fh-nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 1.5px; background: currentColor; transform: scaleX(0); transform-origin: 0 50%; transition: transform 0.3s var(--settle); }
+.fh-nav a:hover::after { transform: scaleX(1); }
+
+.fh-main { display: grid; align-content: center; justify-items: center; padding: 0 var(--g); }
+.fh-stage { position: relative; display: grid; justify-items: center; text-align: center; }
+.fh-h { margin: 0; font-size: clamp(40px, 8.6vw, 132px); line-height: 1.02; font-weight: 600; letter-spacing: -0.045em; }
+.fh-sub { max-width: 40ch; margin: 1.6em 0 0; color: var(--ink-2); font-size: clamp(16px, 1.35vw, 20px); line-height: 1.55; }
+.fh-cta { display: flex; align-items: center; gap: 28px; margin-top: 32px; }
+.fh-btn { display: inline-flex; align-items: center; height: 52px; padding: 0 28px; border-radius: 999px; background: var(--ink); color: #fff !important; font-weight: 600; font-size: 16px; transition: transform 0.15s var(--snap); }
+.fh-btn:hover { transform: translateY(-2px); }
+.fh-btn:active { transform: scale(0.97); }
+.fh-link { font-weight: 600; font-size: 16px; text-decoration: underline !important; text-decoration-thickness: 2px !important; text-underline-offset: 6px; }
+
+.fh-foot { display: flex; justify-content: space-between; padding: 24px var(--g); color: var(--ink-3); font-size: 14px; }
+.fh-scroll { position: relative; padding-right: 18px; }
+.fh-scroll::after { content: ""; position: absolute; right: 2px; top: 4px; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); animation: fh-nudge 2s var(--settle) infinite; }
+@keyframes fh-nudge { 0%, 60%, 100% { transform: translateY(0) rotate(45deg); } 30% { transform: translateY(4px) rotate(45deg); } }
+
+/* ---------- the reveal ---------- */
+
+/* The top bar and foot are there at once, so the visitor always knows whose page this is. */
+.fh.is-armed .fh-top,
+.fh.is-armed .fh-foot { animation: fh-in 0.5s var(--settle) both; }
+@keyframes fh-in { from { opacity: 0; transform: translateY(-6px); } }
+
+/* Text waits for its keystroke; buttons wait for their box. */
+.fh.is-armed .fh-ch:not(.on) { opacity: 0; }
+.fh.is-armed .fh-cta:not(.on) > * { opacity: 0; transform: scale(0.96); }
+.fh-cta > * { transition: opacity 0.25s var(--settle), transform 0.3s var(--snap); }
+.fh-cta.on > :last-child { transition-delay: 0.08s; }
+
+/* A Figma text box: blue outline with a size label while dragged, then a caret while typing. */
+.fh-box { position: absolute; z-index: 3; border: 1px solid var(--figma); pointer-events: none; transition: opacity 0.2s var(--settle); }
+.fh-size { position: absolute; left: 50%; top: calc(100% + 6px); padding: 1px 6px; border-radius: 3px; background: var(--figma); color: #fff; font: 500 11px/16px var(--font-sk), system-ui, sans-serif; letter-spacing: 0; white-space: nowrap; transform: translateX(-50%); }
+.fh-box[data-mode="edit"] .fh-size { opacity: 0; }
+.fh-box[data-mode="off"] { opacity: 0; }
+.fh-caret { position: absolute; left: 0; top: 0; width: 2px; height: 0; background: var(--figma); display: none; }
+.fh-box[data-mode="edit"] .fh-caret { display: block; animation: fh-blink 1s steps(1) infinite; }
+@keyframes fh-blink { 50% { opacity: 0; } }
+
+/* Cursors, in Figma's multiplayer style: an arrow and a name tag. His is ink; the agents are blue. */
+.fh-cur { position: absolute; left: 0; top: 0; z-index: 4; display: flex; align-items: flex-start; opacity: 0; pointer-events: none; transition: opacity 0.2s var(--settle); --c: var(--agent); }
+.fh-cur.is-on { opacity: 1; }
+.fh-cur--me { --c: var(--ink); }
+.fh-cur svg { width: 18px; height: 24px; flex: none; margin: -2px 0 0 -2px; transition: transform 0.12s var(--snap); }
+.fh-cur path { fill: var(--c); stroke: #fff; stroke-width: 1.4; stroke-linejoin: round; }
+.fh-cur span { margin: 18px 0 0 -4px; padding: 0 8px; border-radius: 4px; background: var(--c); color: #fff; font: 500 12px/20px var(--font-sk), system-ui, sans-serif; letter-spacing: 0; white-space: nowrap; }
+.fh-cur.is-down svg { transform: scale(0.85); }
+
+@media (max-width: 760px) {
+  .fh-top { padding-top: 20px; }
+  .fh-nav { gap: 18px; font-size: 14px; }
+  .fh-id > span:last-child { display: none; }
+  .fh-h { font-size: clamp(34px, 10.4vw, 72px); }
+  .fh-cta { flex-direction: column; gap: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fh *, .fh *::after { transition: none !important; animation: none !important; }
+}

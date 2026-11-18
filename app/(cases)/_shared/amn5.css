@@ -1,0 +1,310 @@
+/* AMN Healthcare, fifth version (./amn-v5): the fourth's words on the third's pictures, with the
+   second's Type and lock-up cells in the board. Only what differs from ./amn2.css and ./amn3.css is
+   here; ./amn4.css is not loaded, so the people cards and the strips are the third's. */
+
+/* A paragraph between two pictures of the same chapter: no heading of its own, less air above. The
+   empty first cell is where a heading would be. */
+.st--amn5 .st-sec--text { margin-top: 64px; }
+.st--amn5 .st-sec--text > span { display: block; }
+
+/* A strip that runs past the screen fades at its right edge, so it reads as "more this way". The extra
+   room on the right lets the last phone come clear of the fade. */
+.st--amn5 .a3-strip[data-n="7"] { padding-right: 72px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); }
+@media (max-width: 1727px) { .st--amn5 .a3-strip[data-n="6"] { padding-right: 72px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); } }
+@media (max-width: 1439px) { .st--amn5 .a3-strip[data-n="5"] { padding-right: 72px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); } }
+@media (max-width: 1187px) { .st--amn5 .a3-strip[data-n="4"] { padding-right: 72px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); } }
+
+/* The closing panel says, inside itself, whose figures these are. */
+.st--amn5 .a4-src { margin: 30px 32px 0; padding-top: 18px; border-top: 1px solid rgb(255 255 255 / 0.16); color: rgb(255 255 255 / 0.72); font-size: 14px; line-height: 20px; }
+
+/* ---------- the design-system board, refined (his "This section got so messed up") ----------
+   Two groups with a label each. In Foundations color is the left column and type the right. Cells in
+   a row are the same height and their contents fill them, so nothing hangs in white space. */
+
+/* The board sat 0px under its text: story.css's `.st figure { margin: 0 }` beat `.a2-boardfig`. */
+.st .st--amn5 .a2-boardfig, .st.st--amn5 .a2-boardfig { margin-top: 56px; }
+
+.st--amn5 .a5-group { grid-column: 1 / -1; margin: 0; padding: 0 4px 4px; color: var(--ink-3); font-size: 12px; line-height: 18px; font-weight: 543; letter-spacing: 0.9px; text-transform: uppercase; }
+.st--amn5 .a5-group ~ .a5-group { margin-top: 40px; }
+.st--amn5 .a5-sub { color: var(--ink-3); font-family: var(--mono); font-size: 11px; line-height: 16px; letter-spacing: 0.6px; text-transform: uppercase; }
+
+/* Colors with an assigned meaning: the three alerts, then the eleven credentialing categories. */
+.st--amn5 .a5-mean .a2-kinds + .a5-sub { margin-top: 14px; padding-top: 20px; border-top: 1px solid var(--hair); }
+.st--amn5 .a3-type { grid-template-rows: auto auto 1fr; }
+.st--amn5 .a3-type ul { align-content: space-between; }
+
+/* Icons: the seven named ones over the general set. Logos: three tiles that share the cell's height. */
+.st--amn5 .a5-icons { grid-template-rows: auto auto 1fr; }
+.st--amn5 .a5-icons .a3-notes { margin: 0; padding: 4px 0 22px; border-top: 0; }
+.st--amn5 .a5-icons .a3-gen { align-content: space-between; margin: 10px 0 0; gap: 20px 0; }
+.st--amn5 .a5-lock { grid-template-rows: auto repeat(3, minmax(64px, 1fr)); }
+.st--amn5 .a5-lock > span { display: grid; place-items: center; border-radius: 14px; background: #f5f5f5; }
+.st--amn5 .a5-lock > span.is-purple { background: linear-gradient(160deg, #7f5dd6, #5b33ad); }
+.st--amn5 .a5-lock .pp-logo { font-size: 24px; line-height: 30px; }
+.st--amn5 .a5-lock img[alt] { width: auto; height: 38px; }
+
+/* The error card stands in the middle of its cell. Tags and status: one strip of three named groups. */
+.st--amn5 .a5-err { grid-template-rows: auto 1fr; }
+.st--amn5 .a5-err > .pp-card { align-self: center; }
+.st--amn5 .a5-tags { grid-template-columns: 1.5fr 0.8fr 1fr; gap: 0 32px; }
+.st--amn5 .a5-tags > h3 { grid-column: 1 / -1; }
+.st--amn5 .a5-tags > div { display: grid; align-content: start; gap: 12px; min-width: 0; }
+.st--amn5 .a5-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.st--amn5 .a5-chips u { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 3px; color: #fff; font-size: 11.5px; line-height: 16px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.st--amn5 .a5-chips u .pp-ic { width: 11px; height: 11px; }
+.st--amn5 .a5-chips u.is-line { background: #fff; box-shadow: inset 0 0 0 1.5px var(--navy); color: var(--navy); }
+.st--amn5 .a5-chips u.is-pill { border-radius: 999px; background: var(--err); font-size: 10px; letter-spacing: 0.4px; }
+.st--amn5 u.is-count { display: inline-grid; place-items: center; width: 24px; height: 24px; padding: 0; border-radius: 50%; background: var(--err); color: #fff; font-size: 11.5px; line-height: 1; font-weight: 700; text-decoration: none; }
+.st--amn5 .a5-chips u.is-flag { display: inline-grid; gap: 0; height: auto; padding: 7px 14px 8px 12px; border-radius: 10px 10px 10px 0; font-size: 13px; line-height: 17px; }
+.st--amn5 .a5-chips u.is-flag small { color: #fff; font-size: 9px; line-height: 12px; font-weight: 400; }
+
+/* Cards: four equal columns, each named. */
+.st--amn5 .a5-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 24px; }
+.st--amn5 .a5-cards > div { gap: 12px; }
+.st--amn5 .a5-cards .a5-sub { margin-bottom: 2px; }
+.st--amn5 .a5-arow { display: flex; align-items: center; gap: 10px; padding-right: 10px; overflow: hidden; border-radius: 10px; background: #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.14); }
+.st--amn5 .a5-arow > i { flex: none; width: 48px; height: 52px; background: #8f9ca8 url(/sketches/work/amn/amn-booked.webp) center / cover; }
+.st--amn5 .a5-arow b { flex: 1; min-width: 0; overflow: hidden; color: var(--navy); font-size: 13px; line-height: 18px; font-weight: 400; white-space: nowrap; text-overflow: ellipsis; }
+.st--amn5 .a5-arow .pp-ic { flex: none; width: 12px; height: 12px; color: #9a9da0; }
+
+@media (max-width: 1040px) {
+  /* Two columns. Type and Type styles pair up (dense flow lets the second fill the place beside the
+     first); everything else in Foundations is full width, so nothing from Components is pulled up. */
+  .st--amn5 .a5-board { grid-auto-flow: dense; }
+  .st--amn5 .a5-board > .a5-lock { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto 72px; }
+  .st--amn5 .a5-board > .a5-lock > h3 { grid-column: 1 / -1; }
+  .st--amn5 .a5-lock .pp-logo { font-size: 18px; line-height: 24px; }
+  .st--amn5 .a5-lock img[alt] { height: 30px; }
+  .st--amn5 .a5-board > .a5-err { grid-column: 1 / -1; }
+  .st--amn5 .a5-err > .pp-card { justify-self: center; width: min(100%, 360px); }
+  .st--amn5 .a5-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 24px; }
+}
+@media (max-width: 900px) {
+  .st--amn5 .st-sec--text { margin-top: 40px; }
+  .st--amn5 .st-sec--text > span { display: none; }
+  .st--amn5 .a4-src { margin: 8px 24px 16px; }
+  .st .st--amn5 .a2-boardfig, .st.st--amn5 .a2-boardfig { margin-top: 32px; }
+  .st--amn5 .a5-group ~ .a5-group { margin-top: 28px; }
+}
+/* A tablet keeps the board's two columns (the second version's rule made it one column from 900px,
+   which stretched a button across the whole screen). */
+@media (min-width: 641px) and (max-width: 900px) {
+  .st--amn5 .a5-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .st--amn5 .a5-board > :is(.a2-cell--4, .a2-cell--5) { grid-column: span 1; }
+  .st--amn5 .a5-board > :is(.a5-lock, .a5-err) { grid-column: 1 / -1; }
+  .st--amn5 .a2-sw { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .st--amn5 .a5-board > .a5-lock { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto repeat(3, 64px); }
+  .st--amn5 .a5-tags { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .st--amn5 .a5-cards { grid-template-columns: minmax(0, 1fr); }
+  .st--amn5 .a5-icons .a3-notes { flex-wrap: wrap; justify-content: flex-start; gap: 14px 8px; }
+}
+
+/* ---------- screens 10 to 12, matched to the team's sheet ----------
+   Drawn at the sheet's size (360 x 743) and shown at the phone's (256 x 528), so every measure below is
+   read straight off the sheet: header 84 tall, a card 57 to 77 tall, the red bar 5 wide. */
+.st--amn5 .a2-ph .c5 { position: relative; display: block; width: 360px; height: 743px; overflow: hidden; zoom: 0.7111; background: #f4f4f5; color: #333; font-size: 14px; line-height: 20px; text-align: left; }
+.c5 :is(b, em, small, u) { font-weight: 400; }
+.c5 .pp-ic { flex: none; }
+.c5-head { position: relative; z-index: 1; display: grid; place-items: end center; height: 84px; padding-bottom: 12px; background: #fff; box-shadow: 0 2px 6px rgb(0 0 0 / 0.08); }
+.c5-head b { color: var(--navy); font-size: 17.5px; line-height: 26px; }
+.c5-head .pp-ic { position: absolute; left: 22px; bottom: 15px; width: 20px; height: 20px; color: var(--sky); stroke-width: 1.4; }
+
+/* 10: the credential center */
+.c5-cc { display: grid; gap: 9px; padding: 29px 14px 0; }
+.c5-hot--green { margin-bottom: 3px; }
+.c5-find { display: flex; align-items: center; gap: 10px; height: 36px; margin: 0 15px 2px; padding: 0 12px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px #d8dbde; color: #8a8d90; font-size: 12px; }
+.c5-find .pp-ic { width: 14px; height: 14px; }
+.c5-hot { display: flex; align-items: center; gap: 12px; height: 59px; padding: 0 16px 0 18px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1.5px #e9a99c, 0 2px 6px rgb(0 0 0 / 0.06); }
+.c5-hot--green { box-shadow: inset 0 0 0 1.5px #a8d59f, 0 2px 6px rgb(0 0 0 / 0.06); }
+.c5-hot > .pp-ic:first-child { width: 30px; height: 30px; color: var(--err); stroke-width: 1.15; }
+.c5-hot--green > .pp-ic:first-child { color: #5aa84f; }
+.c5-hot b { flex: 1; min-width: 0; color: #3d3f42; font-size: 15.5px; line-height: 22px; font-weight: 500; }
+.c5-hot u { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--err); color: #fff; font-size: 10px; line-height: 1; font-weight: 700; }
+.c5 :is(.c5-hot, .c5-row, .c5-g, .c5-it) > .pp-ic:last-child { width: 14px; height: 14px; color: #c5c8cc; }
+.c5-row { display: flex; align-items: center; gap: 12px; height: 77px; padding: 0 16px 0 9px; border-radius: 16px; background: #fff; box-shadow: 0 1px 5px rgb(0 0 0 / 0.07); }
+.c5-tile { position: relative; flex: none; display: grid; place-items: center; width: 58px; height: 60px; border-radius: 9px; background: #d6e8f7; color: var(--navy); }
+.c5-tile .pp-ic { width: 34px; height: 34px; stroke-width: 1.2; }
+.c5-tile u { position: absolute; right: -5px; top: -5px; display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--err); box-shadow: 0 0 0 1.5px #fff; color: #fff; font-size: 10px; line-height: 1; font-weight: 700; }
+.c5-row b { flex: 1; min-width: 0; color: #75787b; font-size: 14px; line-height: 20px; }
+.c5-row em { color: #333; font-size: 15px; }
+.c5-fab { position: absolute; right: 28px; bottom: 3px; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--navy); color: #fff; box-shadow: 0 4px 10px rgb(0 0 0 / 0.3); }
+.c5-fab .pp-ic { width: 24px; height: 24px; stroke-width: 3; }
+
+/* 11 and 12: open requirements */
+.c5-sorts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 14px 17px; border-bottom: 1px solid #e2e4e7; }
+.c5-sorts i { display: flex; align-items: center; justify-content: space-between; height: 35px; padding: 0 14px; border-radius: 5px; background: #fff; box-shadow: 0 1px 4px rgb(0 0 0 / 0.07); color: #444; font-size: 12px; }
+.c5-sorts .pp-ic { width: 16px; height: 16px; color: #9a9da0; }
+.c5-all { display: block; padding: 8px 14px 8px; color: var(--sky); font-size: 15.5px; line-height: 24px; text-align: right; }
+.c5-list { display: grid; gap: 10px; padding: 0 14px; }
+.c5-g, .c5-it { display: flex; align-items: center; height: 57px; border-radius: 5px; background: #fff; box-shadow: inset 5px 0 0 var(--err), 0 1px 5px rgb(0 0 0 / 0.08); }
+.c5-g { gap: 16px; padding: 0 22px 0 20px; }
+.c5-g > .pp-ic:first-child { width: 28px; height: 28px; color: var(--navy); stroke-width: 1.35; }
+.c5-g > .pp-ic.is-solid { fill: currentColor; stroke: #fff; stroke-width: 1.1; }
+/* The globe is a solid disc with the land cut out of it. */
+.c5-g > .pp-ic.is-earth { fill: currentColor; fill-rule: evenodd; stroke: none; }
+.c5-g b { flex: 1; min-width: 0; color: #7a7d80; font-size: 13.5px; }
+.c5-g em { margin-right: -4px; color: #333; font-size: 14px; }
+/* An opened group: its items step in, with a line down their left side. */
+.c5-open { display: grid; gap: 10px; margin-left: 3px; padding-left: 10px; border-left: 2px solid #d4d7da; }
+.c5-it { gap: 12px; padding: 0 16px 0 22px; }
+.c5-it > .pp-ic:first-child { width: 26px; height: 26px; margin-left: -1px; color: #8a8d90; stroke-width: 1.2; }
+.c5-it span { flex: 1; display: grid; min-width: 0; }
+.c5-it b { overflow: hidden; color: var(--navy); font-size: 13px; line-height: 18px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.c5-it small { color: #8a8d90; font-size: 11px; line-height: 15px; }
+.c5-it small.is-bad { color: var(--err); }
+.c5-it u { padding: 4px 10px; border-radius: 999px; background: var(--err); color: #fff; font-size: 9.5px; line-height: 14px; font-weight: 700; letter-spacing: 0.3px; }
+
+/* The record after files are added (15) */
+.c5-rec { display: grid; gap: 14px; padding: 16px 11px 0; }
+.c5-card { display: grid; border-radius: 6px; background: #fff; box-shadow: 0 1px 5px rgb(0 0 0 / 0.07); }
+.c5-up { padding: 22px 20px; }
+.c5-up small { color: #8a8d90; font-size: 9.5px; line-height: 14px; letter-spacing: 0.4px; }
+.c5-up b { margin-top: 12px; color: var(--navy); font-size: 19px; line-height: 26px; }
+.c5-up em { color: #8a8d90; font-size: 12px; line-height: 17px; }
+.c5-up span { margin-top: 14px; color: #8a8d90; font-size: 12px; line-height: 18px; }
+.c5-docs { gap: 14px; padding: 15px 14px 14px; }
+.c5-files { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.c5-files i { position: relative; display: grid; place-items: center; height: 128px; border-radius: 8px; }
+/* The record's first file is a photograph of a filled-in form (a stock stand-in, CREDITS.md). */
+.c5-files .is-photo { background: #c3cad3 url(/sketches/work/amn/amn-upload.jpg) center / cover; }
+.c5-files .is-pdf { background: #fff; box-shadow: inset 0 0 0 1.5px #e9a99c; }
+.c5-files .is-pdf b { display: grid; place-items: center; width: 62px; height: 76px; padding-top: 14px; border-radius: 6px; background: #d9503f; clip-path: polygon(0 0, 70% 0, 100% 24%, 100% 100%, 0 100%); color: #fff; font-size: 15px; line-height: 1; font-weight: 700; }
+.c5-files u { position: absolute; right: 8px; top: 8px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #7d8085; color: #fff; }
+.c5-files u .pp-ic { width: 16px; height: 16px; }
+.c5-add { display: grid; justify-items: center; gap: 2px; padding: 13px 0 11px; border: 1.5px dashed var(--sky); border-radius: 8px; color: var(--sky); font-size: 11px; line-height: 16px; }
+.c5-add .pp-ic { width: 20px; height: 20px; stroke-width: 2.6; }
+.c5-box { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 3px; background: #fff; box-shadow: inset 0 0 0 1.5px #c5c8cc; }
+.c5-box.is-on { background: #2f8fd3; box-shadow: none; color: #fff; }
+.c5-box .pp-ic { width: 14px; height: 14px; stroke-width: 2.4; }
+.c5-tick { display: flex; align-items: flex-start; gap: 12px; padding: 22px 20px; color: #8a8d90; font-size: 12.5px; line-height: 18px; }
+.c5-sel { display: block; padding: 4px 2px 0; color: #75787b; font-size: 13px; line-height: 18px; }
+.c5-picks { gap: 18px; padding: 20px; }
+.c5-picks span { display: flex; align-items: center; gap: 12px; color: #555; font-size: 13.5px; }
+.c5-foot { position: absolute; inset: auto 0 0 0; padding: 16px 26px; background: #fff; box-shadow: 0 -2px 8px rgb(0 0 0 / 0.1); }
+.c5-btn { display: grid; place-items: center; height: 48px; border-radius: 6px; background: var(--navy); color: #fff; font-size: 16px; }
+
+/* The main menu (16): rows on white, a grey band for the section, the tab bar. */
+.st--amn5 .a2-ph .c5--white { background: #fff; }
+.c5-me { position: absolute; right: 18px; bottom: 9px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #8fc3c9; color: #fff; font-size: 10.5px; line-height: 1; }
+.c5-menu { display: grid; }
+.c5-menu i { display: flex; align-items: center; gap: 12px; height: 46px; margin: 0 24px; border-bottom: 1px solid #e6e8eb; }
+.c5-menu i:has(+ em), .c5-menu i:last-child { border-bottom: 0; }
+.c5-menu i > .pp-ic:first-child { width: 18px; height: 18px; color: #8a8d90; stroke-width: 1.2; }
+.c5-menu i > .pp-ic:last-child { width: 13px; height: 13px; color: #c5c8cc; }
+.c5-menu b { flex: 1; min-width: 0; color: #3b4654; font-size: 14.5px; font-weight: 500; }
+.c5-menu em { display: flex; align-items: center; height: 32px; padding: 0 24px; background: #f1f2f3; color: #8a8d90; font-size: 9.5px; letter-spacing: 0.5px; }
+.c5-tabs { position: absolute; inset: auto 0 0 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 74px; padding: 12px 8px 0; background: #fff; box-shadow: 0 -2px 8px rgb(0 0 0 / 0.1); }
+.c5-tabs i { display: grid; justify-items: center; align-content: start; gap: 5px; color: #8a8d90; }
+.c5-tabs .pp-ic { width: 22px; height: 22px; stroke-width: 1.2; }
+.c5-tabs small { font-size: 9px; line-height: 12px; }
+.c5-tabs i.is-on { color: var(--sky); }
+
+/* The sheet with two ways to answer (14): the same scale as its neighbours. */
+.st--amn5 .a2-ph .c5--dim { background: #9a9b9d; }
+.c5-modal { position: absolute; left: 15px; right: 15px; top: 146px; display: grid; justify-items: center; padding: 66px 24px 30px; border-radius: 4px; background: #fff; box-shadow: 0 6px 20px rgb(0 0 0 / 0.2); text-align: center; }
+.c5-modal .c5-x { position: absolute; right: 22px; top: 20px; width: 18px; height: 18px; color: var(--sky); }
+.c5-modal .c5-big { width: 66px; height: 66px; color: #75787b; stroke-width: 0.8; }
+.c5-modal b { margin-top: 30px; color: var(--navy); font-size: 24px; line-height: 32px; }
+.c5-modal small { max-width: 250px; color: #8a8d90; font-size: 12px; line-height: 19px; }
+.c5-modal b + small { margin-top: 24px; }
+.c5-modal .c5-btn { justify-self: stretch; margin-top: 14px; }
+.c5-modal em { display: flex; align-items: center; gap: 12px; justify-self: stretch; margin: 14px 0; color: #8a8d90; font-size: 12px; line-height: 18px; }
+.c5-modal em::before, .c5-modal em::after { content: ""; flex: 1; height: 1px; background: #d5d8db; }
+.c5-modal em + small + .c5-btn { margin-top: 12px; }
+
+/* ---------- sign-up and sign-in (01 to 09), matched to the team's sheets ----------
+   Drawn at the sheet's size, 375 wide, and shown at the phone's 256; the phone shows the top 774 of the
+   sheet's 812. Every block is placed by its distance from the top of the sheet (an inline `top`). */
+.st--amn5 .a2-ph .s5 { position: relative; display: block; width: 375px; height: 774px; overflow: hidden; zoom: 0.6827; background: #f5f5f5; color: #333; font-size: 16px; line-height: 22px; text-align: center; }
+.s5 > * { position: absolute; left: 0; right: 0; }
+.s5 :is(b, em, small, u, strong) { font-weight: 400; }
+/* As on the sheets, a photograph of a clinician under the purple (a stock stand-in, CREDITS.md). */
+.st--amn5 .a2-ph .s5--purple { background: linear-gradient(172deg, rgb(125 87 216 / 0.86) 0%, rgb(106 80 210 / 0.84) 42%, rgb(85 96 214 / 0.88) 100%), url(/sketches/work/amn/amn-bg-nurse.jpg) center / cover; color: #fff; }
+.st--amn5 .a2-ph .s5--pale { background: #fafafa; }
+.s5-mark { left: 50%; right: auto; top: 362px; width: 100px; height: auto; margin-left: -50px; filter: brightness(0) invert(1); }
+.s5-logo { display: flex; justify-content: center; }
+.s5-logo .pp-logo { font-size: 31px; line-height: 36px; font-weight: 500; letter-spacing: -0.6px; }
+.s5-h { padding: 0 34px; color: var(--navy); font-size: 29.5px; line-height: 36px; text-wrap: balance; }
+.s5--purple .s5-h { color: #fff; }
+.s5-h--s { font-size: 28px; line-height: 35px; }
+.s5-p { padding: 0 46px; color: #444; font-size: 16.5px; line-height: 22px; }
+.s5--purple .s5-p { padding: 0 20px; color: #fff; }
+.s5--pale .s5-p { padding: 0 52px; color: #75787b; font-size: 17px; text-wrap: balance; }
+.s5-p--s { padding: 0 60px; color: #75787b; font-size: 15px; line-height: 19.5px; text-wrap: balance; }
+/* A field: label over value, or the label alone when empty. On the purple it is 41 from each side; in a sheet, 30. */
+.s5-f { left: 41px; right: 41px; display: grid; align-content: start; height: 64px; padding: 11px 16px 0; border-radius: 4px 4px 0 0; background: #f6f6f6; box-shadow: inset 0 -1px 0 #b3b6ba; text-align: left; }
+.s5--grey .s5-f { left: 30px; right: 30px; }
+.s5-f small { color: #75787b; font-size: 12.5px; line-height: 17px; }
+.s5-f b { color: #333; font-size: 17px; line-height: 24px; }
+.s5-f.is-null { align-content: center; padding-top: 8px; }
+.s5-f.is-null b { color: #444; }
+.s5-f.is-bad { box-shadow: inset 0 -3px 0 #d0563f; }
+.s5-f.is-bad small { color: #c8553d; }
+.s5-f > .pp-ic { position: absolute; right: 16px; top: 50%; width: 20px; height: 20px; margin-top: -8px; color: #6b6e72; stroke-width: 1.3; }
+.s5-btn { left: 42px; right: 42px; display: grid; place-items: center; height: 50px; border-radius: 5px; background: var(--navy); color: #fff; font-size: 18px; }
+.s5--grey .s5-btn { left: 30px; right: 30px; }
+.s5--grey .s5-btn--card { left: 45px; right: 45px; }
+.s5-btn--line { background: #fff; box-shadow: inset 0 0 0 1px #c5c8cc; color: var(--navy); }
+.s5-btn--in { right: 91px; }
+.s5-finger { left: auto; right: 31px; display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: var(--navy); color: #fff; }
+.s5-finger .pp-ic { width: 28px; height: 28px; stroke-width: 1.3; }
+.s5-link { color: var(--sky); font-size: 17px; line-height: 24px; }
+.s5--purple .s5-link { color: #fff; }
+.s5-link i { display: inline-block; width: 1px; height: 18px; margin: 0 10px -3px; background: currentColor; }
+.s5-links { display: flex; justify-content: center; gap: 44px; color: var(--sky); font-size: 15px; line-height: 22px; }
+.s5 .s5-mail { display: flex; align-items: center; justify-content: center; gap: 10px; color: #333; font-size: 17px; line-height: 24px; font-weight: 700; }
+.s5-mail .pp-ic { width: 18px; height: 18px; color: var(--sky); }
+.s5-cap { left: 30px; color: #333; font-size: 15px; line-height: 20px; text-align: left; }
+.s5-sheet { left: 15px; right: 15px; border-radius: 6px; background: #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.08); }
+/* 05: welcome */
+.s5-skip { left: auto; right: 32px; color: var(--navy); font-size: 12.5px; line-height: 16px; letter-spacing: 0.3px; }
+.s5-trio { display: grid; place-items: center; }
+.s5 .a3-trio { gap: 11px; width: 242px; height: 242px; margin: 0; }
+.s5 .a3-trio i { width: 48px; height: 113px; margin-bottom: 26px; border-radius: 22px 22px 10px 10px; }
+.s5 .a3-trio i:nth-child(2) { height: 126px; }
+.s5 .a3-trio i::before { top: -39px; width: 32px; height: 32px; margin-left: -16px; }
+.s5-dots { display: flex; justify-content: center; gap: 9px; }
+.s5-dots i { width: 7px; height: 7px; border-radius: 50%; background: #c9ccd0; }
+.s5-dots i.is-on { background: #2f8fd3; }
+/* 07: the failure, said at the top of the screen */
+.s5-fail { top: 0; display: grid; align-content: start; height: 100px; padding: 10px 12px 0 97px; background: #fff; color: #c8553d; text-align: left; }
+.s5-fail .pp-ic { position: absolute; left: 46px; top: 35px; width: 30px; height: 30px; stroke-width: 1.2; }
+.s5-fail b { font-size: 17px; line-height: 22px; }
+.s5-fail strong { margin-top: 4px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; }
+.s5-fail small { font-size: 13px; line-height: 18px; }
+/* 09: home for a new user */
+.s5-bar { top: 0; display: flex; justify-content: center; height: 89px; padding-top: 57px; background: #fff; box-shadow: 0 2px 6px rgb(0 0 0 / 0.08); }
+.s5-bar .pp-logo { font-size: 19.5px; line-height: 24px; font-weight: 500; letter-spacing: -0.4px; }
+.s5-me { position: absolute; right: 9px; top: 55px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #8fc3c9; color: #fff; font-size: 10.5px; line-height: 1; }
+.s5-who { left: 50%; right: auto; display: grid; place-items: center; width: 62px; height: 62px; margin-left: -31px; border-radius: 50%; box-shadow: inset 0 0 0 3px #c9ccd0; color: #c9ccd0; }
+.s5-who .pp-ic { width: 40px; height: 40px; stroke-width: 1.3; }
+.s5-segs { left: 98px; right: 93px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; height: 15px; }
+.s5-segs i { background: #cfd1d4; }
+.s5-segs i.is-on { background: #2f8fd3; }
+.s5-todo { left: 82px; display: grid; gap: 5px; text-align: left; }
+.s5-todo i { display: flex; align-items: center; gap: 12px; color: #333; font-size: 17px; line-height: 26px; font-weight: 700; }
+.s5-todo .pp-ic { width: 19px; height: 19px; color: var(--grass); stroke-width: 2; opacity: 0; }
+.s5-todo i.is-done .pp-ic { opacity: 1; }
+.s5-jobs { left: 16px; right: 16px; display: flex; align-items: baseline; justify-content: space-between; }
+.s5-jobs b { color: #333; font-size: 21px; line-height: 28px; }
+.s5-jobs small { color: var(--navy); font-size: 12px; font-weight: 600; letter-spacing: 0.3px; }
+.s5-jobrow { left: 16px; right: auto; display: flex; gap: 10px; }
+.s5-jobrow .a3-job { width: 284px; border-radius: 8px; }
+/* The phone is shorter than the sheet, so the photograph is too: its tag still shows above the tab bar. */
+.s5-jobrow .a3-job-pic { height: 62px; }
+.s5-jobrow .a3-job-pic u { padding: 3px 10px; font-size: 13px; line-height: 19px; }
+.s5-tabs { top: auto; bottom: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 83px; padding: 13px 6px 0; background: #fff; box-shadow: 0 -2px 8px rgb(0 0 0 / 0.1); }
+.s5-tabs i { display: grid; justify-items: center; align-content: start; gap: 6px; color: #6b6e72; }
+.s5-tabs .pp-ic { width: 26px; height: 26px; stroke-width: 1.15; }
+.s5-tabs small { font-size: 12px; line-height: 16px; }
+.s5-tabs i.is-on { color: #2f8fd3; }
+
+/* ---------- photographs in the image places (stock stand-ins, /public/sketches/work/amn/CREDITS.md) ---------- */
+.st--amn5 .a3-job-pic { background-color: #a9bdd1; background-position: center; background-size: cover; }
+.st--amn5 .a3-booked-pic { background: #8f9ca8 url(/sketches/work/amn/amn-booked.webp) center / cover; }
+/* People: a portrait in each round place that held initials. */
+.st--amn5 :is(img.a3-av, img.s5-me, img.c5-me) { object-fit: cover; }
+.st--amn5 .a3-avs i { overflow: hidden; }
+.st--amn5 .a3-avs i img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }

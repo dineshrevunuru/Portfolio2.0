@@ -1,0 +1,603 @@
+/* Direction C, live (/sketches/c/live): the landing page as one working session.
+   Unlayered so Tailwind cannot win. The pinning and every hidden state are switched on by
+   .is-armed (set by the effect only), so no JS shows the finished hero and the page under it.
+   Scroll drives three custom properties: --p (the page shrinks into the canvas), --u (the canvas
+   pans, in frames) and --q (the editor closes). Everything else is a short transition on transform
+   or opacity.
+
+   The visual system is his design-taste file, applied as written (skills/design-taste):
+   soft white #fcfcfd, warm ink #1d1b1b with secondary text as the ink at reduced opacity, Geist +
+   Geist Mono, one hot blue accent, pills for actions, 12-16px soft rectangles for containers, dark
+   only as one rounded stage panel, his locked zero-overshoot curves. The Wise mood board supplies
+   the scale and air: big confident display type, generous space, one accent doing the work. */
+
+/* ---------- tokens ---------- */
+.lv {
+  /* colour */
+  --surface: #fcfcfd;
+  --ink-rgb: 29 27 27;
+  --ink: rgb(var(--ink-rgb));
+  --ink-2: rgb(var(--ink-rgb) / 0.72);
+  --ink-3: rgb(var(--ink-rgb) / 0.62);
+  --line: rgb(var(--ink-rgb) / 0.1);
+  --canvas: #f2f2f3;
+  --accent: #0e2af5;
+  --accent-tint: rgb(14 42 245 / 0.08);
+  --accent-on-dark: #9aa8ff;
+  --stage: #1d1b1b;
+  --on-stage: #f5f3f2;
+  --on-stage-2: rgb(245 243 242 / 0.72);
+  --on-stage-3: rgb(245 243 242 / 0.5);
+  --stage-line: rgb(245 243 242 / 0.1);
+  --stage-raised: #2a2727;
+  --error: #e5484d;
+  --claude: #d97757; /* Claude's own mark, the only colour that is not the accent: it names the tool */
+
+  /* type */
+  --sans: var(--font-inter-tight), "Inter Tight", system-ui, sans-serif;
+  --mono: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
+  --t-display: clamp(40px, 5.8vw, 84px);
+  --t-title: clamp(26px, 2.5vw, 36px);
+  --t-lead: clamp(17px, 1.4vw, 20px);
+  --t-body: 16px;
+  --t-small: 14px;
+  --t-label: 12px;
+
+  /* space (8-point) */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 40px;
+  --s8: 48px;
+  --s9: 64px;
+  --s10: 96px;
+  --s11: 120px;
+  --s12: 176px;
+  --gutter: clamp(20px, 5vw, 72px);
+
+  /* shape */
+  --r-frame: 12px;
+  --r-panel: 20px;
+  --r-pill: 999px;
+  --shadow-frame: 0 0 0 1px var(--line), 0 24px 48px -32px rgb(var(--ink-rgb) / 0.35);
+
+  /* motion: his locked curves, zero overshoot */
+  --settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --fade: cubic-bezier(0, 0, 0.2, 1);
+  --morph: cubic-bezier(0.4, 0, 0.2, 1);
+  --snap: var(--settle);
+
+  /* scroll state */
+  --p: 0;
+  --q: 0;
+  --k: 1;
+  --s: 0.45;
+  --fx: 0px;
+  --fy: 0px;
+  --pan: 0px;
+  --open: calc(var(--p) * (1 - var(--q)));
+
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+.sk:has(.lv) { background: #fcfcfd; }
+.lv p { margin: 0; }
+.lv .mono { font-family: var(--mono); }
+
+.lv-pin { position: relative; height: 100vh; height: 100svh; overflow: clip; background: var(--surface); }
+.lv.is-armed .lv-wrap { height: 870vh; height: 870svh; }
+.lv.is-armed .lv-pin { position: sticky; top: 0; }
+
+/* ---------- the hero, on the system ----------
+   v8: the bar, then the centred content alone. The work strip is out (his call, 2026-11-13), so the
+   only colour is the three client marks in the headline. */
+.lv .fh { --ink: rgb(var(--ink-rgb)); --ink-2: rgb(var(--ink-rgb) / 0.72); --ink-3: rgb(var(--ink-rgb) / 0.62); --paper: #fcfcfd; --g: var(--gutter); background: var(--surface); color: var(--ink); }
+/* v9: the type is Mobbin's landing page, measured on mobbin.com on 2026-11-13 (LANDING-SPEC 17).
+   Their scale, as size / line / weight / tracking:
+     showcase 80/80/652/-0.6px (headline from 1200px) · spotlight 56/56/652/-0.6px (769 to 1199px)
+     feature 20/26/440/0 · body 16/22/456/0.2px · body-bold 16/22/600/0.2px
+     compact 14/20/456/0.2px · caption 12/16/456/0.2px · title-2 32/36/652/0
+   The face stays Geist: Mobbin's is Saans, a paid face, and its files are not ours to take.
+   v10: the face is Inter Tight, the closest free match (research/type-saans-alternatives). Sizes,
+   line heights and letter spacing stay Mobbin's. Weights are mapped so strokes match Saans:
+   652 -> 580 (measured), and 600 -> 543, 456 -> 440, 440 -> 429 on a line through 400 -> 400. */
+.lv .fh-top { padding: var(--s5) var(--gutter); }
+.lv .fh-id { gap: var(--s3); font-size: 16px; line-height: 22px; letter-spacing: 0.2px; }
+.lv .fh-id b { font-weight: 543; }
+.lv .fh-id i { color: var(--ink-2); font-weight: 440; }
+.lv .fh-nav { gap: var(--s5); font-size: 16px; line-height: 22px; font-weight: 543; letter-spacing: 0.2px; }
+/* Mobbin's links are 44px tall; the underline keeps its place under the word. */
+.lv .fh-nav a { padding-block: 11px; }
+.lv .fh-nav a::after { bottom: 7px; }
+/* With nothing under it, the content sits a little above the middle of the screen, as Mobbin's does:
+   the space under it is the bar's height again plus a share of the screen. */
+.lv .fh-main { --t-display: 80px; min-height: 0; padding-bottom: clamp(72px, 14vh, 160px); }
+.lv .fh-stage { max-width: 760px; }
+.lv .fh-h { font-size: var(--t-display); line-height: 1; font-weight: 580; letter-spacing: -0.6px; }
+/* Mobbin's grey is #707070 on white; the ink at 62% on this paper is the same tone. */
+.lv .fh-sub { max-width: 36rem; text-wrap: balance; margin: var(--s7) auto 0; color: var(--ink-3); font-size: 20px; line-height: 26px; font-weight: 429; letter-spacing: 0; }
+.lv .fh-cta { gap: var(--s2); margin-top: var(--s9); }
+.lv .fh-btn { height: 44px; padding: 0 var(--s4); border-radius: var(--r-pill); background: var(--ink); font-size: 16px; line-height: 22px; font-weight: 543; letter-spacing: 0.2px; }
+.lv .fh-link { font-size: var(--t-body); font-weight: 500; text-decoration-thickness: 1.5px !important; text-underline-offset: 6px; }
+
+/* v7, Mobbin's layout (his reference, 2026-11-13): the links sit beside the name; a profile icon and
+   Contact sit on the right behind a hairline; the headline runs three lines with a client's mark in
+   each, set like an app icon; both actions are pills, the second a soft one with an arrow. */
+/* The top bar, restructured (2026-11-14): one group of options on the right, so there is one place
+   to look. Work, Resume and Contact are words at the same size; a hairline, then the LinkedIn logo
+   as v14 had it (his call, same day: no pill, no arrow). */
+.lv .fh-nav { align-items: center; gap: var(--s6); }
+/* 24px either side of the hairline, as v14 had it, inside the group's 32px rhythm. */
+.lv .fh-sep { width: 1px; height: 22px; margin-inline: calc(var(--s5) - var(--s6)); background: var(--line); }
+/* A 40px target around a 22px glyph; the negative margin keeps the bar's rhythm to the glyph. */
+.lv .fh-nav .fh-soc { display: grid; place-items: center; width: 40px; height: 40px; margin: -9px; padding: 0; border-radius: 10px; }
+.lv .fh-nav .fh-soc::after { display: none; }
+.lv .fh-soc svg { width: 22px; height: 22px; fill: currentColor; }
+.lv .fh-stage { max-width: 980px; }
+/* Mobbin's icons: 68px in an 80px line (0.85em), corners at 20%, centred on the line. */
+.lv .fh-ic { display: inline-block; width: 0.85em; height: 0.85em; vertical-align: -0.08em; overflow: hidden; border-radius: 20%; background: #fff; box-shadow: 0 0 0 1px var(--line), 0 0.08em 0.2em -0.1em rgb(var(--ink-rgb) / 0.3); }
+.lv .fh-ic img { display: block; width: 100%; height: 100%; padding: 15%; object-fit: contain; }
+.lv .fh-ic--adani img { padding: 7%; }
+.lv .fh-btn { gap: var(--s2); }
+.lv .fh-btn--soft { background: rgb(var(--ink-rgb) / 0.08); color: var(--ink) !important; }
+.lv .fh-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- the real page: full screen at --p 0, in its frame on the canvas at --p 1 ---------- */
+.lv-page {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  transform-origin: 0 0;
+  transform: translate3d(calc(var(--open) * (var(--fx) - var(--pan))), calc(var(--open) * var(--fy)), 0) scale(calc(1 - var(--open) * (1 - var(--s))));
+}
+.lv-page::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: calc(var(--open) * 26px); box-shadow: 0 0 0 calc(var(--open) * 2px) var(--line), 0 60px 120px -70px rgb(var(--ink-rgb) / 0.5); opacity: var(--open); }
+/* Once it sits in its frame, the copy on the canvas takes over, so it can pan with the canvas. At the
+   close the real page comes back and grows out of the Home frame (--open falls with --q). */
+.lv.is-docked .lv-page { opacity: 0; pointer-events: none; }
+.lv-page .fh { height: 100%; min-height: 0; }
+
+/* ---------- the reveal: 01 layout, 02 wireframe, 03 content, 04 UI (after harshitr.me) ----------
+   A drafting sheet over the real page, on his white by default (?sheet=dark shows Harshit's dark
+   sheet for comparison). The wireframe boxes are measured from the real elements, so when the sheet
+   wipes away the finished page is exactly where its wireframe was. */
+.rv { --rv-bg: #fcfcfd; --rv: var(--ink-rgb); --rv-col: rgb(14 42 245 / 0.05); --rv-lab: var(--accent); --rv-edge: var(--accent); position: absolute; inset: 0; z-index: 20; pointer-events: none; animation: rv-bye 0.01s 2.6s forwards; }
+.rv.rv--dark { --rv-bg: #1d1b1b; --rv: 245 243 242; --rv-col: rgb(154 168 255 / 0.07); --rv-edge: #f5f3f2; }
+.rv.is-js { animation: none; }
+.rv.is-gone { display: none; }
+@keyframes rv-bye { to { visibility: hidden; } }
+.rv-sheet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: rgb(var(--rv));
+  background-color: var(--rv-bg);
+  background-image:
+    linear-gradient(rgb(var(--rv) / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--rv) / 0.07) 1px, transparent 1px),
+    linear-gradient(rgb(var(--rv) / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--rv) / 0.03) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.05s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.rv.is-wipe .rv-sheet { clip-path: inset(100% 0 0 0); }
+.rv-edge { position: absolute; left: 0; right: 0; top: 0; height: 1px; opacity: 0; background: linear-gradient(90deg, transparent, var(--rv-edge) 30%, var(--rv-edge) 70%, transparent); box-shadow: 0 0 16px 1px var(--rv-edge); transition: top 1.05s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.2s linear; }
+.rv.is-wipe .rv-edge { top: 100%; opacity: 0.8; }
+
+/* 01 Layout: Figma's layout grid, twelve columns inside the page margins. */
+.rv-grid { position: absolute; inset: 0 var(--rv-pad, 72px); display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--s5); }
+.rv-grid i { background: var(--rv-col); transform: scaleY(0); transform-origin: 50% 0; transition: transform 0.6s var(--settle); }
+.rv.is-grid .rv-grid i { transform: none; }
+.rv.is-text .rv-grid i { opacity: 0.5; transition: opacity 0.4s var(--fade); }
+.rv-guide { position: absolute; top: 0; bottom: 0; border-left: 1px dashed rgb(var(--rv) / 0.22); }
+.rv-guide--l { left: var(--rv-pad, 72px); }
+.rv-guide--r { right: var(--rv-pad, 72px); }
+.rv-name { position: absolute; left: var(--s4); top: var(--s3); margin: 0; font: 500 11px/1 var(--mono); letter-spacing: 0.06em; color: rgb(var(--rv) / 0.62); white-space: nowrap; text-transform: uppercase; }
+
+/* 02 Wireframe: a hatched box drawn left to right over each element, with its layer name. */
+.rv-box { position: absolute; opacity: 0; clip-path: inset(0 100% 0 0); border-radius: 4px; outline: 1px solid rgb(var(--rv) / 0.42); outline-offset: -1px; background: repeating-linear-gradient(-45deg, rgb(var(--rv) / 0.1) 0 1px, transparent 1px 7px); transition: opacity 0.25s var(--fade), clip-path 0.55s var(--settle), background-color 0.45s var(--morph); }
+.rv-box--drag { clip-path: inset(0 100% 100% 0); }
+.rv-box.is-on { opacity: 1; clip-path: inset(-22px -6px -6px -6px); }
+.rv-box--btn { border-radius: var(--r-pill); outline: none; box-shadow: inset 0 0 0 1px rgb(var(--rv) / 0.42); }
+.rv-box--block { border-radius: 20px 20px 0 0; outline: none; box-shadow: inset 0 0 0 1px rgb(var(--rv) / 0.42); }
+.rv-lab { position: absolute; left: 0; bottom: calc(100% + 4px); padding: 3px 6px; border-radius: 4px; background: var(--rv-lab); color: #fff; font: 600 10px/1 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; transition: opacity 0.25s var(--fade); }
+.rv-ghost { position: absolute; inset: 0 -2px; overflow: visible; color: rgb(var(--rv) / 0.92); white-space: pre-line; opacity: 0; transition: opacity 0.45s var(--fade) 0.05s; }
+.rv-ghost.is-pre { white-space: pre; }
+/* The headline's marks in the wireframe: an empty square the size and place of each. */
+.rv-ic { display: inline-block; width: 0.85em; height: 0.85em; vertical-align: -0.08em; border-radius: 20%; box-shadow: inset 0 0 0 1px rgb(var(--rv) / 0.5); }
+.rv-box--btn .rv-ghost { display: flex; align-items: center; justify-content: center; }
+
+/* Redlines: sizes and gaps, as hairlines with their value. */
+.rv-dim { position: absolute; opacity: 0; transition: opacity 0.35s var(--fade); }
+.rv-dim.is-on { opacity: 1; }
+.rv-dim--h { height: 0; border-top: 1px solid rgb(var(--rv) / 0.55); }
+.rv-dim--v { width: 0; border-left: 1px solid rgb(var(--rv) / 0.55); }
+.rv-dim::before, .rv-dim::after { content: ""; position: absolute; background: rgb(var(--rv) / 0.55); }
+.rv-dim--h::before, .rv-dim--h::after { top: -4px; width: 1px; height: 8px; }
+.rv-dim--h::before { left: 0; }
+.rv-dim--h::after { right: 0; }
+.rv-dim--v::before, .rv-dim--v::after { left: -4px; width: 8px; height: 1px; }
+.rv-dim--v::before { top: 0; }
+.rv-dim--v::after { bottom: 0; }
+.rv-dim b { position: absolute; padding: 3px 6px; border-radius: 4px; background: rgb(var(--rv)); color: var(--rv-bg); font: 600 10px/1 var(--mono); letter-spacing: 0.04em; }
+.rv-dim--h b { left: 50%; top: 6px; transform: translateX(-50%); }
+.rv-dim--v b { right: 8px; top: 50%; transform: translateY(-50%); }
+
+/* 03 Content: the real copy fills the boxes; labels, hatching and redlines step back. */
+.rv.is-text .rv-ghost { opacity: 1; }
+.rv.is-text .rv-box { background: transparent; outline-color: rgb(var(--rv) / 0.14); }
+.rv.is-text .rv-box--btn, .rv.is-text .rv-box--block { background: rgb(var(--rv) / 0.08); box-shadow: inset 0 0 0 1px rgb(var(--rv) / 0.24); }
+.rv.is-text .rv-box--block .rv-lab { opacity: 0; }
+.rv.is-text .rv-lab, .rv.is-text .rv-dim { opacity: 0; }
+
+/* ---------- his cursor on the hero ----------
+   It drags out the headline's box in the reveal, then leaves as the sheet wipes. Decoration. */
+.hc-layer { position: absolute; inset: 0; z-index: 21; pointer-events: none; }
+.lv:not(.is-armed) .hc-layer { display: none; }
+.hc { position: absolute; left: 0; top: 0; display: flex; align-items: flex-start; opacity: 0; transition: transform 0.5s var(--settle), opacity 0.2s var(--fade); }
+.hc.is-in { opacity: 1; }
+.hc svg { flex: none; width: 18px; height: 25px; fill: var(--ink); stroke: #fff; stroke-width: 1.2; transition: transform 0.15s var(--settle); }
+.hc.is-down svg { transform: scale(0.84); }
+.hc-chip { margin-top: 18px; padding: 4px 10px; border-radius: var(--r-pill); background: var(--ink); color: #fff; font-size: 13px; font-weight: 500; line-height: 1.3; }
+/* On the dark drafting sheet the cursor is drawn in the sheet's own light ink. */
+.hc.is-inv svg { fill: #f5f3f2; stroke: #1d1b1b; }
+.hc.is-inv .hc-chip { background: #f5f3f2; color: #1d1b1b; }
+
+/* ---------- the workspace: a light canvas panel and one dark stage panel ---------- */
+.lv-ws { position: absolute; inset: 0; display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--s3); padding: var(--s3); }
+.lv-canvas { position: relative; min-width: 0; overflow: clip; border-radius: var(--r-panel); }
+.lv-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--canvas);
+  background-image: radial-gradient(rgb(var(--ink-rgb) / 0.13) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  background-position: calc(var(--pan) * -1) 0;
+  opacity: var(--open);
+}
+
+.lv-file, .lv-people, .lv-cap { opacity: var(--open); }
+.lv-file { position: absolute; z-index: 2; left: var(--s4); top: var(--s4); display: flex; align-items: center; gap: var(--s1); padding: 6px 6px 6px var(--s4); border-radius: var(--r-pill); background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 6px 16px -10px rgb(var(--ink-rgb) / 0.3); font-size: 13px; font-weight: 500; color: var(--ink-3); }
+.lv-file b { color: var(--ink); font-weight: 543; }
+.lv-file i { font-style: normal; margin: 0 var(--s1); color: rgb(var(--ink-rgb) / 0.3); }
+.lv-file span { padding: 6px 12px; border-radius: var(--r-pill); transition: background-color 0.2s var(--morph), color 0.2s var(--morph); }
+.lv-file span.is-on { background: var(--accent-tint); color: var(--accent); }
+.lv-people { position: absolute; z-index: 2; right: var(--s4); top: var(--s4); display: flex; align-items: center; gap: var(--s2); }
+.lv-people .ppl-me { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 12px; font-weight: 543; }
+.lv-people .ppl-ag { display: flex; align-items: center; height: 32px; padding: 0 var(--s3); border-radius: var(--r-pill); background: var(--accent); color: #fff; font-size: 12px; font-weight: 500; transform-origin: 100% 50%; }
+.lv.is-home .lv-file span.is-on { background: none; color: var(--ink-3); }
+.lv.is-home .lv-file span[data-i="0"] { background: var(--accent-tint); color: var(--accent); }
+
+.lv-stage { position: absolute; inset: 80px var(--s5) 132px; opacity: calc(1 - var(--q)); }
+/* The canvas is one long row of frames. Scrolling pans it sideways (--u, in frames). */
+.lv-track { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: scale(var(--k)) translateX(calc(var(--u, 0) * -860px)); }
+.lv-scene { position: absolute; left: calc(var(--i) * 860px - 360px); top: -280px; display: grid; place-items: center; width: 720px; height: 560px; pointer-events: none; }
+.lv .fname { margin-bottom: var(--s2); color: var(--ink-3); font: 500 11px/1 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
+.lv .frame { position: relative; border-radius: var(--r-frame); background: var(--surface); box-shadow: var(--shadow-frame); }
+.lv .fwrap { position: relative; }
+
+/* The caption: a mono kicker with the strength, then the line, the word that changes in bold. */
+.lv-cap { position: absolute; left: var(--s9); right: var(--s9); bottom: var(--s6); height: 84px; }
+.lv-cap p { text-wrap: balance; position: absolute; left: 0; right: 0; bottom: 0; text-align: center; color: var(--ink-2); font-size: var(--t-lead); line-height: 1.45; opacity: 0; transform: translateY(var(--s3)); transition: opacity 0.25s var(--fade), transform 0.4s var(--settle); }
+.lv-cap p.is-on { opacity: 1; transform: none; transition-delay: 0.12s; }
+.lv-cap span { display: block; margin-bottom: var(--s2); color: var(--ink-3); font: 500 var(--t-label)/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.lv-cap span:empty { display: none; }
+.lv-cap b { color: var(--ink); font-weight: 543; }
+
+/* ---------- what a timeline shows ---------- */
+.lv.is-armed .a { opacity: 0; transform: translateY(10px); transition: opacity 0.25s var(--fade), transform 0.4s var(--settle); }
+.lv.is-armed .a--pop { transform: scale(0.92); transition: opacity 0.2s var(--fade), transform 0.35s var(--settle); }
+.lv.is-armed .a--grow { opacity: 1; transform: scaleX(0); transform-origin: 0 50%; transition: transform 0.6s var(--settle); }
+.lv.is-armed .a--line { transform: translateY(4px); transition: opacity 0.15s var(--fade), transform 0.2s var(--settle); }
+.lv.is-armed .a.is-in { opacity: 1; transform: none; }
+
+.lv .cur { position: absolute; left: 0; top: 0; z-index: 4; display: flex; align-items: flex-start; transition: transform 0.5s var(--settle), opacity 0.2s var(--fade); }
+.lv.is-armed .cur { opacity: 0; }
+.lv.is-armed .cur.is-in { opacity: 1; }
+.lv .cur svg { width: 16px; height: 22px; fill: var(--ink); stroke: #fff; stroke-width: 1.2; transition: transform 0.15s var(--settle); }
+.lv .cur.is-down svg { transform: scale(0.84); }
+.lv .cur span { margin: 16px 0 0 -2px; padding: 4px 8px; border-radius: var(--r-pill); background: var(--ink); color: #fff; font-size: 12px; font-weight: 500; line-height: 1.2; }
+.lv .cur--agent svg { fill: var(--accent); }
+.lv .cur--agent span { background: var(--accent); }
+
+/* ---------- frames on the canvas ---------- */
+.lv .slot-wrap { position: relative; }
+.lv .slot-wrap .fname { position: absolute; left: 0; bottom: 100%; }
+.lv-slot { position: relative; overflow: hidden; width: 640px; height: 400px; border-radius: var(--r-frame); background: var(--surface); box-shadow: var(--shadow-frame); transition: box-shadow 0.25s var(--morph); }
+.lv-mini { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.lv-mini .fh { height: 100%; min-height: 0; }
+/* The close: back on Home, the frame is option C. */
+.lv .home-chip { position: absolute; right: 0; bottom: calc(100% + 4px); padding: 4px 10px; border-radius: var(--r-pill); background: var(--accent); color: #fff; font-size: 12px; font-weight: 500; line-height: 1.2; opacity: 0; transform: translateY(4px); transition: opacity 0.25s var(--fade), transform 0.4s var(--settle); }
+.lv.is-home .home-chip { opacity: 1; transform: none; }
+.lv.is-home .lv-slot { box-shadow: 0 0 0 2px var(--accent), var(--shadow-frame); }
+
+/* 01 The brief Claude writes from his prompt. */
+.lv .br { display: grid; width: 440px; padding: var(--s7) var(--s7) var(--s6); }
+.lv .br-k { color: var(--ink-3); font: 500 11px/1 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
+.lv .br-h { margin: var(--s3) 0 var(--s5); font-size: 34px; line-height: 1.08; font-weight: 543; letter-spacing: -0.03em; }
+.lv .br-r { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) 0; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 15px; line-height: 1.4; }
+.lv .br-r::before { content: "✓"; display: grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-tint); color: var(--accent); font-size: 11px; font-weight: 543; }
+
+/* 02 The plan: one agent per task, between his prompt and his review. */
+.lv .pl { display: grid; grid-template-columns: auto minmax(20px, 1fr) auto minmax(20px, 1fr) auto minmax(20px, 1fr) auto minmax(20px, 1fr) auto; align-items: center; width: 640px; height: 260px; padding: 0 var(--s6); }
+.lv .pl-n { position: relative; display: grid; place-items: center; height: 36px; padding: 0 var(--s3); border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16); font-size: 13px; font-weight: 500; white-space: nowrap; }
+.lv .pl-n.is-ag { background: var(--accent-tint); box-shadow: inset 0 0 0 1px rgb(14 42 245 / 0.22); color: var(--accent); }
+.lv .pl-n.is-me { background: var(--ink); box-shadow: none; color: #fff; }
+.lv .pl-n em { position: absolute; left: 50%; top: calc(100% + var(--s2)); transform: translateX(-50%); color: var(--ink-3); font: 500 10px/1 var(--mono); font-style: normal; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.lv .pl-l { height: 1.5px; background: rgb(var(--ink-rgb) / 0.3); }
+.lv .pl-stack { position: relative; display: grid; gap: var(--s2); padding: 0 14px; }
+.lv .pl-stack::before, .lv .pl-stack::after { content: ""; position: absolute; top: 18px; bottom: 18px; width: 1.5px; background: rgb(var(--ink-rgb) / 0.3); }
+.lv .pl-stack::before { left: 0; }
+.lv .pl-stack::after { right: 0; }
+.lv .pl-stack .pl-n::before, .lv .pl-stack .pl-n::after { content: ""; position: absolute; top: 50%; width: 14px; height: 1.5px; background: rgb(var(--ink-rgb) / 0.3); }
+.lv .pl-stack .pl-n::before { right: 100%; }
+.lv .pl-stack .pl-n::after { left: 100%; }
+
+/* 03 to 05 The options: each frame is empty, then a hatched wireframe, then real UI. */
+/* A and B on top, C below with his comment beside it. */
+.lv .ops { position: relative; display: grid; grid-template-columns: 300px 300px; gap: 28px; }
+.lv .op { position: relative; transition: opacity 0.3s var(--fade); }
+.lv .op .fname { position: relative; display: flex; justify-content: space-between; align-items: center; }
+.lv .op .frame { overflow: hidden; width: 300px; height: 196px; border-radius: 10px; transition: box-shadow 0.25s var(--morph); }
+.lv.is-armed .op:not(.is-wire) .frame { box-shadow: none; outline: 1.5px dashed rgb(var(--ink-rgb) / 0.22); outline-offset: -1.5px; background: transparent; }
+.lv .op.is-sel .frame { box-shadow: 0 0 0 2px var(--accent), var(--shadow-frame); }
+.lv.is-armed .ops.is-picked .op:not(.is-sel) { opacity: 0.4; }
+.lv .ok { color: var(--accent); font-size: 12px; transform-origin: 100% 50%; }
+.lv .op .chip { position: absolute; right: 0; top: -6px; padding: 4px 10px; border-radius: var(--r-pill); background: var(--accent); color: #fff; font: 500 12px/1.2 var(--sans); letter-spacing: 0; text-transform: none; transform-origin: 100% 50%; }
+.lv .op.is-sel .ok { opacity: 0; }
+
+/* Thumbnails are drawn at 208 by 136 and scaled up to the frame. */
+.lv .t { position: absolute; left: 0; top: 0; width: 208px; height: 136px; transform: scale(1.4423); transform-origin: 0 0; }
+.lv .w { display: block; background: var(--bg, transparent); transition: opacity 0.3s var(--fade), transform 0.45s var(--settle), color 0.3s var(--fade); }
+.lv.is-armed .op:not(.is-wire) .w { opacity: 0; transform: scale(0.96); }
+.lv.is-armed .op.is-wire:not(.is-built) .w { color: transparent; background: repeating-linear-gradient(-45deg, rgb(var(--ink-rgb) / 0.13) 0 1px, transparent 1px 5px); box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.3); }
+.lv.is-armed .op.is-wire:not(.is-built) .w > * { visibility: hidden; }
+.lv .t-deco { transition: opacity 0.3s var(--fade) 0.15s; }
+.lv.is-armed .op:not(.is-built) .t-deco { opacity: 0; }
+
+.lv .t-nav { display: flex; justify-content: space-between; align-items: center; height: 8px; }
+.lv .t-logo { width: 14px; height: 6px; border-radius: 2px; --bg: var(--ink); }
+.lv .t-links { width: 44px; height: 4px; border-radius: 2px; --bg: rgb(var(--ink-rgb) / 0.22); }
+.lv .t-h { font-size: 14px; line-height: 1.08; font-weight: 543; letter-spacing: -0.03em; color: var(--ink); }
+.lv .t-pill { width: 44px; height: 12px; border-radius: var(--r-pill); --bg: var(--ink); }
+
+/* A: drawn in Figma, the headline selected. */
+.lv .tA { display: grid; align-content: start; justify-items: center; padding: 10px 12px; }
+.lv .tA .t-nav { justify-self: stretch; }
+.lv .t-selw { position: relative; margin-top: 26px; }
+.lv .tA .t-h { width: 128px; text-align: center; }
+.lv .tA .t-pill { margin-top: 12px; }
+.lv .t-sel { position: absolute; inset: -3px -4px; border: 1px solid var(--accent); }
+.lv .t-sel i { position: absolute; width: 5px; height: 5px; border: 1px solid var(--accent); background: #fff; }
+.lv .t-sel i:nth-child(1) { left: -3px; top: -3px; }
+.lv .t-sel i:nth-child(2) { right: -3px; top: -3px; }
+.lv .t-sel i:nth-child(3) { left: -3px; bottom: -3px; }
+.lv .t-sel i:nth-child(4) { right: -3px; bottom: -3px; }
+.lv .t-sel b { position: absolute; left: -1px; bottom: calc(100% + 3px); padding: 1px 4px; border-radius: 2px; background: var(--accent); color: #fff; font: 600 7px/1.3 var(--mono); }
+
+/* B: finished, then inspected, with a redline and a spec column. */
+.lv .tB { display: grid; grid-template-columns: 1fr 58px; }
+.lv .tB-l { display: grid; align-content: start; justify-items: start; padding: 10px 12px; }
+.lv .tB-l .t-nav { justify-self: stretch; }
+.lv .tB .t-h { width: 112px; margin-top: 18px; font-size: 13px; }
+.lv .t-red { position: relative; width: 0; height: 9px; margin: 2px 0 2px 4px; border-left: 1px solid var(--error); }
+.lv .t-red b { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); padding: 0 3px; border-radius: 2px; background: var(--error); color: #fff; font: 600 6px/1.4 var(--mono); }
+.lv .t-sub { width: 96px; height: 4px; border-radius: 2px; --bg: rgb(var(--ink-rgb) / 0.18); }
+.lv .t-sub--s { width: 70px; margin-top: 4px; }
+.lv .tB .t-pill { margin-top: 10px; }
+.lv .tB-r { display: grid; align-content: start; gap: 6px; padding: 12px 7px; --bg: #f5f5f6; box-shadow: inset 1px 0 0 var(--line); color: var(--ink-3); font: 500 6px/1.2 var(--mono); letter-spacing: 0.03em; text-transform: uppercase; }
+
+/* C: design and code, side by side. This page. */
+.lv .tC { display: grid; grid-template-columns: 1.15fr 1fr; gap: 4px; padding: 5px; }
+.lv .tC-l { display: grid; place-items: center; border-radius: 5px; --bg: var(--canvas); }
+.lv .tC-f { display: grid; place-items: center; width: 66px; height: 42px; padding: 4px; border-radius: 3px; background: #fff; box-shadow: 0 0 0 0.5px var(--line); }
+.lv .tC-f b { font-size: 6px; line-height: 1.1; font-weight: 543; letter-spacing: -0.02em; text-align: center; }
+.lv .tC-r { display: grid; align-content: start; gap: 6px; padding: 10px 8px; border-radius: 5px; --bg: var(--stage); }
+.lv .tC-r i { display: block; height: 3px; border-radius: 2px; background: rgb(245 243 242 / 0.25); }
+.lv .tC-r i:nth-child(1) { width: 40%; background: var(--accent-on-dark); }
+.lv .tC-r i:nth-child(2) { width: 76%; }
+.lv .tC-r i:nth-child(3) { width: 60%; }
+.lv .tC-r i:nth-child(4) { width: 84%; background: #f0c48a; }
+.lv .tC-r i:nth-child(5) { width: 50%; }
+.lv .tC-r i:nth-child(6) { width: 66%; }
+
+/* His comment on C, Figma style. */
+.lv .thr { grid-column: 2; grid-row: 2; align-self: start; margin-top: 36px; display: flex; gap: 10px; align-items: flex-start; transform-origin: 0 0; }
+.lv .pin-dot { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50% 50% 50% 0; background: var(--ink); color: #fff; font-size: 12px; font-weight: 543; }
+.lv .thr p { width: 210px; padding: var(--s3) var(--s4); border-radius: var(--r-frame); background: #fff; box-shadow: 0 0 0 1px var(--line), 0 12px 28px -16px rgb(var(--ink-rgb) / 0.4); color: var(--ink-2); font-size: 14px; line-height: 1.45; }
+.lv .thr b { display: block; margin-bottom: 2px; color: var(--ink); font-weight: 543; }
+
+/* ---------- the tool: the one dark stage panel ---------- */
+.lv-tool {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--r-panel);
+  background: var(--stage);
+  color: var(--on-stage-2);
+  transform: translate3d(calc((1 - var(--open)) * var(--ox, calc(100% + 24px))), calc((1 - var(--open)) * var(--oy, 0%)), 0);
+}
+.lv-tabs { position: relative; display: flex; gap: var(--s1); padding: var(--s3) var(--s4) 0; border-bottom: 1px solid var(--stage-line); font-size: 13px; font-weight: 500; line-height: 40px; }
+.lv-tabs span { padding: 0 var(--s4); color: var(--on-stage-3); transition: color 0.2s var(--morph); }
+.lv-tabs span.is-on { color: var(--on-stage); }
+.lv-tabs::after { content: ""; position: absolute; left: 0; bottom: -1px; width: 1px; height: 2px; background: var(--accent-on-dark); transform-origin: 0 50%; transform: translateX(var(--tx, 16px)) scaleX(var(--tw, 60)); transition: transform 0.4s var(--settle); }
+
+.lv-panels { position: relative; min-height: 0; overflow: hidden; }
+.lv-panel { position: absolute; inset: 0; display: grid; align-content: center; gap: var(--s6); padding: 0 clamp(var(--s5), 3.4vw, var(--s9)); opacity: 0; pointer-events: none; transform: translateY(var(--s3)); transition: opacity 0.25s var(--fade), transform 0.4s var(--settle); }
+.lv-panel.is-on { opacity: 1; transform: none; transition-delay: 0.08s; }
+.lv .crumb { color: var(--on-stage-3); font: 500 var(--t-label)/1 var(--mono); letter-spacing: 0.04em; }
+
+.lv .code { display: grid; grid-template-columns: auto 1fr; gap: var(--s5); min-width: 0; }
+.lv .lines { display: grid; color: rgb(245 243 242 / 0.22); text-align: right; }
+.lv .lines, .lv .code pre { margin: 0; font: 400 clamp(11px, 1vw, 14px) / 1.8 var(--mono); white-space: pre; }
+.lv .c-kw { color: var(--accent-on-dark); }
+.lv .c-tag { color: var(--on-stage); }
+.lv .c-attr { color: var(--on-stage-2); }
+.lv .c-str { color: #f0c48a; }
+.lv .c-pun { color: var(--on-stage-3); }
+.lv .c-tx { color: var(--on-stage-2); }
+.lv .c-cm { color: var(--on-stage-3); }
+.lv-caret { display: inline-block; width: 0.55em; height: 1.2em; margin-left: 1px; vertical-align: -0.22em; background: var(--on-stage); animation: lv-blink 1s steps(1) infinite; }
+@keyframes lv-blink { 50% { opacity: 0; } }
+
+.lv .cl { display: grid; gap: var(--s5); max-width: 520px; font-size: clamp(14px, 1.15vw, 16px); line-height: 1.55; }
+.lv .me { justify-self: end; max-width: 82%; padding: var(--s3) var(--s4); border-radius: 16px; background: var(--stage-raised); color: var(--on-stage); transform-origin: 100% 100%; }
+.lv .turn { position: relative; min-height: 5.6em; }
+.lv .dots { position: absolute; left: 0; top: 4px; display: flex; gap: 5px; }
+.lv .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--claude); animation: lv-dot 0.9s var(--morph) infinite; }
+.lv .dots i:nth-child(2) { animation-delay: 0.12s; }
+.lv .dots i:nth-child(3) { animation-delay: 0.24s; }
+@keyframes lv-dot { 0%, 100% { opacity: 0.3; transform: none; } 40% { opacity: 1; transform: translateY(-3px); } }
+.lv .ai { display: grid; gap: var(--s2); color: var(--on-stage-2); }
+.lv .ai b { color: var(--on-stage); font-weight: 543; }
+.lv .who { display: flex; align-items: center; gap: var(--s2); color: var(--on-stage-3); font: 500 var(--t-label)/1 var(--mono); letter-spacing: 0.04em; }
+.lv .who i { width: 8px; height: 8px; border-radius: 50%; background: var(--claude); }
+.lv .muted { color: var(--on-stage-3); }
+.lv .ans, .lv .ans2, .lv .note { min-height: 1.55em; }
+/* Earlier turns, cut to two lines. The clamp sits inside the bubble, or its padding shows a third. */
+.lv .me--past { opacity: 0.5; }
+.lv .me--past span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* 01 The composer his prompt is typed into. Its height is set before typing, so nothing shifts. */
+.lv .cmp { display: grid; gap: var(--s3); padding: var(--s4) var(--s4) var(--s3); border-radius: 16px; background: var(--stage-raised); box-shadow: inset 0 0 0 1px var(--stage-line); transform-origin: 50% 100%; }
+.lv .cmp-t { min-height: calc(1.55em * 4); color: var(--on-stage); }
+.lv .cmp-bar { display: flex; justify-content: space-between; align-items: center; color: var(--on-stage-3); font: 500 var(--t-label)/1 var(--mono); letter-spacing: 0.04em; }
+.lv .cmp-send { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: rgb(245 243 242 / 0.12); color: var(--on-stage-2); font-size: 14px; font-style: normal; transition: background-color 0.2s var(--morph), color 0.2s var(--morph); }
+.lv .cmp.is-ready .cmp-send { background: var(--claude); color: #fff; }
+.lv .cmp.is-sent .cmp-t { color: var(--on-stage-2); transition: color 0.2s var(--fade); }
+.lv .cmp.is-sent .cmp-send { background: rgb(245 243 242 / 0.12); color: var(--on-stage-3); }
+
+/* 02 The agents, one switch each. Copy stays off. */
+.lv .ag { display: grid; max-width: 520px; }
+.lv .ag-r { display: grid; grid-template-columns: 34px 92px 1fr; align-items: center; gap: var(--s4); padding: var(--s4) 0; border-bottom: 1px solid var(--stage-line); font-size: clamp(13px, 1.1vw, 15px); line-height: 1.4; }
+.lv .ag-r b { color: var(--on-stage); font-weight: 543; }
+.lv .ag-r > span:last-child { color: var(--on-stage-2); }
+.lv .ag-r.is-off b, .lv .ag-r.is-off > span:last-child { color: var(--on-stage-3); }
+.lv .tg { position: relative; width: 34px; height: 20px; border-radius: var(--r-pill); background: rgb(245 243 242 / 0.16); transition: background-color 0.2s var(--morph); }
+.lv .tg i { position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--on-stage); transition: transform 0.3s var(--settle), background-color 0.2s var(--morph); }
+.lv .tg.is-on, .lv:not(.is-armed) .tg.fin { background: var(--accent-on-dark); }
+.lv .tg.is-on i, .lv:not(.is-armed) .tg.fin i { transform: translateX(14px); background: var(--stage); }
+.lv .ag-sum { margin-top: var(--s5); color: var(--on-stage-3); font: 500 var(--t-label)/1 var(--mono); letter-spacing: 0.04em; }
+
+.lv .tm { font: 400 clamp(11px, 1vw, 14px) / 1.9 var(--mono); color: var(--on-stage-2); }
+.lv .tm p { white-space: pre; min-height: 1.9em; }
+.lv .tm-p { color: var(--accent-on-dark); }
+.lv .dim { color: var(--on-stage-3); }
+.lv .tm-s::after { content: "✓"; color: var(--accent-on-dark); }
+.lv.is-armed .tm-s:not(.is-done)::after { content: "…"; color: var(--on-stage-3); }
+.lv .tm b { color: var(--on-stage); font-weight: 543; }
+
+.lv-status { display: flex; justify-content: space-between; padding: 0 var(--s5); border-top: 1px solid var(--stage-line); color: var(--on-stage-3); font: 500 11px/36px var(--mono); letter-spacing: 0.04em; }
+.lv .st-ai { display: flex; align-items: center; gap: var(--s2); }
+.lv .st-ai i { width: 7px; height: 7px; border-radius: 50%; background: rgb(245 243 242 / 0.3); }
+.lv .st-ai em { font-style: normal; }
+.lv .st-busy { display: none; }
+.lv-status.is-busy .st-ai { color: var(--on-stage-2); }
+.lv-status.is-busy .st-ai i { background: var(--claude); animation: lv-blink 0.9s steps(1) infinite; }
+.lv-status.is-busy .st-idle { display: none; }
+.lv-status.is-busy .st-busy { display: inline; }
+
+/* ---------- the close: back on Home, the caption names it ---------- */
+.lv.is-home .lv-cap p.is-on { opacity: 0; transform: translateY(calc(var(--s3) * -1)); transition-delay: 0s; }
+.lv.is-home .lv-cap .cap-home { opacity: 1; transform: none; transition-delay: 0.12s; }
+
+/* Mobbin's headline steps down at its two breakpoints; nothing scales in between. */
+/* v9: the story's own text on Mobbin's scale too. The mono labels and the code stay as they are
+   (Mobbin has no mono), and the miniature frames keep their small sizes but take the headline's
+   weight and tracking. */
+.lv-cap p { font-size: 20px; line-height: 26px; font-weight: 429; letter-spacing: 0; }
+.lv .br-h { font-size: 32px; line-height: 36px; font-weight: 580; letter-spacing: 0; }
+.lv .br-r, .lv .cl { font-size: 16px; line-height: 22px; font-weight: 440; letter-spacing: 0.2px; }
+.lv .ag-r, .lv .thr p { font-size: 14px; line-height: 20px; font-weight: 440; letter-spacing: 0.2px; }
+.lv-file, .lv-tabs, .lv .pl-n, .hc-chip { font-size: 14px; letter-spacing: 0.2px; }
+.lv-people .ppl-me, .lv-people .ppl-ag, .lv .cur span, .lv .home-chip, .lv .op .chip { font-size: 12px; font-weight: 543; letter-spacing: 0.2px; }
+.lv .t-h, .lv .tC-f b { line-height: 1; font-weight: 580; letter-spacing: -0.0075em; }
+/* The wider setting needs a slightly smaller miniature to hold three lines. */
+.lv .t-h { font-size: 13px; }
+.lv .tB .t-h { font-size: 12px; }
+@media (max-width: 1199px) {
+  .lv .fh-main { --t-display: 56px; }
+}
+@media (max-width: 760px) {
+  .lv { --t-display: clamp(34px, 10vw, 44px); }
+  /* The name tag would run off the right edge while the headline's box is dragged out. */
+  .hc-chip { display: none; }
+  /* Mobbin's phone rule exactly: min(40px, (100vw - 40px) / 9.5). Inter Tight is narrow enough for
+     this headline's longest line to fit it (v9 in Geist needed 10.5). */
+  .lv .fh-main { --t-display: min(40px, calc((100vw - 40px) / 9.5)); }
+  /* No mark any more, so the name stays on the phone. One row (his calls, 2026-11-14, after a
+     two-row bar and then Contact as the one word): the name, then Work, the hairline and the
+     logo. Resume is the hero's second pill right under the bar; there is no menu to open. */
+  .lv .fh-id > span:last-child { display: block; }
+  .lv .fh-top { padding: var(--s5) var(--gutter); }
+  .lv .fh-nav { gap: var(--s5); }
+  .lv .fh-nav .fh-wide { display: none; }
+  .lv .fh-sep { margin-inline: calc(var(--s4) - var(--s5)); }
+  .rv-name { display: none; }
+  .lv .fh-sub { margin-top: var(--s5); }
+  .lv .fh-cta { margin-top: var(--s7); gap: var(--s2); flex-direction: row; }
+  .lv-ws { grid-template-columns: 1fr; grid-template-rows: 52% 48%; gap: var(--s2); padding: var(--s2); }
+  .lv-tool { --ox: 0%; --oy: calc(100% + 16px); border-radius: 16px; }
+  .lv-canvas { border-radius: 16px; }
+  .lv-panel { gap: var(--s3); }
+  .lv .crumb { display: none; }
+  .lv .cl { gap: var(--s3); }
+  .lv .me { padding: 9px 13px; }
+  .lv .turn { min-height: 4.6em; }
+  .lv .cmp { padding: var(--s3) var(--s3) var(--s2); gap: var(--s2); }
+  .lv .cmp-t { min-height: calc(1.55em * 5); }
+  .lv .ag-r { grid-template-columns: 34px 76px 1fr; gap: var(--s3); padding: var(--s3) 0; }
+  .lv .ag-sum { margin-top: var(--s3); }
+  .lv-file { left: var(--s3); top: var(--s3); }
+  .lv-file span:not(.is-on), .lv-file i, .lv-people { display: none; }
+  .lv-stage { inset: 56px var(--s3) 96px; }
+  .lv-cap { left: var(--s4); right: var(--s4); bottom: var(--s4); height: 72px; }
+  .lv-cap p { font-size: 15px; }
+  .lv-cap span { margin-bottom: 6px; font-size: 10px; }
+  .lv-tabs { padding: var(--s1) var(--s2) 0; line-height: 36px; }
+  .lv-tabs span { padding: 0 var(--s3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lv .a, .lv .cur, .lv-panel, .lv-cap p, .lv-tabs::after { transition: none !important; }
+  .hc, .hc svg { transition: none !important; }
+  .rv { display: none; }
+  .lv .dots i, .lv-caret, .lv-status.is-busy .st-ai i { animation: none; }
+}
+
+/* ---------- v13: the hero from /sketches/c/live-v12-refined (his pick, 2026-11-13) ----------
+   Type, position and buttons as measured on that page at 1440 x 900 and 375 x 812:
+   headline 88px (clamp 64-88, 6.15vw) at weight 600, line 1.06, tracking -0.018em; marks 0.8em at
+   22% corners; subline 19/28 in the ink at 72%, 570px wide; pills 48px with 21px sides, 10px apart.
+   That page also adds a foot row under the hero (Chicago, "See how this page was made"), which was
+   not asked for here, so the foot's height (80px, 70 on a phone) moves into the bottom padding and
+   the content sits exactly where it sits there. */
+.lv .fh-main { --t-display: clamp(64px, 6.15vw, 88px); padding-top: 32px; padding-bottom: calc(56px + 80px); }
+.lv .fh-stage { max-width: 1080px; }
+.lv .fh-h { font-weight: 600; line-height: 1.06; letter-spacing: -0.018em; }
+.lv .fh-sub { max-width: 570px; margin-top: 32px; color: var(--ink-2); font-size: 19px; line-height: 28px; }
+.lv .fh-cta { margin-top: 30px; gap: 10px; }
+.lv .fh-btn { height: 48px; padding: 0 21px; }
+.lv .fh-btn--soft { background: rgb(var(--ink-rgb) / 0.055); }
+.lv .fh a:focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; }
+.lv .fh-ic, .rv-ic { width: 0.8em; height: 0.8em; vertical-align: -0.075em; border-radius: 22%; }
+.lv .fh-ic > img { border-radius: inherit; }
+@media (max-width: 1199px) {
+  .lv .fh-main { --t-display: clamp(56px, 6.3vw, 74px); }
+}
+@media (max-width: 760px) {
+  .lv .fh-main { --t-display: min(42px, calc((100vw - 40px) / 9.5)); padding-top: 24px; padding-bottom: calc(30px + 70px); }
+  .lv .fh-sub { max-width: 32ch; margin-top: 24px; font-size: 16px; line-height: 24px; }
+  .lv .fh-cta { margin-top: 28px; }
+  .lv .fh-btn { height: 46px; padding: 0 18px; font-size: 15px; }
+}
+@media (max-width: 760px) and (max-height: 740px) {
+  .lv .fh-top { padding-top: 18px; padding-bottom: 18px; }
+  .lv .fh-main { padding-top: 16px; padding-bottom: calc(20px + 56px); }
+}

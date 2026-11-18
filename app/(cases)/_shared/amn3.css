@@ -1,0 +1,308 @@
+/* AMN Healthcare, third version (./amn-v3). It adds every screen of the team's designs to the second
+   version's page (./amn2.css): three strips of whole phone screens, the ShiftWise staff list as a grid
+   and as cards, and the framework's cards, type styles, form parts and icons. The strips and the staff
+   list run the page's full width, because a row of five phones or a grid of eleven columns does not
+   fit a 1,000px picture. Windows are drawn at their real size and shown smaller with `zoom`. */
+.st--amn3 .pp :is(.a3-wlogo, .a3-none b, .a3-faces em) { font-style: italic; }
+.st--amn3 .pp .is-u { text-decoration: underline; }
+.a3-z { zoom: var(--z, 1); }
+
+/* ---------- a band: the page's full width ---------- */
+/* story.css zeroes every figure's margin with a stronger selector; this has to be stronger still. */
+.st .a3-bandfig { margin: 56px 0 0; }
+.a3-bandfig figcaption { margin-top: 16px; padding-inline: 20px; color: var(--ink-3); font-size: 14px; line-height: 20px; letter-spacing: 0.2px; text-align: center; }
+.a3-band { padding: 56px 0 44px; overflow: hidden; }
+.a3-band--p { background: var(--p-tint); }
+.a3-band--w { background: var(--w-tint); }
+.st--amn3 .a3-strip, .a3-scroll, .a3-sizes { display: flex; justify-content: safe center; overflow-x: auto; padding: 0 clamp(20px, 4vw, 56px) 18px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.st--amn3 .a3-strip { gap: 28px; padding-inline: 20px; }
+.a3-strip li { flex: none; display: grid; align-content: start; gap: 22px; width: 256px; scroll-snap-align: center; }
+
+/* ---------- phones, a little smaller so five sit in a row ---------- */
+.st--amn3 .a2-ph { width: 256px; height: 528px; border-radius: 32px; }
+.a2-ph .pp-s { position: relative; }
+.st--amn3 .a2-ph .pp-s:not(.pp-s--white) { padding: 42px 18px 0; gap: 12px; }
+.st--amn3 .a2-ph .pp-s--splash { padding: 0; }
+.st--amn3 .a2-ph.pp-phone .pp-h { font-size: 20px; line-height: 26px; }
+.st--amn3 .a2-ph .pp-s--purple .pp-logo, .st--amn3 .a2-ph .pp-s--grey > .pp-logo { margin-bottom: 8px; font-size: 21px; line-height: 26px; }
+.st--amn3 .a2-ph .pp-sub { font-size: 12px; line-height: 17px; }
+.st--amn3 .a2-ph .pp-f { min-height: 46px; }
+.st--amn3 .a2-ph .pp-btn { height: 42px; font-size: 14px; }
+.st--amn3 .a2-ph .pp-link { margin-top: 2px; font-size: 12.5px; }
+.st--amn3 .a2-ph .pp-s--grey { padding-inline: 12px; }
+.st--amn3 .a2-ph .pp-sheet { gap: 10px; padding: 20px 14px 0; }
+.st--amn3 .a2-ph .pp-btn--line { box-shadow: inset 0 0 0 1px #c9ccd0; }
+.a3-links { display: flex; justify-content: center; gap: 22px; margin-top: 4px; color: var(--sky); font-size: 12px; }
+.a3-signin { display: flex; gap: 8px; }
+.a3-signin .pp-btn { flex: 1; }
+.a3-round { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--navy); color: #fff; }
+.a3-round .pp-ic { width: 22px; height: 22px; }
+.st--amn3 .a2-ph .a3-err { padding-top: 0; }
+.a3-err .pp-fail { margin: 0 -18px 6px; padding: 40px 14px 12px; border-radius: 0; }
+/* Welcome. */
+.st--amn3 .a2-ph .a3-welcome { align-items: center; padding: 42px 22px 22px; background: #fafafa; }
+.a3-skip { align-self: flex-end; color: var(--navy); font-size: 10px; letter-spacing: 0.3px; }
+.a3-welcome .a3-trio { margin: 22px 0 18px; }
+.a3-welcome .pp-sub { color: var(--mute); }
+.a3-pips { display: flex; gap: 6px; margin-top: auto; }
+.a3-pips i { width: 6px; height: 6px; border-radius: 50%; background: #d0d3d6; }
+.a3-pips i.is-on { background: var(--sky); }
+.a3-welcome .pp-btn { align-self: stretch; margin-top: 16px; }
+.a3-trio { position: relative; flex: none; display: flex; align-items: flex-end; justify-content: center; gap: 7px; width: 150px; height: 150px; border-radius: 50%; background: #cfe6f5; }
+.a3-trio i { position: relative; width: 30px; height: 70px; margin-bottom: 16px; border-radius: 14px 14px 6px 6px; background: var(--purple); }
+.a3-trio i:nth-child(2) { height: 78px; background: #7d55d1; }
+.a3-trio i::before { content: ""; position: absolute; left: 50%; top: -24px; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%; background: #b9a3e6; }
+/* Home: the job cards and the tab bar. */
+.st--amn3 .a2-ph .a3-home .pp-profile { margin: 10px 12px; padding: 16px 14px; gap: 7px; }
+.st--amn3 .a2-ph.pp-phone .a3-home .pp-profile > b { font-size: 20px; line-height: 25px; }
+.st--amn3 .a2-ph .a3-home .pp-profile > small { font-size: 11px; line-height: 15px; }
+.st--amn3 .a2-ph .a3-home .pp-todo { gap: 4px; font-size: 12.5px; }
+.st--amn3 .a2-ph .a3-home .pp-avatar:not(.pp-avatar--s) { width: 36px; height: 36px; }
+.st--amn3 .a2-ph .pp-bar { padding: 40px 14px 10px; }
+.st--amn3 .a2-ph .pp-bar .pp-logo { font-size: 18px; }
+.a3-home .pp-jobs { padding: 2px 14px 6px; }
+.a3-home .pp-jobs b { font-size: 16px; line-height: 22px; }
+.a3-jobrow { display: flex; gap: 10px; padding: 0 12px; }
+.a3-job { flex: none; display: grid; align-content: start; width: 172px; overflow: hidden; border-radius: 8px; background: #fff; box-shadow: 0 1px 5px rgb(0 0 0 / 0.14); }
+.a3-job-pic { position: relative; display: block; height: 76px; background: linear-gradient(180deg, #a9bdd1, #cfdae5 58%, #8f9ca8 58%, #a7b1bb); }
+.a3-job-pic u { position: absolute; left: 0; bottom: 0; padding: 2px 8px; color: #fff; font-size: 10px; line-height: 15px; font-weight: 700; }
+.a3-job-pic .pp-ic { position: absolute; right: 8px; bottom: -11px; width: 24px; height: 24px; padding: 5px; border-radius: 50%; background: #fff; color: #9a9da0; box-shadow: 0 1px 3px rgb(0 0 0 / 0.2); }
+.a3-job-in { display: grid; gap: 1px; padding: 10px 10px 8px; }
+.a3-job-in b { color: var(--navy); font-size: 13px; line-height: 18px; font-weight: 400; }
+.a3-job-in small { overflow: hidden; color: var(--mute); font-size: 9.5px; line-height: 13px; white-space: nowrap; text-overflow: ellipsis; }
+.a3-job-in strong { justify-self: end; color: var(--grass); font-size: 16px; line-height: 20px; font-weight: 400; }
+.a3-job-in strong i { font-size: 9px; }
+.a3-job--wide { grid-template-columns: 54px minmax(0, 1fr); width: auto; }
+.a3-job--wide .a3-job-pic { height: auto; }
+.a3-job--wide .a3-job-pic u { position: static; display: none; }
+.a3-job--wide .a3-job-pic .pp-ic { display: none; }
+.a3-tabs { position: absolute; inset: auto 0 0 0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 4px 12px; background: #fff; box-shadow: 0 -1px 3px rgb(0 0 0 / 0.1); }
+.a3-tabs i { display: grid; justify-items: center; gap: 3px; color: var(--mute); font-size: 8.5px; line-height: 11px; }
+.a3-tabs i.is-on { color: var(--sky); }
+.a3-tabs .pp-ic { width: 17px; height: 17px; }
+/* Credentials. */
+.a3-head { position: relative; display: grid; place-items: center; padding: 40px 14px 12px; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.08); }
+.a3-head > .pp-ic { position: absolute; left: 14px; bottom: 13px; width: 16px; height: 16px; color: var(--sky); }
+.a3-head b { color: var(--navy); font-size: 15px; line-height: 20px; font-weight: 400; }
+.a3-head--more .pp-avatar { position: absolute; right: 14px; bottom: 9px; }
+.a3-find { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px #d5d8db; color: var(--mute); font-size: 11.5px; }
+.a3-find .pp-ic { width: 13px; height: 13px; }
+.pp .a3-gi { width: 17px; height: 17px; color: var(--navy); }
+.st--amn3 .a2-scr > * { min-width: 0; }
+.a3-cc .pp-c { padding-block: 9px; }
+.st--amn3 .a2-scr .pp-docs i { width: 76px; height: 60px; }
+.st--amn3 .a2-scr .pp-add { margin-bottom: 0; padding: 10px; }
+.st--amn3 .a2-scr .pp-docs { margin-bottom: 10px; }
+.a3-fab { position: absolute; right: 12px; bottom: 22px; }
+.a3-sorts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.a3-sorts i { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 6px; background: #fff; box-shadow: 0 0 0 1px #eceef0; font-size: 11px; }
+.a3-sorts .pp-ic { width: 11px; height: 11px; color: var(--mute); }
+.a3-all { justify-self: end; padding: 2px; color: var(--sky); font-size: 12px; }
+.st--amn3 .a2-ph .a3-dim { justify-content: center; padding: 0 14px; background: #8f9194; }
+.a3-modal { position: relative; display: grid; gap: 10px; padding: 28px 18px 20px; border-radius: 6px; background: #fff; }
+.a3-modal .a3-close { position: absolute; right: 12px; top: 12px; color: var(--sky); }
+.a3-modal .a3-big { justify-self: center; width: 46px; height: 46px; color: var(--mute); stroke-width: 0.9; }
+.a3-modal .pp-sub { color: #555; }
+.a3-or { color: var(--mute); font-size: 12px; text-align: center; }
+.a3-tick { display: flex; align-items: flex-start; gap: 10px; color: #333; font-size: 12px; line-height: 17px; }
+.a3-tick > i { flex: none; display: grid; place-items: center; width: 16px; height: 16px; border: 1.5px solid #c9ccd0; border-radius: 3px; }
+.a3-tick.is-on > i { border-color: var(--sky); background: var(--sky); color: #fff; }
+.a3-tick .pp-ic { width: 11px; height: 11px; stroke-width: 2.4; }
+.a3-picks { display: grid; gap: 10px; }
+.a3-sel { padding: 4px 2px 0; color: #555; font-size: 12px; }
+.st--amn3 .a2-scr .a2-sheet { padding: 14px; }
+.a3-foot { position: absolute; inset: auto 0 0 0; padding: 12px 14px 18px; background: #fff; box-shadow: 0 -1px 4px rgb(0 0 0 / 0.12); }
+.pp-docs i { position: relative; }
+.pp-docs .pp-ic.a3-del { position: absolute; right: -7px; top: -7px; width: 22px; height: 22px; padding: 5px; border-radius: 50%; background: #75787b; color: #fff; stroke-width: 1.5; }
+.a3-menu { display: grid; background: #fff; }
+.a3-menu i { display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-bottom: 1px solid #eceef0; font-size: 13px; line-height: 18px; }
+.a3-menu b { flex: 1; color: var(--navy); font-weight: 400; }
+.a3-menu .pp-ic { color: var(--mute); }
+.a3-menu em { padding: 7px 14px; background: #f5f5f5; color: var(--mute); font-size: 10px; letter-spacing: 0.4px; }
+
+/* ---------- ShiftWise: the staff list, at its real size ---------- */
+.a3-win { flex: none; display: grid; align-content: start; overflow: hidden; border-radius: 10px; background: #f3f5f8; box-shadow: 0 30px 60px -30px rgb(0 60 105 / 0.4), 0 0 0 1px rgb(0 60 105 / 0.07); color: #333; font-size: 12px; line-height: 16px; }
+/* A grid item is as wide as its longest unbroken line unless told otherwise; these must not push
+   the window wider than it is. */
+.a3-win > *, .a3-wbody > *, .a3-panel > *, .a3-scs > * { min-width: 0; }
+.a3-win--d { width: 1240px; }
+.a3-win--cards { height: 780px; }
+.a3-win--cards.a3-win--d { width: 720px; }
+.a3-win--t { width: 500px; }
+.a3-win--m { width: 270px; border-radius: 22px; }
+.a3-wtop { display: flex; align-items: center; gap: 18px; padding: 14px 20px 8px; background: #fff; }
+.pp .a3-wlogo { color: var(--wise); font-size: 24px; line-height: 28px; font-weight: 800; letter-spacing: -0.4px; }
+.a3-wwel { flex: 1; min-width: 0; overflow: hidden; color: #555; font-size: 11px; white-space: nowrap; text-overflow: ellipsis; }
+.a3-wwel u { color: #1d6fb8; }
+.a3-wlinks { flex: none; display: flex; color: var(--wise); font-size: 10px; font-weight: 700; }
+.a3-wlinks i + i::before { content: "|"; margin: 0 10px; color: #c9ccd0; font-weight: 400; }
+.a3-wnav { display: flex; gap: 50px; padding: 11px 20px 11px 152px; background: var(--navy); color: #fff; font-size: 12px; white-space: nowrap; }
+.a3-wnav i { display: inline-flex; align-items: center; gap: 5px; padding-bottom: 3px; }
+.a3-wnav i.is-on { font-weight: 700; box-shadow: 0 2px 0 #fff; }
+.a3-wnav .pp-ic { width: 10px; height: 10px; }
+.a3-win--cards .a3-wnav, .a3-win--t .a3-wnav { gap: 26px; padding-left: 132px; }
+.a3-wbar { display: flex; align-items: center; gap: 14px; padding: 24px 14px 14px; background: var(--navy); color: #fff; }
+.pp .a3-wbar .a3-wlogo { color: #fff; font-size: 17px; line-height: 22px; }
+.a3-wbar i { padding-bottom: 3px; font-size: 11px; box-shadow: 0 2px 0 #fff; }
+.a3-wbar .pp-ic { width: 18px; height: 18px; margin-left: auto; }
+.a3-wbody { display: grid; gap: 12px; padding: 16px 20px 22px; }
+.a3-win--m .a3-wbody { padding: 12px 10px; }
+.a3-wtitle { font-size: 16px; line-height: 22px; font-weight: 400; }
+.a3-panel { display: grid; gap: 14px; padding: 16px 18px 18px; border-radius: 4px; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.08); }
+.a3-win--m .a3-panel { padding: 12px 10px; }
+.a3-wtabs { display: flex; gap: 28px; border-bottom: 1px solid var(--hair); color: #555; font-size: 13px; line-height: 18px; }
+.a3-wtabs i { padding: 2px 4px 10px; }
+.a3-wtabs i.is-on { color: #005bbb; font-weight: 600; box-shadow: inset 0 -2px 0 #005bbb; }
+.a3-tools { display: flex; align-items: center; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--hair); }
+.a3-tools .a3-find { width: 210px; height: 32px; border-radius: 4px; font-size: 11px; }
+.a3-tools > i { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 1px solid #c9ccd0; border-radius: 4px; color: #555; font-size: 11px; }
+.a3-tools .pp-ic, .a3-count .pp-ic { width: 12px; height: 12px; }
+.a3-reset { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid #c9ccd0; border-radius: 50%; color: #555; }
+.a3-switch { display: inline-flex; margin-left: auto; }
+.a3-switch i { padding: 8px 18px; border: 1px solid #c9ccd0; font-size: 11px; }
+.a3-switch i + i { margin-left: -1px; }
+.a3-switch i.is-on { background: #eef1f6; font-weight: 600; }
+.a3-switch.is-off i { border-color: #d5d8db; background: #d5d8db; color: #9a9da0; font-weight: 400; }
+.a3-count { display: flex; align-items: center; justify-content: space-between; min-height: 20px; }
+.a3-count b { font-size: 13px; font-weight: 400; }
+.a3-count > span:not(.a3-switch) { display: flex; align-items: center; gap: 14px; color: #555; }
+.a3-count > span i { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; }
+.a3-grid { display: grid; border: 1px solid var(--hair); }
+.a3-grid > span { display: grid; grid-template-columns: 1.25fr 1.05fr 1.9fr 1.9fr 1.9fr 0.75fr 0.5fr 0.7fr 1fr 0.9fr 0.9fr 16px; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid #eceef0; white-space: nowrap; }
+.a3-grid > span > i { overflow: hidden; text-overflow: ellipsis; }
+.a3-grid > .a3-grid-h { border-top: 0; background: #f5f5f5; font-size: 11px; font-weight: 700; }
+.a3-grid .is-name { color: var(--wise); font-weight: 700; }
+.a3-grid .is-link, .a3-sc .is-link { color: #1d6fb8; }
+.a3-grid .is-ic { display: flex; color: #1d6fb8; }
+.a3-grid .is-ic .pp-ic { width: 16px; height: 16px; }
+.pp-ic.a3-kebab { color: #555; stroke-width: 2.4; }
+.a3-grid > .a3-none { display: flex; align-items: center; justify-content: center; gap: 44px; min-height: 400px; white-space: normal; }
+.pp .a3-none b { max-width: 440px; color: #333; font-size: 20px; line-height: 29px; font-weight: 600; }
+.a3-none .a3-trio { width: 180px; height: 180px; background: #e3e8ee; }
+.a3-none .a3-trio i { width: 36px; height: 84px; background: var(--wise); }
+.a3-none .a3-trio i:nth-child(2) { height: 94px; background: #2a62ad; }
+.a3-none .a3-trio i::before { top: -28px; width: 24px; height: 24px; margin-left: -12px; background: #9db4d2; }
+.a3-pager { display: flex; align-items: center; justify-content: space-between; color: #555; font-size: 11px; }
+.a3-pager > span { display: flex; align-items: center; gap: 6px; }
+.a3-pager i { display: grid; place-items: center; min-width: 22px; height: 22px; border-radius: 50%; }
+.a3-pager i.is-on { background: #005bbb; color: #fff; }
+.a3-pager .pp-ic { width: 11px; height: 11px; }
+.a3-per { display: inline-flex; align-items: center; gap: 5px; }
+.a3-win--cards .a3-per { display: none; }
+.a3-scs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.a3-win--t .a3-scs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.a3-win--m .a3-scs { grid-template-columns: minmax(0, 1fr); }
+.a3-sc { display: grid; align-content: start; gap: 1px; min-width: 0; padding: 14px; border: 1px solid var(--hair); border-radius: 4px; box-shadow: 0 1px 4px rgb(0 0 0 / 0.08); }
+.a3-sc-h { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; padding-bottom: 10px; border-bottom: 1px solid #eceef0; color: #1d6fb8; }
+.a3-sc-h b { flex: 1; min-width: 0; overflow: hidden; color: var(--wise); font-size: 13px; line-height: 18px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; }
+.a3-sc-h .pp-ic { width: 15px; height: 15px; }
+.a3-sc small { margin-top: 8px; color: var(--mute); font-size: 10px; line-height: 13px; }
+.a3-sc i { overflow: hidden; font-size: 11.5px; line-height: 16px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.a3-sc > span:not(.a3-sc-h) { display: grid; grid-template-columns: 1fr 1fr; }
+.a3-sc > span > span { display: grid; }
+/* Where the windows sit. */
+.a3-scroll > div { flex: none; }
+.a3-sizes { align-items: flex-start; gap: 24px; }
+.a3-sizes > div { flex: none; display: grid; justify-items: center; gap: 18px; }
+.a3-sizes > div > small { color: var(--wise); font-family: var(--mono); font-size: 12px; line-height: 16px; letter-spacing: 0.6px; text-transform: uppercase; }
+.a3-z--cards { --z: 0.8; }
+.a3-z--before { --z: 0.716; }
+.st--amn3 .a3-before { padding: 48px 56px; }
+.a3-cover .a3-z--cover { --z: 0.68; align-self: flex-end; }
+.a3-cover .a3-win { height: 700px; border-radius: 14px 14px 0 0; }
+
+/* ---------- the framework board: what the third version adds ---------- */
+.st--amn3 .a3-alerts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; padding-top: 18px; border-top: 1px solid var(--hair); }
+.a3-alerts li { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px 0 10px; border-radius: 999px; background: #f5f5f5; font-size: 13px; line-height: 18px; }
+.a3-alerts u { width: 14px; height: 14px; border-radius: 4px; }
+.a3-faces { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; padding-bottom: 14px; border-bottom: 1px solid var(--hair); font-size: 13.5px; line-height: 20px; }
+.a3-faces b { font-weight: 600; }
+.st--amn3 .a3-type ul { display: grid; }
+.a3-type li { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 12px; padding: 5px 0; }
+.a3-type li small { color: var(--ink-3); font-family: var(--mono); font-size: 11px; line-height: 15px; }
+.a3-type li small i { display: block; opacity: 0.75; }
+.a3-type li > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.a3-smalls { display: flex; gap: 8px; }
+.a3-smalls .pp-btn { height: 30px; padding: 0 14px; font-size: 12px; }
+.a3-floats { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.a3-floats .pp-float { margin: 0; width: 46px; height: 46px; }
+.a3-arrow { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: #fff; }
+.a3-arrow.is-off { background: #9aa9b8; }
+.a3-text { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; color: var(--sky); font-size: 13px; font-weight: 600; }
+.a2-cell .a3-find { box-shadow: inset 0 0 0 1px #c9ccd0; }
+.a2-cell .pp-f b .pp-ic { width: 13px; height: 13px; }
+.a2-cell .a3-picks { grid-template-columns: 1fr 1fr; margin-top: 4px; }
+.a2-cell--12 { grid-column: 1 / -1; }
+.a3-cards { grid-template-columns: 1.2fr 1.05fr 0.95fr 1fr; gap: 0 28px; }
+.a3-cards > h3 { grid-column: 1 / -1; }
+.a3-cards > div { display: grid; align-content: start; gap: 14px; min-width: 0; }
+.a3-contact { position: relative; display: flex; gap: 12px; padding: 14px; border-radius: 6px; background: #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.14); }
+.a3-av { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #8fc3c9; color: #fff; font-size: 18px; }
+.a3-contact > span:last-child { display: grid; gap: 2px; min-width: 0; }
+.a3-contact b { font-size: 13px; line-height: 18px; font-weight: 400; }
+.a3-contact small { color: var(--mute); font-size: 11px; line-height: 15px; }
+.a3-contact i { display: flex; align-items: center; gap: 4px; color: var(--sky); font-size: 11px; line-height: 15px; }
+.a3-contact i .pp-ic { width: 12px; height: 12px; }
+.a3-reach { display: flex; gap: 12px; margin-top: 8px; }
+.a3-reach u { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #3d95d6; color: #fff; }
+.a3-contact.is-pref { padding-top: 46px; }
+.a3-contact em { position: absolute; inset: 0 0 auto 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border-radius: 6px 6px 0 0; background: #eee9fa; color: var(--purple); font-size: 11px; line-height: 15px; }
+.a3-contact em .pp-ic { width: 12px; height: 12px; fill: currentColor; }
+.a3-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px 10px 20px; border-radius: 10px; background: #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.14); }
+.a3-avs { display: flex; }
+.a3-avs i { display: grid; place-items: center; width: 30px; height: 30px; margin-left: -7px; border: 2px solid #fff; border-radius: 50%; background: #8fc3c9; color: #fff; font-size: 10px; }
+.a3-avs i.is-n { background: var(--navy); }
+.a3-row .pp-btn { height: 34px; padding: 0 14px; font-size: 13px; }
+.a3-cards .a3-job { width: 100%; }
+.a3-booked { display: grid; gap: 4px; padding-bottom: 12px; overflow: hidden; border-radius: 14px; background: #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.14); }
+.a3-booked-pic { position: relative; height: 86px; background: linear-gradient(180deg, #a9bdd1, #cfdae5 58%, #8f9ca8 58%, #a7b1bb); }
+.a3-booked-pic u { position: absolute; left: 0; top: 0; display: grid; padding: 8px 16px 8px 12px; border-radius: 0 0 14px 0; background: var(--purple); color: #fff; font-size: 13px; line-height: 17px; font-weight: 700; }
+.a3-booked-pic small { color: #fff; font-size: 9px; line-height: 12px; font-weight: 400; }
+.a3-booked > b { padding: 8px 14px 0; color: var(--navy); font-size: 13px; line-height: 18px; font-weight: 400; }
+.a3-booked > small { padding: 0 14px 6px; color: var(--mute); font-size: 10.5px; line-height: 14px; }
+.a3-booked > i { display: flex; align-items: center; gap: 10px; margin: 3px 12px; padding: 9px 10px; border-radius: 4px; background: #f3f0fb; box-shadow: inset 3px 0 0 var(--purple); color: var(--navy); font-size: 11.5px; line-height: 16px; }
+.a3-booked > i span { flex: 1; display: grid; gap: 4px; }
+.a3-booked s { display: block; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--purple) 35%, #d9d2ee 35%); }
+.a3-prof { display: grid; justify-items: center; gap: 3px; padding: 18px 14px; border-radius: 6px; background: #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.14); text-align: center; }
+.a3-av--l { width: 64px; height: 64px; margin-bottom: 10px; font-size: 21px; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--sky); }
+.a3-prof b { font-size: 17px; line-height: 23px; font-weight: 400; }
+.a3-prof small { color: var(--mute); font-size: 10.5px; line-height: 14px; }
+.a3-prof i { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--sky); font-size: 12px; }
+.a3-prof .pp-ic { width: 11px; height: 11px; }
+.a3-well { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 4px; background: #fff; box-shadow: inset 3px 0 0 var(--purple), 0 1px 5px rgb(0 0 0 / 0.14); }
+.a3-well > .pp-ic:first-child { width: 20px; height: 20px; color: var(--purple); }
+.a3-well > span { flex: 1; display: grid; justify-items: start; gap: 6px; }
+.a3-well b { font-size: 11.5px; line-height: 16px; font-weight: 400; }
+.a3-well u { padding: 3px 18px; border-radius: 3px; background: var(--purple); color: #fff; font-size: 9px; line-height: 13px; font-weight: 700; }
+.a3-well > .pp-ic:last-child { align-self: flex-start; width: 12px; height: 12px; color: var(--sky); }
+.a3-logos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.a3-logos > span { display: grid; place-items: center; height: 58px; border-radius: 10px; background: #f5f5f5; }
+.a3-logos img { width: auto; height: 30px; }
+.a3-logos .pp-logo { font-size: 15px; line-height: 20px; }
+.a3-logos .pp-logo img { height: 1.15em; }
+.a3-logos > .is-purple { background: var(--purple); }
+.st--amn3 .a3-notes { display: flex; justify-content: space-between; gap: 4px; margin-top: 6px; padding: 16px 0; border-block: 1px solid var(--hair); }
+.a3-notes li { display: grid; justify-items: center; align-content: start; gap: 5px; width: 54px; text-align: center; }
+.a3-notes .pp-ic { width: 21px; height: 21px; }
+.a3-notes small { color: var(--mute); font-size: 8.5px; line-height: 11px; }
+.a3-gen { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); justify-items: center; gap: 16px 0; margin-top: 8px; color: #666; }
+.a3-gen .pp-ic { width: 19px; height: 19px; stroke-width: 1.2; }
+
+@media (max-width: 1040px) {
+  .a3-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+}
+@media (max-width: 900px) {
+  .a3-band { padding: 28px 0 20px; }
+  .st--amn3 .a3-strip { gap: 18px; }
+  .a3-cover .a3-z--cover { display: none; }
+  .a3-z--grid { --z: 0.8; }
+  .a3-z--cards { --z: 0.7; }
+  .st--amn3 .a3-before { padding: 20px; }
+  .st--amn3 .a3-before > div { width: 888px; }
+  .a3-cards { grid-template-columns: minmax(0, 1fr); }
+  .a3-gen { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
+/* Nothing in a board cell or a phone-sized window may push it wider than its place. */
+.st--amn3 .a2-cell > * { min-width: 0; }
+.a3-win--m .a3-pager small { display: none; }
+.a3-win--m .a3-pager > span { gap: 3px; }
