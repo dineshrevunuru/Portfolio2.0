@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
-import { access } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
+import { get } from "@vercel/blob";
 import path from "node:path";
 import { cookies } from "next/headers";
 
@@ -36,7 +37,34 @@ export async function isOpen() {
 export const SCREENS = ["summary-light", "summary-dark", "map", "plant", "drill", "plant-summary", "silo", "manual", "diy",
   ...["sales", "logistics", "hr", "finance", "procurement", "benchmark", "safety", "inventory", "micro-market", "fpc", "alerts", "quality"].map((n) => `wall-${n}`)];
 
-// Whether the real screens can be read here. On the live host they cannot yet (they are in no repository and
-// no storage the server reaches), so an unlocked page there shows the redrawn case and keeps each full screen
-// veiled, where it would otherwise show a broken picture.
-export const hasVault = () => access(path.join(VAULT, "summary-light.webp")).then(() => true, () => false);
+// Where the real screens are read from. On his machine: the private folder beside this checkout (VAULT). On the live
+// host: a private Vercel Blob store connected to the project (connecting it sets BLOB_STORE_ID or
+// BLOB_READ_WRITE_TOKEN), never this repository. A store's files can sit under adani/ or at its root.
+const REMOTE = Boolean(process.env.BLOB_STORE_ID || process.env.BLOB_READ_WRITE_TOKEN);
+
+export async function readScreen(name: string): Promise<{ body: BodyInit; type: string } | null> {
+  try {
+    return { body: new Uint8Array(await readFile(path.join(VAULT, `${name}.webp`))), type: "image/webp" };
+  } catch {}
+  if (!REMOTE) return null;
+  for (const key of [`adani/${name}.webp`, `${name}.webp`]) {
+    try {
+      const found = await get(key, { access: "private" });
+      if (found?.statusCode === 200) return { body: found.stream, type: found.blob.contentType || "image/webp" };
+    } catch {}
+  }
+  return null;
+}
+
+// Whether the real screens can be read here. Where they cannot (no folder, no store, or a store without the files),
+// an unlocked page shows the redrawn case and keeps each full screen veiled, where it would otherwise show a broken
+// picture. Asked only for an unlocked visitor; a found answer is kept for ten minutes so a store is read once, not on
+// every page view.
+let found = { ok: false, at: 0 };
+export async function hasVault() {
+  if (found.ok && Date.now() - found.at < 600_000) return true;
+  const shot = await readScreen("summary-light");
+  if (shot && shot.body instanceof ReadableStream) await shot.body.cancel();
+  found = { ok: Boolean(shot), at: Date.now() };
+  return found.ok;
+}
