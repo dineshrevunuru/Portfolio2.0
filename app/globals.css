@@ -37,6 +37,8 @@
   /* Card palette — per project */
   --color-card-adani-bg: #e4daf2;
   --color-card-adani-ink: #50228c;
+  --color-card-amn-bg: #dff1ef;
+  --color-card-amn-ink: #0b5850;
   --color-card-microsoft-bg: #f4d6dc;
   --color-card-microsoft-ink: #932535;
   --color-card-jira-bg: #e0eefd;
@@ -333,6 +335,10 @@ body {
   .card-adani {
     background: var(--color-card-adani-bg);
     color: var(--color-card-adani-ink);
+  }
+  .card-amn {
+    background: var(--color-card-amn-bg);
+    color: var(--color-card-amn-ink);
   }
   .card-microsoft {
     background: var(--color-card-microsoft-bg);

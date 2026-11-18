@@ -57,6 +57,8 @@ export const metadata = pageMetadata({
  * If a logo is ever swapped, re-tune its height by eye against the other three.
  * Do not normalise them back to one value.
  */
+/* 2026-11-18: Adani and the Jira extension left this strip when their case studies went up as cards in the
+   grid above; two entries remain, and the subhead names only those two. */
 const enterprise: {
   title: string;
   description: string;
@@ -73,14 +75,6 @@ const enterprise: {
     logoH: 24,
   },
   {
-    title: "Adani cement manufacturing",
-    description:
-      "Dashboards for reading plant performance at a glance, across seven clusters and thirty-four plants.",
-    logo: "/logos/Adani-logo.png",
-    logoAlt: "Adani",
-    logoH: 26,
-  },
-  {
     title: "Learning Care Group",
     description:
       "Enrollment forms that school administrators can edit themselves, without waiting on an engineering release.",
@@ -89,19 +83,6 @@ const enterprise: {
     /* The tallest of the four: a two-line stack needs ~1.5x a single-line
        wordmark's height before its second line becomes readable. */
     logoH: 36,
-  },
-  {
-    /* Jira is the platform the extension was built for, not a fourth client —
-       which is why the subhead above names only Microsoft, Adani and Learning
-       Care Group. The logo identifies what it plugs into. */
-    title: "Generative AI extension for Jira",
-    description:
-      "Plain-language prompts become well-formed tickets and sprint summaries, inside the tool teams already work in.",
-    logo: "/logos/Jira-logo.png",
-    logoAlt: "Jira Software",
-    /* The shortest: at 6.5:1 this wordmark is already the widest thing in the
-       row, so height is what keeps it from dominating. */
-    logoH: 20,
   },
 ];
 
@@ -232,7 +213,7 @@ export default function Home() {
       <section id="enterprise" className="pad-cards mx-auto w-full max-w-[1440px] pt-20 sm:pt-24">
         <h3 className="t-section-head">Enterprise work at Neudesic</h3>
         <p className="mt-4 max-w-[620px] t-body">
-          Designed and prototyped for Microsoft, Adani and Learning Care Group.
+          Designed and prototyped for Microsoft and Learning Care Group.
           This work is under NDA and stayed in development, so there are no
           screens to show and no numbers to claim. The scope is the point.
         </p>
