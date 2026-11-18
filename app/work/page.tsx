@@ -10,7 +10,7 @@ const SEO = {
   path: "/work",
   title: "Work: product design case studies — Dinesh Revunuru",
   description:
-    "Case studies by product designer Dinesh Revunuru: an AI booking platform, custom clothing e-commerce, a journalism platform, a B2B trading app, and concepts.",
+    "Case studies by product designer Dinesh Revunuru: an AI booking platform, a cement-plant dashboard, a healthcare staffing platform, a generative AI extension for Jira, custom clothing e-commerce, a journalism platform, a B2B trading app, and concepts.",
 };
 
 export const metadata = pageMetadata(SEO);
@@ -143,7 +143,7 @@ export default function WorkPage() {
         <h2 className="t-section-head">Projects I worked on</h2>
       </section>
       <section className="pad-cards mx-auto w-full max-w-[1440px] pt-8 sm:pt-10">
-        <ProjectGrid />
+        <ProjectGrid on="work" />
       </section>
 
       <section className={`${styles.funWrap} mx-auto w-full max-w-[1440px] pt-28 sm:pt-40`}>

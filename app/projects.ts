@@ -30,6 +30,8 @@ export type Project = {
   thumbVariant: ThumbVariant;
   /** Keep the entry but omit it from the grid. Flip to false to show again. */
   hidden?: boolean;
+  /** On /work only, not the homepage grid. */
+  workOnly?: boolean;
   /** Serve the original file untouched, no Next.js downscaling. */
   unoptimized?: boolean;
 };
@@ -49,33 +51,37 @@ export const projects: Project[] = [
   },
   {
     slug: "adani",
-    /* 2026-11-18: back on the grid, opening the new case study. The picture is the drawn tiles with made-up
-       figures, not the old thumbnail: that one is the real dashboard with its map, which stays off public pages. */
+    /* 2026-11-18: back on the grid, opening the new case study, with its original title and line. The picture
+       is the case's redrawn Leadership Summary (every figure changed, the map left out) in the same laptop as the
+       other cards. The old thumbnail is the real dashboard with its map and stays off the grid (NDA). */
     logo: "/logos/Adani-logo.png",
     logoAlt: "Adani",
-    title: "34 plants on one screen",
+    title: "Enterprise Cement manufacturing",
     description:
-      "A leadership dashboard for 34 cement plants, designed to be read in a minute and read right.",
+      "Redesigning manufacturing dashboard for easy consumption of data and keeping track of what is happening across various manufacturing plants.",
     cta: "case-study",
     href: "/adani-case-study",
-    thumb: "/sketches/work/adani-tiles.webp",
-    thumbW: 1600,
-    thumbH: 1000,
+    thumb: "/projects/adani-redrawn-thumbnail.png",
+    thumbW: 1272,
+    thumbH: 986,
     thumbVariant: "wide",
   },
   {
     slug: "amn",
-    // 2026-11-18: new card for the new case study. The photograph behind the sign-up screen is free stock.
+    /* 2026-11-18: new card for the new case study. Title and line are DRAFT (Lorem's, in the grid's register;
+       Dinesh to confirm). The picture is the case's own cover, redrawn: ShiftWise's staff list on the laptop,
+       Passport's home on the phone, in the same frames as the other cards. */
     logo: "/sketches/logos/amn.png",
     logoAlt: "AMN Healthcare",
-    title: "Three products as one",
-    description: "Three products from three places, rebuilt to belong together.",
+    title: "Healthcare staffing platform",
+    description:
+      "Apps for travel nurses and the hospitals that staff them, rebuilt to work as one on a shared design system.",
     cta: "case-study",
     href: "/amn-healthcare-case-study",
-    thumb: "/sketches/work/amn/amn-signup-card.webp",
-    thumbW: 1024,
-    thumbH: 1600,
-    thumbVariant: "tall",
+    thumb: "/projects/amn-thumbnail.png",
+    thumbW: 1272,
+    thumbH: 986,
+    thumbVariant: "wide",
   },
   {
     slug: "microsoft",
@@ -103,13 +109,13 @@ export const projects: Project[] = [
   },
   {
     slug: "jira",
-    /* 2026-11-18: back on the grid, opening the new 3 Stripes case study. The mark is 3 Stripes' own; Jira is
-       the tool the extension plugs into, not the client. */
-    logo: "/sketches/work/stripes/three-stripes.png",
-    logoAlt: "3 Stripes",
-    title: "An AI extension for Jira",
+    /* 2026-11-18: back on the grid, opening the new 3 Stripes case study, with its original logo, title and
+       picture. The line drops "sprint summaries", which the case does not show. */
+    logo: "/logos/Jira-logo.png",
+    logoAlt: "Jira Software",
+    title: "Generative A.I Extension",
     description:
-      "An AI inside Jira that asks before it writes, and changes nothing until it is accepted.",
+      "Plain-language prompts become well-formed epics and tickets, right inside Jira.",
     cta: "case-study",
     href: "/3-stripes-case-study",
     thumb: "/projects/Jira-thumbnail.png",
@@ -136,8 +142,8 @@ export const projects: Project[] = [
   },
   {
     slug: "uniquefit",
-    // Hidden from the grid 2026-11-18 ("replace the current case studies from home page"); the page still opens by its address.
-    hidden: true,
+    // Off the homepage grid since 2026-11-18 ("replace the current case studies from home page"); still on /work.
+    workOnly: true,
     title: "Online custom clothing platform",
     description:
       "people can customise their clothes online with a wide range of customising options at affordable prices.",
@@ -150,8 +156,8 @@ export const projects: Project[] = [
   },
   {
     slug: "reporters",
-    // Hidden from the grid 2026-11-18 ("replace the current case studies from home page"); the page still opens by its address.
-    hidden: true,
+    // Off the homepage grid since 2026-11-18 ("replace the current case studies from home page"); still on /work.
+    workOnly: true,
     title: "Freelance Journalists\nPlatform",
     description:
       "A platform for freelance journalists who can & are open to write articles and blogs on their own interest.",
@@ -164,8 +170,8 @@ export const projects: Project[] = [
   },
   {
     slug: "b2b",
-    // Hidden from the grid 2026-11-18 ("replace the current case studies from home page"); the page still opens by its address.
-    hidden: true,
+    // Off the homepage grid since 2026-11-18 ("replace the current case studies from home page"); still on /work.
+    workOnly: true,
     title: "B2B retailer and Reseller Platform",
     description:
       "B2B Dock is an application that connects with manufacturers, wholesalers, traders, and retailers.",
@@ -178,5 +184,7 @@ export const projects: Project[] = [
   },
 ];
 
-// Cards shown in the work grid. Hidden entries stay in `projects` above.
+// Cards shown on /work. Hidden entries stay in `projects` above.
 export const visibleProjects = projects.filter((p) => !p.hidden);
+// Cards shown on the homepage: the /work list without the work-only ones.
+export const homeProjects = visibleProjects.filter((p) => !p.workOnly);
