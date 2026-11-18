@@ -1,0 +1,44 @@
+/* 3 Stripes, fourth version (./stripes-v4). Loaded after stripes2.css, which holds the screens' own styles.
+   His words: "visuals, gradients, and animation doesn't sound like me". So this file has no gradient, no
+   motion and one flat light ground. Colour comes from the interface itself; the one diagram uses Jira's
+   blue for Jira and one purple for the extension. */
+.st--jx4 { --ground: #e9eef8; --jira: #0c66e4; --ext: #6e3fc6; }
+
+/* real Jira under the designs (the file's own screenshots; see ../stripes-v3/jira.tsx) */
+.st--jx4 .jx-shade { background: rgb(42 61 102 / 0.49); }
+.st--jx4 .jx-under--real { background: #fff url("/sketches/work/stripes/jira-backlog.webp") 0 0 / 1366px 648px no-repeat; }
+.st--jx4 .jx-brand img { display: block; width: 18px; height: 17px; }
+
+/* one flat ground for every picture */
+.st--jx4 .jx-stage, .j4-sheet { background: var(--ground); }
+.st--jx4 .jx-shot { box-shadow: 0 24px 48px -28px rgb(9 30 66 / 0.45), 0 0 0 1px rgb(9 30 66 / 0.1); }
+.j4-sheet { padding: 48px 40px; border-radius: 24px; }
+.j4-scroll { overflow-x: auto; }
+
+/* the map: flat fills, no gradient */
+.st--jx4 .jx-ia { display: block; width: 100%; min-width: 860px; height: auto; overflow: visible; }
+.st--jx4 .jx-ia rect { fill: #fff; stroke: rgb(9 30 66 / 0.16); } .st--jx4 .jx-ia rect.is-main { fill: var(--jira); stroke: none; } .st--jx4 .jx-ia rect:is(.is-brand, .is-dialog) { fill: var(--ext); stroke: none; }
+.st--jx4 .jx-ia rect.is-tick { fill: var(--ext); stroke: none; } .st--jx4 .jx-ia rect.is-band { fill: #fff; stroke: none; }
+.st--jx4 .jx-ia text { fill: #172b4d; font-size: 14px; font-weight: 600; } .st--jx4 .jx-ia text.s { fill: #44546f; font-size: 13.5px; font-weight: 400; } .st--jx4 .jx-ia text.k { fill: var(--ext); font-size: 13.5px; font-weight: 600; }
+.st--jx4 .jx-ia text.w { fill: #fff; } .st--jx4 .jx-ia text.ws { fill: rgb(255 255 255 / 0.9); font-size: 13.5px; font-weight: 400; }
+.st--jx4 .jx-ia path { fill: none; stroke: #5e6c84; stroke-width: 1.5; } .st--jx4 .jx-ia path.d { stroke: var(--ext); stroke-dasharray: 5 4; } .st--jx4 .jx-ia path.d.a { stroke-dasharray: none; }
+
+/* two panels at the size they were designed, the earlier one beside the prototype's */
+.j4-pair { display: grid; grid-template-columns: repeat(2, 350px); justify-content: center; gap: 56px; }
+.j4-pair > div { display: grid; align-content: start; gap: 16px; }
+.lv .j4-pair > div > p { color: var(--ink); font-size: 16px; line-height: 22px; font-weight: 543; }
+.j4-pair .jx-panel { box-shadow: inset 0 0 0 1px rgb(9 30 66 / 0.14), 0 20px 40px -26px rgb(9 30 66 / 0.4); }
+.j4-lead { max-width: 286px; margin-bottom: 4px; color: #626f86; line-height: 20px; }
+
+/* the left of the dialog, at the size it was designed */
+.j4-crop { position: relative; margin-inline: auto; overflow: hidden; border-radius: 8px; background: #fff; box-shadow: 0 24px 48px -28px rgb(9 30 66 / 0.45), 0 0 0 1px rgb(9 30 66 / 0.1); }
+.j4-crop > div { position: absolute; }
+/* the principle a decision serves, as a quiet line above its paragraph */
+.lv .st--jx4 .j4-tag, .lv.st--jx4 .j4-tag { display: block; margin-bottom: 6px; color: var(--ext); font-size: 14px; line-height: 20px; font-weight: 543; letter-spacing: 0.2px; }
+
+@media (max-width: 1000px) { .j4-scroll { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); } .j4-crop { margin-inline: 0; } }
+@media (max-width: 900px) {
+  .j4-sheet { padding: 24px 20px; border-radius: 20px; }
+  .j4-pair { grid-template-columns: minmax(0, 350px); gap: 32px; } .j4-pair .jx-part { zoom: 0.86; }
+  .j4-crop { zoom: 0.8; }
+}

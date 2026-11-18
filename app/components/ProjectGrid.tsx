@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { visibleProjects } from "../projects";
+import { homeProjects, visibleProjects } from "../projects";
 
 export function WArrow() {
   return (
@@ -10,14 +10,15 @@ export function WArrow() {
   );
 }
 
-/** The shipped case-study cards. Rendered on the homepage and on /work. */
-export default function ProjectGrid() {
+/** The shipped case-study cards. The homepage shows the featured ones; /work shows them all. */
+export default function ProjectGrid({ on = "home" }: { on?: "home" | "work" }) {
+  const list = on === "work" ? visibleProjects : homeProjects;
   return (
         <div
           className="grid grid-cols-1 items-start gap-6 md:gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10"
           data-seq-group
         >
-          {visibleProjects.map((p) => (
+          {list.map((p) => (
             <article key={p.slug} className={`project-card card-${p.slug} group relative`}>
               {p.logo && (
                 <div className="mb-6 flex h-[40px] items-center">

@@ -1,0 +1,100 @@
+/* 3 Stripes, the Jira extension only (./stripes-v2). Screens are the Figma prototype's, drawn at 1366 x 816
+   with every block at its measured place (./stripes-v2/jira.tsx) and shown smaller by `zoom: var(--z)`.
+   Colors are the designs', which are Atlassian's: text #172b4d, blue #0c66e4, selected #e9f2ff, the
+   person's bubble #009bff, the panel #f1f1f1. Picture grounds are a light tint of that blue. */
+.st--jx { --jx-ink: #172b4d; --jx-blue: #0c66e4; --jx-sub: #44546f; --jx-line: rgb(9 30 66 / 0.14); --jx-fill: rgb(9 30 66 / 0.06); }
+.st--jx .jx-desk { background: linear-gradient(180deg, #eef3fc, #e0e9f8); }
+.st--jx p { margin: 0; }
+.st--jx .jx-in:not(.is-seen) [style*="--i"] { opacity: 0; transform: translateY(14px); }
+
+.jx { position: relative; width: 1366px; height: 816px; overflow: hidden; background: #fff; color: var(--jx-ink); font: 14px/20px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; text-align: left; }
+.jx > :not(.jx-under, .jx-shade, .jx-nav, .jx-side), .jx-abs { position: absolute; }
+.jx b { font-weight: 500; } .jx :is(i, em, u, s, small) { font-style: normal; text-decoration: none; }
+.jx-ic { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .jx-ic.is-red { color: #c9372c; }
+.jx-brand { display: inline-flex; align-items: center; gap: 6px; color: var(--jx-sub); } .jx-brand i { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(#e8467c, #f5a623, #4a90e2, #7b61ff, #e8467c); }
+.jx-b { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 3px; background: var(--jx-fill); white-space: nowrap; }
+.jx-b.is-on { background: #e9f2ff; color: var(--jx-blue); } .jx-b.is-primary { background: var(--jx-blue); color: #fff; }
+.jx-bare { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; }
+.jx-acts, .jx-tabs { display: flex; gap: 8px; }
+/* Jira under the dialog, dimmed as a modal dims it. */
+.jx-under { position: absolute; inset: 0; } .jx-shade { position: absolute; inset: 0; background: rgb(9 30 66 / 0.5); }
+.jx-under p, .jx-nav { display: flex; align-items: center; gap: 22px; height: 56px; padding: 0 20px; border-bottom: 1px solid var(--jx-line); color: var(--jx-sub); font-weight: 500; }
+.jx-under p i, .jx-nav > i { width: 20px; height: 20px; border-radius: 4px; background: var(--jx-blue); margin-right: -12px; }
+.jx-under p b, .jx-nav > b { padding: 6px 12px; border-radius: 3px; background: var(--jx-blue); color: #fff; }
+.jx-under div { display: grid; align-content: start; gap: 24px; width: 235px; height: 760px; padding: 110px 28px; border-right: 1px solid var(--jx-line); background: #f7f8f9; color: var(--jx-sub); }
+.jx-dialog { border-radius: 3px; background: #fff; box-shadow: 0 8px 12px rgb(9 30 66 / 0.15), 0 0 1px rgb(9 30 66 / 0.31); }
+.jx-head { display: flex; align-items: center; gap: 8px; height: 37px; padding-bottom: 12px; border-bottom: 2px solid #ebecf0; } .jx-head > i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 4px; background: #6554c0; color: #fff; }
+.jx-head .jx-brand { margin-left: auto; } .jx-head > .jx-ic { width: 20px; height: 20px; margin-left: 14px; }
+.jx-row { display: grid; grid-template-columns: 198px auto; align-items: center; line-height: 27px; } .jx-row--s { grid-template-columns: 124px auto; } .jx-row--s em { color: var(--jx-ink); }
+.jx-l { line-height: 27px; } .jx-t { line-height: 24px; } .jx-t.is-none { color: var(--jx-sub); } .jx-t > span { display: block; }
+/* the panel */
+.jx-panel { display: grid; grid-template-rows: 466px 124px; width: 350px; height: 590px; border-radius: 4px; background: #f1f1f1; box-shadow: inset 0 0 0 1px var(--jx-line); overflow: hidden; }
+.jx-talk { display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; padding: 16px 24px; overflow: hidden; } .jx-talk.is-top { justify-content: flex-start; gap: 8px; padding-top: 26px; } .jx-talk:has(.jx-q) { gap: 8px; }
+.jx-m { align-self: flex-start; max-width: 286px; padding: 8px; background: #fff; box-shadow: inset 0 0 0 1px var(--jx-line); color: #242424; line-height: 24px; } .jx-m.is-me { align-self: flex-end; max-width: 278px; background: #009bff; box-shadow: none; color: #fff; line-height: 20px; margin-right: 0; }
+.jx-q { display: grid; gap: 8px; width: 286px; padding: 8px; background: #fff; box-shadow: inset 0 0 0 1px var(--jx-line); color: #242424; line-height: 24px; flex: none; }
+.jx-q > i { display: flex; align-items: center; justify-content: space-between; min-height: 40px; padding: 0 0 0 8px; border-radius: 3px; box-shadow: inset 0 0 0 1px #8590a2; color: #626f86; line-height: 20px; } .jx-q > i.is-typed { align-items: flex-start; padding: 8px 0 8px 8px; box-shadow: inset 0 0 0 2px var(--jx-blue); color: var(--jx-ink); } .jx-q > i > span { flex: 1; min-width: 0; }
+.jx-q u { flex: none; display: grid; place-items: center; width: 32px; height: 32px; margin: 0 4px; } .jx-q .is-typed u { border-radius: 3px; background: var(--jx-blue); color: #fff; }
+.jx-send { display: grid; align-content: start; gap: 16px; padding: 16px 17px; background: #fff; box-shadow: inset 0 0 0 1px var(--jx-line); } .jx-send p { display: flex; justify-content: flex-end; gap: 8px; }
+.jx-field { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 6px 6px 6px 8px; box-shadow: inset 0 0 0 1px #8590a2; color: #626f86; } .jx-field.is-on { box-shadow: inset 0 0 0 2px var(--jx-blue); color: var(--jx-ink); } .jx-field > span { flex: 1; min-width: 0; } .jx-field b { flex: none; padding: 4px 10px; border-radius: 3px; color: var(--jx-ink); } .jx-field.is-on b { background: var(--jx-blue); color: #fff; }
+/* the description editor, with a selection */
+.jx-tools { display: flex; align-items: center; gap: 14px; height: 32px; font-weight: 500; } .jx-tools s { width: 1px; height: 20px; background: var(--jx-line); } .jx-tools u { min-width: 12px; text-align: center; }
+.jx-edit { padding: 16px 12px; border-radius: 3px; box-shadow: inset 0 0 0 1px #c1c7d0; line-height: 24px; } .jx-edit mark { background: #dfe8f6; color: inherit; }
+.jx-tip { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 3px; background: #fff; box-shadow: 0 4px 8px rgb(9 30 66 / 0.25), 0 0 1px rgb(9 30 66 / 0.31); font-weight: 500; }
+/* features */
+.jx-art { display: block; border-radius: 12px; background: linear-gradient(180deg, #dbeafe, #eef3fc); } .jx-art i { position: absolute; border-radius: 6px; } .jx-art i:nth-child(1) { left: 48px; top: 64px; width: 114px; height: 86px; background: #f5a623; } .jx-art i:nth-child(2) { left: 30px; top: 22px; width: 56px; height: 40px; border-radius: 20px; background: #0c66e4; } .jx-art i:nth-child(3) { left: 112px; top: 30px; width: 46px; height: 46px; border-radius: 50%; background: #ffc400; }
+.jx-none { font-size: 20px; line-height: 28px; text-align: center; } .jx-none2 { text-align: center; }
+.jx-table p { display: grid; grid-template-columns: 120px 623px 60px; align-items: center; height: 42px; border-bottom: 2px solid #ebecf0; } .jx-table p:first-child { height: 30px; color: var(--jx-sub); font-size: 12px; font-weight: 600; } .jx-table p span { padding: 0 8px; } .jx-table p span:first-child { display: flex; align-items: center; gap: 12px; } .jx-table p span:last-child { text-align: center; }
+.jx-table i { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 3px; background: #36b37e; color: #fff; } .jx-table i .jx-ic { width: 12px; height: 12px; }
+.jx-go { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; }
+/* the issue page */
+.jx--page .jx-nav { position: relative; color: var(--jx-ink); } .jx-nav .is-on { color: var(--jx-blue); } .jx-nav em { margin-left: auto; width: 200px; padding: 5px 10px; border-radius: 3px; box-shadow: inset 0 0 0 1px #8590a2; color: #626f86; font-weight: 400; } .jx-nav u { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #1d7afc; color: #fff; font-size: 10px; }
+.jx-side { display: grid; align-content: start; gap: 6px; width: 235px; height: 760px; padding: 26px 16px; border-right: 1px solid var(--jx-line); background: #f7f8f9; color: var(--jx-sub); } .jx-side > b { display: grid; margin: 0 8px 14px; color: var(--jx-ink); font-weight: 600; } .jx-side small { margin: 10px 8px 2px; font-size: 11px; font-weight: 600; } .jx-side > b small { margin: 0; font-weight: 400; } .jx-side span { padding: 8px 12px 8px 40px; border-radius: 3px; } .jx-side span.is-on { background: #e9f2ff; color: var(--jx-blue); } .jx-side hr { width: 100%; margin: 10px 0; border: 0; border-top: 1px solid var(--jx-line); }
+.jx-crumb { color: var(--jx-sub); font-size: 12px; line-height: 20px; } .jx-h { font-size: 24px; line-height: 28px; }
+.jx-show { display: flex; align-items: center; gap: 8px; } .jx-show i { padding: 2px 8px; border-radius: 3px; background: var(--jx-fill); font-weight: 500; } .jx-show .is-on { background: #e9f2ff; color: var(--jx-blue); }
+.jx-comment { display: flex; align-items: center; gap: 12px; } .jx-comment u { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #1d7afc; color: #fff; font-size: 11px; } .jx-comment span { flex: 1; padding: 9px 12px; border-radius: 3px; box-shadow: inset 0 0 0 1px #c1c7d0; color: #626f86; }
+.jx-card { display: grid; align-content: start; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--jx-line); } .jx-card > b { padding: 14px 16px; border-bottom: 1px solid var(--jx-line); font-weight: 600; } .jx-card span { display: grid; grid-template-columns: 150px 1fr; align-items: center; min-height: 56px; padding: 0 16px; } .jx-card small { color: var(--jx-sub); font-size: 12px; font-weight: 600; }
+.jx-menu { display: grid; padding: 4px 0; border-radius: 3px; background: #fff; box-shadow: 0 4px 8px rgb(9 30 66 / 0.25), 0 0 1px rgb(9 30 66 / 0.31); } .jx-menu i { padding: 7px 14px; font-size: 12.5px; white-space: nowrap; }
+.jx-b--s { height: 26px; padding: 0 8px; font-size: 12.5px; }
+
+/* ---------- on the page ---------- */
+/* A whole screen: wider than the text column, so its 14px type stays near 12px at a desktop width. */
+.st .st--jx .jx-wide, .st.st--jx .jx-wide { max-width: none; margin: 56px auto 0 !important; padding-inline: clamp(16px, 3vw, 40px); }
+.jx-stage { --z: 0.86; display: grid; justify-content: safe center; padding: 40px 0; overflow-x: auto; border-radius: 24px; background: linear-gradient(180deg, #eef3fc, #e0e9f8); }
+.jx-shot { position: relative; width: calc(1366px * var(--z)); border-radius: calc(8px * var(--z)); box-shadow: 0 30px 60px -32px rgb(9 30 66 / 0.5), 0 0 0 1px rgb(9 30 66 / 0.12); }
+.jx-shot > .jx-z { zoom: var(--z); overflow: hidden; border-radius: 8px; }
+.jx-wide figcaption { margin-top: 16px; color: var(--ink-3); font-size: 14px; line-height: 20px; letter-spacing: 0.2px; text-align: center; }
+.st .st--jx .jx-wide + .jx-wide, .st.st--jx .jx-wide + .jx-wide { margin-top: 40px !important; }
+@media (max-width: 1480px) { .jx-stage { --z: 0.8; } }
+/* Below about 1180 the screen no longer fits at a readable size: it keeps the size and scrolls sideways, with a fade to say so. */
+@media (max-width: 1180px) { .jx-stage { justify-content: start; padding-inline: 20px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); } }
+/* Narrower than that the screen keeps a readable size and scrolls sideways, with a fade to say so. */
+@media (max-width: 900px) { .jx-stage { --z: 0.72; padding: 20px 16px; border-radius: 20px; } .st .st--jx .jx-wide, .st.st--jx .jx-wide { margin-top: 32px !important; } }
+
+/* Parts at the size they were designed: two panels side by side, each with a line under it. */
+.st--jx .jx-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; place-items: stretch; padding: 40px; }
+.jx-pair > div { display: grid; grid-template-rows: 1fr auto; justify-items: center; gap: 16px; min-width: 0; } .jx-pair > div > p { justify-self: start; color: var(--ink-2); font-size: 15px; line-height: 21px; } .jx-pair > div > p i { display: block; color: var(--ink); font-style: normal; font-weight: 543; }
+.jx-part { position: relative; color: #172b4d; font: 14px/20px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; text-align: left; } .jx-part b { font-weight: 500; } .jx-part :is(i, u) { font-style: normal; text-decoration: none; }
+.jx-part .jx-panel { box-shadow: inset 0 0 0 1px var(--jx-line), 0 20px 40px -24px rgb(9 30 66 / 0.4); }
+/* Atlassian's parts, as used */
+.st--jx .jx-kit { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; place-items: stretch; padding: 40px; }
+.jx-kit > div { display: grid; align-content: start; gap: 14px; min-width: 0; padding: 18px 20px 22px; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgb(9 30 66 / 0.12); } .jx-kit > div > small { color: var(--ink-3); font-size: 13px; line-height: 18px; }
+.jx-kit .jx-part { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .jx-kit .jx-q, .jx-kit .jx-field { width: 100%; } 
+.jx-out { padding: 52px 16px 36px; border-radius: 24px; background: linear-gradient(120deg, #0a2f73, #0c66e4); color: #fff; }
+.jx-out dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; } .jx-out dl > div { display: grid; align-content: start; gap: 8px; padding: 0 28px; } .jx-out dl > div + div { border-left: 1px solid rgb(255 255 255 / 0.2); }
+.jx-out dd { margin: 0; font-size: 56px; line-height: 60px; font-weight: 580; letter-spacing: -0.6px; } .jx-out dt { font-size: 17px; line-height: 23px; font-weight: 500; text-wrap: balance; }
+.lv .jx-out > p { margin: 40px 28px 0; padding-top: 18px; border-top: 1px solid rgb(255 255 255 / 0.2); color: rgb(255 255 255 / 0.84); font-size: 14px; line-height: 20px; }
+
+/* the demo */
+.jx-view { animation: jx-in 0.4s var(--fade) both; } @keyframes jx-in { from { opacity: 0.4; } }
+.jx-tap { position: absolute; z-index: 3; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: rgb(20 22 34 / 0.3); box-shadow: 0 0 0 1.5px rgb(255 255 255 / 0.9), 0 4px 12px rgb(0 0 0 / 0.25); opacity: 0; pointer-events: none; animation: jx-tap 0.62s var(--fade) both; }
+@keyframes jx-tap { 0% { opacity: 0; transform: scale(1.4); } 30% { opacity: 1; transform: scale(1); } 64% { opacity: 1; transform: scale(0.72); } 100% { opacity: 0; transform: scale(0.9); } }
+.jx-caret { display: inline-block; width: 1.5px; height: 1.05em; margin-left: 1px; vertical-align: -0.16em; background: var(--jx-blue); animation: jx-blink 1s steps(1) infinite; } @keyframes jx-blink { 50% { opacity: 0; } }
+.jx-shot.is-held :is(.jx-tap, .jx-caret, .jx-view) { animation-play-state: paused; }
+.lv .jx-hold { position: absolute; right: 0; top: -36px; z-index: 4; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: rgb(var(--ink-rgb) / 0.5); color: #fff; cursor: pointer; } .jx-hold svg { width: 12px; height: 12px; fill: currentColor; }
+
+@media (max-width: 900px) {
+  .st--jx :is(.jx-pair, .jx-kit) { grid-template-columns: minmax(0, 1fr); padding: 20px; } .jx-pair .jx-part { zoom: 0.84; }
+  .jx-out { padding: 12px 4px 24px; border-radius: 20px; } .jx-out dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } .jx-out dl > div { padding: 18px 20px; } .jx-out dl > div + div { border-left: 0; } .jx-out dd { font-size: 40px; line-height: 44px; } .jx-out dt { font-size: 15px; line-height: 20px; } .lv .jx-out > p { margin: 20px 20px 0; }
+  .lv .jx-hold { top: 6px; right: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .jx-view, .jx-tap, .jx-caret { animation: none; } }
