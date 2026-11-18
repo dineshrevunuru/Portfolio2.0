@@ -1,0 +1,8 @@
+/* The site nav over these case studies: the same nav as every page, with its logo and links on the
+   same lines as the page's content (a 1,240px frame padded clamp(20px, 4vw, 56px) at each side), as
+   the other case studies line their nav up with theirs. Unlayered, so it wins over nav.top's padding. */
+.cases-chrome > nav.top { width: min(100% - 2 * clamp(20px, 4vw, 56px), 1128px); max-width: none; padding-left: 0; padding-right: 0; }
+
+/* These pages' own ground was #fcfcfd, a shade off the site's white; under the site's nav and above its footer
+   that showed as a seam. On the live site they sit on the same white as every other page. */
+.cases-chrome .lv { --surface: #fff; }

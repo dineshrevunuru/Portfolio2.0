@@ -66,10 +66,6 @@ export default function SketchCaseStripes4() {
   return (
     <div className={`${sans.variable} ${mono.variable}`}>
       <div className="lv st st--jx st--jx4">
-        <header className="st-top">
-          <a href="/work"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" /></svg>Work</a>
-          <a href="/">Dinesh Revunuru</a>
-        </header>
         <main>
           <section className="st-open">
             <dl className="st-rail">

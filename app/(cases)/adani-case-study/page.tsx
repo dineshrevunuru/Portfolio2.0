@@ -283,10 +283,6 @@ export default async function SketchCaseAdani5({ searchParams }: { searchParams:
   return (
     <div className={`${sans.variable} ${mono.variable} ${maven.variable}`}>
       <div className="lv st st--adani st--adani2 st--adani3 st--adani4 st--adani5">
-        <header className="st-top">
-          <a href="/work"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" /></svg>Work</a>
-          <a href="/">Dinesh Revunuru</a>
-        </header>
         <main>
           <section className="st-open">
             <dl className="st-rail">
